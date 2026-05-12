@@ -201,8 +201,7 @@ class BrowseModules extends Component
             ->when($this->search, function($query) {
                 $query->where(function($q) {
                     $q->where('title', 'like', '%'.$this->search.'%')
-                      ->orWhere('course_code', 'like', '%'.$this->search.'%')
-                      ->orWhere('description', 'like', '%'.$this->search.'%');
+                      ->orWhere('course_code', 'like', '%'.$this->search.'%');
                 });
             })
             ->when(!empty($this->selectedDepartments), function($query) {
@@ -295,7 +294,6 @@ class BrowseModules extends Component
                     ])
                     ->where('course_id', $user->course_id)
                     ->where('department_id', $user->department_id)
-                    ->where('status', 'published')
                     ->latest()
                     ->take(6)
                     ->get();
@@ -312,8 +310,7 @@ class BrowseModules extends Component
                     ->where('course_code', $this->selectedCourseCode)
                     ->when($this->search, function($query) {
                         $query->where(function($q) {
-                            $q->where('title', 'like', '%'.$this->search.'%')
-                              ->orWhere('description', 'like', '%'.$this->search.'%');
+                            $q->where('title', 'like', '%'.$this->search.'%');
                         });
                     })
                     ->when($this->semester, function($query) {

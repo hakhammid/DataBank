@@ -146,25 +146,6 @@
 
         <div class="flex items-center justify-center">
             <div class="flex items-center justify-center">
-                <!-- Status Badge -->
-                <div class="absolute top-3 left-4 z-20">
-                    @if($module->status === 'draft')
-                        <span class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10 backdrop-blur-md bg-opacity-80 shadow-sm">
-                            <svg class="mr-1.5 h-3 w-3 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM6.75 9.25a.75.75 0 000 1.5h6.5a.75.75 0 000-1.5h-6.5z" clip-rule="evenodd" />
-                            </svg>
-                            Draft
-                        </span>
-                    @else
-                        <span class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20 backdrop-blur-md bg-opacity-80 shadow-sm">
-                            <svg class="mr-1.5 h-3 w-3 text-green-500" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" />
-                            </svg>
-                            Published
-                        </span>
-                    @endif
-                </div>
-
                 <!-- Actions dropdown with stopPropagation to prevent card click -->
                 <div onclick="event.stopPropagation()"
                     class="absolute top-3 right-4 gap-1 flex flex-col z-20 p-2 rounded-full shadow-lg backdrop-blur-sm">

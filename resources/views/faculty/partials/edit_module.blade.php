@@ -113,12 +113,6 @@
                     <x-input-error :messages="$errors->get('title')" class="mt-2" />
                 </div>
                 <div class="space-y-1">
-                    <h2 class="text-base/7 font-semibold text-zinc-950 sm:text-sm/6">Course Description / Topic</h2>
-                    <textarea name="description" id="description" placeholder="Optional" rows="2"
-                        class="h-[3rem] peer block w-full text-sm h-[100px] px-4 pt-2 pb-2 text-zinc-900 bg-white rounded-[8px] border border-gray-200 appearance-none focus:border-transparent focus:outline focus:outline-2 focus:outline-primary focus:ring-0 overflow-hidden resize-none font-normal">{{ $module->description }}</textarea>
-                    <x-input-error :messages="$errors->get('description')" class="mt-2" />
-                </div>
-                <div class="space-y-1">
                     <h2 class="text-base/7 font-semibold text-zinc-950 sm:text-sm/6">Course Status</h2>
                     <span data-slot="control"
                         class="relative block w-full before:absolute before:inset-px before:rounded-[calc(theme(borderRadius.lg)-1px)] before:bg-white before:shadow after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:ring-inset after:ring-transparent sm:after:focus-within:ring-2 sm:after:focus-within:ring-zinc-500 has-[[data-disabled]]:opacity-50 before:has-[[data-disabled]]:bg-zinc-950/5 before:has-[[data-disabled]]:shadow-none before:has-[[data-invalid]]:shadow-red-500/10">
@@ -194,22 +188,6 @@
                         </span>
                     </span>
                     <x-input-error :messages="$errors->get('semester')" class="mt-2" />
-                </div>
-                <div class="space-y-1">
-                    <h2 class="text-base/7 font-semibold text-zinc-950 sm:text-sm/6">Visibility Status</h2>
-                    <span data-slot="control"
-                        class="relative block w-full before:absolute before:inset-px before:rounded-[calc(theme(borderRadius.lg)-1px)] before:bg-white before:shadow after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:ring-inset after:ring-transparent sm:after:focus-within:ring-2 sm:after:focus-within:ring-zinc-500 has-[[data-disabled]]:opacity-50 before:has-[[data-disabled]]:bg-zinc-950/5 before:has-[[data-disabled]]:shadow-none before:has-[[data-invalid]]:shadow-red-500/10">
-                        <span data-slot="control"
-                            class="group relative block w-full before:absolute before:inset-px before:rounded-[calc(theme(borderRadius.lg)-1px)] before:bg-white dark:before:hidden after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:ring-inset after:ring-transparent after:has-[[data-focus]]:ring-2 after:has-[[data-focus]]:ring-blue-500 has-[[data-disabled]]:opacity-50 before:has-[[data-disabled]]:bg-zinc-950/5 before:has-[[data-disabled]]:shadow-none">
-                            <select
-                                class="h-[3rem] relative block w-full appearance-none rounded-lg py-[calc(theme(spacing[2.5])-1px)] sm:py-[calc(theme(spacing[1.5])-1px)] pl-[calc(theme(spacing[3.5])-1px)] pr-[calc(theme(spacing.10)-1px)] sm:pl-[calc(theme(spacing.3)-1px)] sm:pr-[calc(theme(spacing.9)-1px)] [&_optgroup]:font-semibold text-base/6 text-zinc-950 placeholder:text-zinc-500 sm:text-sm/6 border border-zinc-950/10 data-[hover]:border-zinc-950/20 dark:border-white/10 dark:data-[hover]:border-white/20 bg-transparent dark:bg-white/5 dark:*:bg-zinc-800 focus:outline-none data-[invalid]:border-red-500 data-[invalid]:data-[hover]:border-red-500 data-[disabled]:border-zinc-950/20 data-[disabled]:opacity-100"
-                                id="status" data-headlessui-state="" name="status" required>
-                                <option value="published" {{ $module->status === 'published' ? 'selected' : '' }}>Published (Visible to Students)</option>
-                                <option value="draft" {{ $module->status === 'draft' ? 'selected' : '' }}>Draft (Hidden from Students)</option>
-                            </select>
-                        </span>
-                    </span>
-                    <x-input-error :messages="$errors->get('status')" class="mt-2" />
                 </div>
             </section>
 
