@@ -316,29 +316,7 @@
         }
 
         function printTable() {
-            // Create a clone of the table
-            const table = document.getElementById('table').cloneNode(true);
-
-            // Remove the actions column (last column)
-            const actionHeaders = table.querySelectorAll('th:last-child, td:last-child');
-            actionHeaders.forEach(el => el.remove());
-
-            // Process each row to clean up the name column
-            const rows = table.querySelectorAll('tbody tr');
-            rows.forEach(row => {
-                const nameCell = row.querySelector('td:nth-child(2)');
-                if (nameCell) {
-                    // Get the name span element
-                    const nameSpan = nameCell.querySelector('span.font-medium');
-                    if (nameSpan) {
-                        // Replace the entire cell content with just the name text
-                        nameCell.innerHTML = nameSpan.textContent;
-                    }
-                }
-            });
-
-            // Create a new window for printing
-            window.open('{{ route('admin.departments-module.print') }}', '');
+            window.open('{{ route('admin.departments-module.print') }}', '_blank');
         }
     </script>
 </x-admin-layout>
