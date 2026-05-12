@@ -96,28 +96,12 @@
                 </div>
 
                 <div>
-                    <label class="text-sm font-medium text-zinc-900">Course Description / Topic</label>
-                    <textarea name="description"
-                        class="mt-1 w-full rounded-lg border border-zinc-200 p-3 text-sm focus:ring-2 focus:ring-zinc-900"
-                        placeholder="Enter course description or topic (optional)">{{ old('description') }}</textarea>
-                </div>
-
-                <div>
                     <label class="text-sm font-medium text-zinc-900">Course Status</label>
                     <select name="isMajor" required
                         class="mt-1 w-full rounded-lg border border-zinc-200 p-2 text-sm">
                         <option value="" disabled selected>Select status</option>
                         <option value="1" {{ old('isMajor') == '1' ? 'selected' : '' }}>Major subject</option>
                         <option value="0" {{ old('isMajor') == '0' ? 'selected' : '' }}>Minor subject</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="text-sm font-medium text-zinc-900">Visibility Status</label>
-                    <select name="status" required
-                        class="mt-1 w-full rounded-lg border border-zinc-200 p-2 text-sm">
-                        <option value="published" {{ old('status', 'published') == 'published' ? 'selected' : '' }}>Published (Visible to Students)</option>
-                        <option value="draft" {{ old('status') == 'draft' ? 'selected' : '' }}>Draft (Hidden from Students)</option>
                     </select>
                 </div>
 

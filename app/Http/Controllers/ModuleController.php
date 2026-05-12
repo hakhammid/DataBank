@@ -80,10 +80,8 @@ class ModuleController extends Controller
             $validatedData = $request->validate([
                 'course_code' => 'required|string|max:255',
                 'title' => 'required|string|max:255',
-                'description' => 'nullable|string',
                 'isMajor' => 'required|in:0,1',
                 'semester' => 'required|in:1st,2nd',
-                'status' => 'required|in:draft,published',
                 'course_id' => 'required|exists:courses,id',
                 'department_id' => 'required|exists:departments,id',
                 'file' => 'required|mimes:pdf|max:204800'
@@ -97,10 +95,8 @@ class ModuleController extends Controller
             $cleanData = [
                 'course_code' => strip_tags($validatedData['course_code']),
                 'title' => strip_tags($validatedData['title']),
-                'description' => $validatedData['description'] ? strip_tags($validatedData['description']) : null,
                 'isMajor' => strip_tags($validatedData['isMajor']),
                 'semester' => strip_tags($validatedData['semester']),
-                'status' => strip_tags($validatedData['status']),
                 'course_id' => strip_tags($validatedData['course_id']),
                 'department_id' => strip_tags($validatedData['department_id']),
                 'user_id' => Auth::user()->id
@@ -143,10 +139,8 @@ class ModuleController extends Controller
             $validatedData = $request->validate([
                 'course_code' => 'required|string|max:255',
                 'title' => 'required|string|max:255',
-                'description' => 'nullable|string',
                 'isMajor' => 'required|in:0,1',
                 'semester' => 'required|in:1st,2nd',
-                'status' => 'required|in:draft,published',
                 'course_id' => 'required|exists:courses,id',
                 'department_id' => 'required|exists:departments,id',
                 'files' => 'required|array|min:1',
@@ -178,11 +172,9 @@ class ModuleController extends Controller
                         Module::create([
                             'course_code' => $sharedCourseCode,
                             'title' => $baseTitle,
-                            'description' => isset($validatedData['description']) ? strip_tags($validatedData['description']) : null,
                             'file' => $fileName,
                             'isMajor' => strip_tags($validatedData['isMajor']),
                             'semester' => strip_tags($validatedData['semester']),
-                            'status' => strip_tags($validatedData['status']),
                             'course_id' => strip_tags($validatedData['course_id']),
                             'department_id' => strip_tags($validatedData['department_id']),
                             'user_id' => Auth::user()->id

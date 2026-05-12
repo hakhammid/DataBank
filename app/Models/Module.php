@@ -28,7 +28,6 @@ class Module extends Model
         'file',
         'isMajor',
         'semester',
-        'status',
         'user_id',
         'department_id',
         'course_id',
