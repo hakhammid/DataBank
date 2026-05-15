@@ -436,38 +436,10 @@
 
     </main>
 
-    {{-- Print Styles --}}
+    {{-- Print Styles (disabled — printing is handled by the dedicated print layout) --}}
     <style>
         @media print {
-            /* Hide navigation, sidebar, header bar, filter section */
-            nav, aside, header, .no-print,
-            [data-sidebar], [data-topbar],
-            .lg\:pl-64, .fixed {
-                display: none !important;
-            }
-
-            body {
-                background: white !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-
-            main {
-                margin: 0 !important;
-                padding: 15px !important;
-                max-width: 100% !important;
-            }
-
-            /* Ensure cards and badges print with colors */
-            .rounded-xl, .rounded-lg, .rounded-full {
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-
-            @page {
-                size: A4 landscape;
-                margin: 10mm;
-            }
+            body { display: none !important; }
         }
     </style>
 

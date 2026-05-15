@@ -4,8 +4,8 @@
     <title>{{ $course->course_name }} Report - {{ config('constants.APP_TITLE') }}</title>
     <style>
         @page {
-            size: A4 landscape;
-            margin: 15mm;
+            size: A4 portrait;
+            margin: 10mm 12mm;
         }
 
         * {
@@ -15,11 +15,11 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.4;
-            color: #1a1a2e;
+            font-family: 'Times New Roman', Times, serif;
+            line-height: 1.2;
+            color: #000;
             background: #fff;
-            font-size: 11px;
+            font-size: 9pt;
         }
 
         .report-container {
@@ -27,185 +27,185 @@
             margin: 0 auto;
         }
 
-        /* Confidential Watermark/Header */
-        .confidential-header {
-            text-align: right;
-            color: #e53e3e;
-            font-weight: 800;
-            text-transform: uppercase;
-            font-size: 10px;
-            letter-spacing: 2px;
-            margin-bottom: 10px;
-            border-bottom: 1px solid #fed7d7;
-            padding-bottom: 5px;
-        }
-
-        /* Header Section */
+        /* ── Header ── */
         .report-header {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding-bottom: 20px;
-            border-bottom: 3px solid #1a1a2e;
-            margin-bottom: 20px;
-            position: relative;
-        }
-
-        .logo-container {
-            position: absolute;
-            left: 0;
-            top: 0;
-        }
-
-        .logo-container img {
-            width: 80px;
-            height: auto;
-        }
-
-        .header-text {
             text-align: center;
+            padding-bottom: 6px;
+            border-bottom: 2.5px double #000;
+            margin-bottom: 8px;
+        }
+
+        .report-header img {
+            width: 50px;
+            height: auto;
+            margin-bottom: 2px;
         }
 
         .institution-name {
-            font-size: 24px;
-            font-weight: 800;
-            color: #1a1a2e;
+            font-size: 12pt;
+            font-weight: bold;
             text-transform: uppercase;
-            margin-bottom: 4px;
+            letter-spacing: 1px;
+        }
+
+        .institution-sub {
+            font-size: 8pt;
+            margin-bottom: 1px;
         }
 
         .report-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #4a5568;
-            margin-bottom: 4px;
+            font-size: 10.5pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-top: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .report-subtitle {
+            font-size: 9pt;
+            margin-top: 2px;
         }
 
         .report-meta {
-            font-size: 10px;
-            color: #718096;
+            font-size: 7.5pt;
+            color: #333;
+            margin-top: 2px;
         }
 
-        /* Summary Stats Table */
+        /* ── Filter Info ── */
+        .filter-info {
+            font-size: 7.5pt;
+            color: #333;
+            margin-bottom: 6px;
+            padding: 3px 6px;
+            border: 1px solid #999;
+            background: #fafafa;
+        }
+
+        .filter-info strong {
+            color: #000;
+        }
+
+        /* ── Summary Stats ── */
         .stats-table {
             width: 100%;
-            margin-bottom: 20px;
             border-collapse: collapse;
+            margin-bottom: 8px;
         }
 
         .stats-table td {
-            width: 16.66%;
-            padding: 10px;
-            background: #f7fafc;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #000;
             text-align: center;
+            padding: 4px 3px;
         }
 
-        .stats-value {
-            font-size: 18px;
-            font-weight: 700;
-            color: #2b6cb0;
-        }
-
-        .stats-label {
-            font-size: 9px;
-            color: #718096;
+        .stats-table .stats-label {
+            font-size: 6.5pt;
             text-transform: uppercase;
-            font-weight: 600;
+            font-weight: bold;
+            letter-spacing: 0.3px;
         }
 
-        /* Section Titles */
-        .section-title {
-            font-size: 14px;
-            font-weight: 700;
-            color: #1a1a2e;
-            margin: 20px 0 10px 0;
-            padding-left: 8px;
-            border-left: 4px solid #2b6cb0;
-            background: #ebf8ff;
-            padding: 8px;
+        .stats-table .stats-value {
+            font-size: 12pt;
+            font-weight: bold;
+        }
+
+        /* ── Section Heading ── */
+        .section-heading {
+            font-size: 8.5pt;
+            font-weight: bold;
             text-transform: uppercase;
+            margin: 8px 0 4px 0;
+            padding-bottom: 2px;
+            border-bottom: 1px solid #000;
         }
 
-        /* Data Tables */
+        /* ── Data Tables ── */
         .data-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
+            margin-bottom: 6px;
+            font-size: 7.5pt;
         }
 
         .data-table thead th {
-            background: #2d3748;
-            color: #ffffff;
-            font-weight: 600;
-            padding: 8px 10px;
+            background: #e0e0e0;
+            color: #000;
+            font-weight: bold;
+            padding: 3px 4px;
             text-align: left;
-            font-size: 9px;
+            font-size: 7pt;
             text-transform: uppercase;
-            border: 1px solid #2d3748;
+            border: 1px solid #000;
         }
 
         .data-table tbody td {
-            padding: 6px 10px;
-            border: 1px solid #e2e8f0;
+            padding: 2.5px 4px;
+            border: 1px solid #000;
             vertical-align: top;
+            line-height: 1.25;
         }
 
         .data-table tbody tr:nth-child(even) {
-            background-color: #f8fafc;
+            background-color: #f5f5f5;
         }
 
-        .type-badge {
-            display: inline-block;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 8px;
-            font-weight: 700;
-            text-transform: uppercase;
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+        .font-bold { font-weight: bold; }
+
+        .data-table .total-row td {
+            font-weight: bold;
+            background: #e0e0e0;
+            border-top: 1.5px solid #000;
         }
 
-        .type-major { background: #c6f6d5; color: #22543d; }
-        .type-minor { background: #e9d8fd; color: #44337a; }
-
-        /* Footer */
+        /* ── Footer ── */
         .report-footer {
-            margin-top: 30px;
-            padding-top: 10px;
-            border-top: 1px solid #e2e8f0;
+            margin-top: 10px;
+            padding-top: 4px;
+            border-top: 1px solid #000;
+            font-size: 7pt;
+            color: #333;
             display: flex;
             justify-content: space-between;
-            font-size: 9px;
-            color: #a0aec0;
         }
 
         @media print {
             .no-print { display: none !important; }
-            body { -webkit-print-color-adjust: exact; }
-            .stats-table td { background: #f7fafc !important; }
-            .data-table thead th { background: #2d3748 !important; }
-            .section-title { background: #ebf8ff !important; }
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .data-table thead th { background: #e0e0e0 !important; }
+            .data-table tbody tr:nth-child(even) { background-color: #f5f5f5 !important; }
+            .data-table .total-row td { background: #e0e0e0 !important; }
         }
     </style>
 </head>
 <body>
     <div class="report-container">
-        <div class="confidential-header">Official & Confidential - Internal Use Only</div>
 
+        {{-- ── Report Header ── --}}
         <div class="report-header">
-            <div class="logo-container">
-                <img src="{{ asset('logo/MSU-LOGO.jpg') }}" alt="MSU Logo">
-            </div>
-            <div class="header-text">
-                <div class="institution-name">Mindanao State University</div>
-                <div class="report-title">{{ $course->course_name }} Report</div>
-                <div class="report-meta">
-                    Generated on {{ now()->format('F d, Y h:i A') }} &bull; 
-                    Prepared by: {{ Auth::user()->name }}
-                </div>
+            <img src="{{ asset('logo/MSU-LOGO.jpg') }}" alt="MSU Logo">
+            <div class="institution-sub">Republic of the Philippines</div>
+            <div class="institution-name">Mindanao State University</div>
+            <div class="institution-sub">Marawi City</div>
+            <div class="report-title">Individual Course Report</div>
+            <div class="report-subtitle">{{ $course->course_name }}</div>
+            <div class="report-meta">
+                Date Generated: {{ now()->format('F d, Y — h:i A') }}&nbsp;&nbsp;|&nbsp;&nbsp;Prepared by: {{ Auth::user()->name }}
             </div>
         </div>
 
-        <!-- Course Statistics Table -->
+        {{-- ── Applied Filters ── --}}
+        @if(!empty($semester))
+        <div class="filter-info">
+            <strong>Filter Applied:</strong> Semester: {{ $semester }}
+        </div>
+        @endif
+
+        {{-- ── I. Course Statistics ── --}}
+        <div class="section-heading">I. Course Statistics</div>
         <table class="stats-table">
             <tr>
                 <td>
@@ -235,66 +235,84 @@
             </tr>
         </table>
 
-        <!-- Top Contributors Section -->
+        {{-- ── II. Faculty Contributors ── --}}
         @if($uploaders->isNotEmpty())
-        <div class="section-title">Key Contributors & Faculty Uploaders</div>
+        <div class="section-heading">II. Faculty Contributors</div>
         <table class="data-table">
             <thead>
                 <tr>
-                    <th style="width: 60%">Faculty Member Name</th>
-                    <th style="text-align: center; width: 40%;">Total Modules Uploaded for this Course</th>
+                    <th style="width: 5%;">#</th>
+                    <th style="width: 70%;">Faculty Name</th>
+                    <th style="width: 25%; text-align: right;">Modules Uploaded</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach($uploaders as $uploader)
+                @foreach($uploaders as $index => $uploader)
                 <tr>
-                    <td style="font-weight: 700; color: #2d3748;">{{ $uploader->name }}</td>
-                    <td style="text-align: center; font-weight: 800; color: #2b6cb0; background-color: #f0f4f8;">{{ $uploader->modules_count }}</td>
+                    <td class="text-center">{{ $index + 1 }}</td>
+                    <td class="font-bold">{{ $uploader->name }}</td>
+                    <td class="text-right font-bold">{{ $uploader->modules_count }}</td>
                 </tr>
                 @endforeach
             </tbody>
         </table>
         @endif
 
-        <!-- All Modules Table -->
-        <div class="section-title">Course Modules Inventory</div>
+        {{-- ── III. Module Inventory ── --}}
+        <div class="section-heading">{{ $uploaders->isNotEmpty() ? 'III' : 'II' }}. Module Inventory</div>
         <table class="data-table">
             <thead>
                 <tr>
-                    <th style="width: 32%">Module Title / Course Code</th>
-                    <th style="width: 10%; text-align: center;">Subject Type</th>
-                    <th style="width: 20%">Department</th>
-                    <th style="width: 18%">Uploaded By</th>
-                    <th style="width: 10%; text-align: center;">Views</th>
-                    <th style="width: 10%; text-align: center;">Downloads</th>
+                    <th style="width: 4%;">#</th>
+                    <th style="width: 28%;">Module Title</th>
+                    <th style="width: 10%;">Code</th>
+                    <th style="width: 7%; text-align: center;">Type</th>
+                    <th style="width: 18%;">Department</th>
+                    <th style="width: 15%;">Uploaded By</th>
+                    <th style="width: 9%; text-align: right;">Views</th>
+                    <th style="width: 9%; text-align: right;">Downloads</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach($modules as $module)
+                @php
+                    $totalViews = 0;
+                    $totalDL = 0;
+                @endphp
+                @forelse($modules as $index => $module)
                 <tr>
-                    <td>
-                        <div style="font-weight: 700; color: #2d3748;">{{ $module->title }}</div>
-                        <div style="font-size: 8px; font-weight: 600; color: #718096; background: #f7fafc; padding: 1px 4px; border-radius: 2px; width: fit-content; border: 1px solid #e2e8f0; margin-top: 2px;">{{ $module->course_code }}</div>
-                    </td>
-                    <td style="text-align: center; vertical-align: middle;">
-                        <span class="type-badge {{ $module->isMajor ? 'type-major' : 'type-minor' }}" style="border: 1px solid rgba(0,0,0,0.05);">
-                            {{ $module->isMajor ? 'Major' : 'Minor' }}
-                        </span>
-                    </td>
-                    <td style="font-size: 10px;">{{ $module->department->department_name ?? 'N/A' }}</td>
-                    <td style="font-weight: 600;">{{ $module->user->name }}</td>
-                    <td style="text-align: center; font-weight: 700; color: #4a5568;">{{ number_format($module->number_of_views) }}</td>
-                    <td style="text-align: center; font-weight: 700; color: #2b6cb0;">{{ number_format($module->module_downloads_count) }}</td>
+                    <td class="text-center">{{ $index + 1 }}</td>
+                    <td class="font-bold">{{ $module->title }}</td>
+                    <td>{{ $module->course_code }}</td>
+                    <td class="text-center">{{ $module->isMajor ? 'Major' : 'Minor' }}</td>
+                    <td>{{ $module->department->department_name ?? 'N/A' }}</td>
+                    <td>{{ $module->user->name }}</td>
+                    <td class="text-right">{{ number_format($module->number_of_views) }}</td>
+                    <td class="text-right">{{ number_format($module->module_downloads_count) }}</td>
                 </tr>
-                @endforeach
+                @php
+                    $totalViews += $module->number_of_views;
+                    $totalDL += $module->module_downloads_count;
+                @endphp
+                @empty
+                <tr>
+                    <td colspan="8" class="text-center" style="padding: 6px; font-style: italic; color: #666;">No modules found for this course.</td>
+                </tr>
+                @endforelse
+                @if(count($modules) > 0)
+                <tr class="total-row">
+                    <td colspan="6" class="text-right">Grand Total</td>
+                    <td class="text-right">{{ number_format($totalViews) }}</td>
+                    <td class="text-right">{{ number_format($totalDL) }}</td>
+                </tr>
+                @endif
             </tbody>
         </table>
 
-        <!-- Footer -->
+        {{-- ── Footer ── --}}
         <div class="report-footer">
-            <div>&copy; {{ date('Y') }} Mindanao State University - Databanking Module System</div>
-            <div>Report ID: CRS-{{ $course->id }}-{{ now()->format('Ymd-His') }}</div>
-            <div>Generated by: {{ Auth::user()->name }}</div>
+            <span>&copy; {{ date('Y') }} Mindanao State University — Databanking Module System</span>
+            <span>Report ID: CRS-{{ $course->id }}-{{ now()->format('Ymd-His') }}</span>
+            <span>Generated by: {{ Auth::user()->name }}</span>
         </div>
     </div>
 
