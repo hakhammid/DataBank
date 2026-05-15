@@ -143,7 +143,7 @@ class ReportService
         }
 
         $modulesPaginated = clone $modulesQuery;
-        $modules = $modulesPaginated->orderBy('created_at', 'desc')->paginate(15);
+        $modules = $modulesPaginated->orderBy('created_at', 'desc')->paginate(10);
         $allModules = $modulesQuery->orderBy('created_at', 'desc')->get();
 
         $statsQuery = function () use ($course, $semester) {
