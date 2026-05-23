@@ -9,36 +9,9 @@
             </x-my-secondary-button>
         </div>
 
-                <!-- Export Controls -->
-                <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-                <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-                    <!-- Search Section -->
-                    <div class="flex-1 w-full lg:w-auto">
-                        <div class="relative w-full max-w-md">
-                            <input type="text" id="departmentSearch" placeholder="Search..."
-                                class="block w-full py-2.5 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-zinc-900 focus:border-zinc-900 transition-all duration-200 text-sm placeholder-zinc-400">
-                            <button type="button" id="clearSearch"
-                                class="absolute inset-y-0 right-0 mr-2 flex items-center opacity-0 transition-opacity duration-200 hover:text-zinc-600">
-                                <svg class="h-5 w-5 text-zinc-400 hover:text-zinc-600 transition-colors" fill="none"
-                                    stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
-                </div>
-            </div>
-
-            <!-- Search Results Status -->
-            <div id="searchStatus" class="mt-4 hidden">
-                <div class="flex items-center gap-2 text-sm text-zinc-600">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span id="searchResultsText"></span>
-                </div>
-            </div>
+        <!-- Search Controls -->
+        <div class="mt-8">
+            <x-search-bar id="departmentSearch" placeholder="Search departments..." />
         </div>
 
         <!-- Module Table -->
@@ -222,9 +195,8 @@
 
             // Enhanced search functionality
             const searchInput = document.getElementById('departmentSearch');
-            const clearSearchBtn = document.getElementById('clearSearch');
-            const searchStatus = document.getElementById('searchStatus');
-            const searchResultsText = document.getElementById('searchResultsText');
+            const searchStatus = document.getElementById('departmentSearch-status');
+            const searchResultsText = document.getElementById('departmentSearch-results-text');
             const departmentRows = document.querySelectorAll('.department-row');
 
             function performSearch() {
@@ -243,33 +215,15 @@
                     }
                 });
 
-                // Update search status
                 if (searchTerm) {
                     searchStatus.classList.remove('hidden');
                     searchResultsText.textContent = `Found ${visibleCount} department${visibleCount !== 1 ? 's' : ''} matching "${searchTerm}"`;
                 } else {
                     searchStatus.classList.add('hidden');
                 }
-
-                // Show/hide clear button
-                clearSearchBtn.style.opacity = searchTerm ? '1' : '0';
-                clearSearchBtn.style.pointerEvents = searchTerm ? 'auto' : 'none';
             }
 
             searchInput.addEventListener('input', performSearch);
-            searchInput.addEventListener('keyup', function (e) {
-                if (e.key === 'Escape') {
-                    searchInput.value = '';
-                    performSearch();
-                    searchInput.blur();
-                }
-            });
-
-            clearSearchBtn.addEventListener('click', function () {
-                searchInput.value = '';
-                performSearch();
-                searchInput.focus();
-            });
         });
 
 

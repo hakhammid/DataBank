@@ -9,38 +9,131 @@
             </x-my-secondary-button>
         </div>
 
-        <!-- Enhanced Search and Export Controls -->
+        <!-- Enhanced Search, Filter and Export Controls -->
         <div class="mt-8 bg-white rounded-xl border border-zinc-200 p-6 shadow-sm">
-            <div class="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-                <!-- Export Controls -->
-                <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+            <div class="flex flex-col gap-5">
+                <!-- Search + Filters Row -->
+                <div class="flex flex-col lg:flex-row gap-4 items-start lg:items-end">
                     <!-- Search Section -->
-                    <div class="flex-1 w-full lg:w-auto">
-                        <div class="relative w-full max-w-md">
-                            <input type="text" id="moduleSearch" placeholder="Search..."
-                                class="block w-full py-2.5 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-zinc-900 focus:border-zinc-900 transition-all duration-200 text-sm placeholder-zinc-400">
-                            <button type="button" id="clearSearch"
-                                class="absolute inset-y-0 right-0 mr-2 flex items-center opacity-0 transition-opacity duration-200 hover:text-zinc-600">
-                                <svg class="h-5 w-5 text-zinc-400 hover:text-zinc-600 transition-colors" fill="none"
-                                    stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
+                    <x-search-bar id="moduleSearch" placeholder="Search modules..." />
                 </div>
+
+                <!-- Filter Dropdowns Row -->
+                <form method="GET" action="{{ route('admin.modules') }}" id="filterForm">
+                    <div class="flex flex-col sm:flex-row gap-3 items-end">
+                        <!-- Course Code Filter -->
+                        <div class="w-full sm:w-48">
+                            <label for="filterCourseCode" class="block text-xs font-medium text-zinc-500 mb-1.5">
+                                <svg class="w-3.5 h-3.5 inline-block mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+                                </svg>
+                                Course Code
+                            </label>
+                            <select name="course_code" id="filterCourseCode"
+                                class="block w-full py-2.5 px-3 border border-zinc-300 rounded-lg bg-white text-sm text-zinc-700 focus:ring-2 focus:ring-zinc-900 focus:border-zinc-900 transition-all duration-200 cursor-pointer">
+                                <option value="">All Course Codes</option>
+                                @foreach($courseCodes as $code)
+                                    <option value="{{ $code }}" {{ request('course_code') == $code ? 'selected' : '' }}>{{ $code }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Department Filter -->
+                        <div class="w-full sm:w-52">
+                            <label for="filterDepartment" class="block text-xs font-medium text-zinc-500 mb-1.5">
+                                <svg class="w-3.5 h-3.5 inline-block mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                                Department
+                            </label>
+                            <select name="department_id" id="filterDepartment"
+                                class="block w-full py-2.5 px-3 border border-zinc-300 rounded-lg bg-white text-sm text-zinc-700 focus:ring-2 focus:ring-zinc-900 focus:border-zinc-900 transition-all duration-200 cursor-pointer">
+                                <option value="">All Departments</option>
+                                @foreach($departments as $department)
+                                    <option value="{{ $department->id }}" {{ request('department_id') == $department->id ? 'selected' : '' }}>{{ $department->department_name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Degree Program Filter -->
+                        <div class="w-full sm:w-52">
+                            <label for="filterDegreeProgram" class="block text-xs font-medium text-zinc-500 mb-1.5">
+                                <svg class="w-3.5 h-3.5 inline-block mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                                </svg>
+                                Degree Program
+                            </label>
+                            <select name="course_id" id="filterDegreeProgram"
+                                class="block w-full py-2.5 px-3 border border-zinc-300 rounded-lg bg-white text-sm text-zinc-700 focus:ring-2 focus:ring-zinc-900 focus:border-zinc-900 transition-all duration-200 cursor-pointer">
+                                <option value="">All Degree Programs</option>
+                                @foreach($courses as $course)
+                                    <option value="{{ $course->id }}" {{ request('course_id') == $course->id ? 'selected' : '' }}>{{ $course->course_name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Filter Actions -->
+                        <div class="flex gap-2">
+                            <button type="submit"
+                                class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-zinc-900 text-white text-sm font-medium rounded-lg hover:bg-zinc-800 focus:ring-2 focus:ring-zinc-900 focus:ring-offset-2 transition-all duration-200">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                                </svg>
+                                Filter
+                            </button>
+                            @if(request()->hasAny(['course_code', 'department_id', 'course_id']))
+                                <a href="{{ route('admin.modules') }}"
+                                    class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-white text-zinc-700 text-sm font-medium rounded-lg border border-zinc-300 hover:bg-zinc-50 focus:ring-2 focus:ring-zinc-900 focus:ring-offset-2 transition-all duration-200">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                    Clear
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Active Filters Display -->
+                @if(request()->hasAny(['course_code', 'department_id', 'course_id']))
+                    <div class="flex flex-wrap items-center gap-2 pt-1">
+                        <span class="text-xs font-medium text-zinc-500">Active filters:</span>
+                        @if(request('course_code'))
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-zinc-100 text-zinc-700">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+                                </svg>
+                                {{ request('course_code') }}
+                            </span>
+                        @endif
+                        @if(request('department_id'))
+                            @php $activeDept = $departments->firstWhere('id', request('department_id')); @endphp
+                            @if($activeDept)
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-zinc-100 text-zinc-700">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                    </svg>
+                                    {{ $activeDept->department_name }}
+                                </span>
+                            @endif
+                        @endif
+                        @if(request('course_id'))
+                            @php $activeCourse = $courses->firstWhere('id', request('course_id')); @endphp
+                            @if($activeCourse)
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-zinc-100 text-zinc-700">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z" />
+                                    </svg>
+                                    {{ $activeCourse->course_name }}
+                                </span>
+                            @endif
+                        @endif
+                    </div>
+                @endif
             </div>
 
-            <!-- Search Results Status -->
-            <div id="searchStatus" class="mt-4 hidden">
-                <div class="flex items-center gap-2 text-sm text-zinc-600">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span id="searchResultsText"></span>
-                </div>
-            </div>
+
         </div>
 
         <!-- Module Table -->
@@ -53,7 +146,7 @@
                             <th class="px-4 py-3 font-semibold text-zinc-700">Course Title</th>
 
                             <th class="px-4 py-3 font-semibold text-zinc-700">Views</th>
-                            <th class="px-4 py-3 font-semibold text-zinc-700">Uploaded By</th>
+                            <th class="px-4 py-3 font-semibold text-zinc-700">Teacher</th>
                             <th class="px-4 py-3 font-semibold text-zinc-700">Date Posted</th>
                             <th class="px-4 py-3 font-semibold text-zinc-700">Actions</th>
                         </tr>
@@ -1002,9 +1095,8 @@
 
             // Enhanced search functionality
             const searchInput = document.getElementById('moduleSearch');
-            const clearSearchBtn = document.getElementById('clearSearch');
-            const searchStatus = document.getElementById('searchStatus');
-            const searchResultsText = document.getElementById('searchResultsText');
+            const searchStatus = document.getElementById('moduleSearch-status');
+            const searchResultsText = document.getElementById('moduleSearch-results-text');
             const moduleRows = document.querySelectorAll('.module-row');
 
             function performSearch() {
@@ -1015,7 +1107,6 @@
                     const courseTitle = row.dataset.moduleTitle.toLowerCase();
                     const courseCode = row.dataset.moduleCourseCode.toLowerCase();
                     const moduleUploaderName = row.dataset.moduleUploaderName.toLowerCase();
-                    // const id = row.querySelector('td:first-child').textContent.toLowerCase();
 
                     if (courseTitle.includes(searchTerm) || courseCode.includes(searchTerm) || moduleUploaderName.includes(searchTerm)) {
                         row.style.display = '';
@@ -1025,33 +1116,15 @@
                     }
                 });
 
-                // Update search status
                 if (searchTerm) {
                     searchStatus.classList.remove('hidden');
                     searchResultsText.textContent = `Found ${visibleCount} module${visibleCount !== 1 ? 's' : ''} matching "${searchTerm}"`;
                 } else {
                     searchStatus.classList.add('hidden');
                 }
-
-                // Show/hide clear button
-                clearSearchBtn.style.opacity = searchTerm ? '1' : '0';
-                clearSearchBtn.style.pointerEvents = searchTerm ? 'auto' : 'none';
             }
 
             searchInput.addEventListener('input', performSearch);
-            searchInput.addEventListener('keyup', function (e) {
-                if (e.key === 'Escape') {
-                    searchInput.value = '';
-                    performSearch();
-                    searchInput.blur();
-                }
-            });
-
-            clearSearchBtn.addEventListener('click', function () {
-                searchInput.value = '';
-                performSearch();
-                searchInput.focus();
-            });
         });
 
 

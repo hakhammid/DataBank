@@ -13,13 +13,31 @@ use App\Http\Controllers\Controller;
 
 class ModuleController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $modules = Module::with(['user' => function ($query) {
-            $query->select('id', 'first_name', 'middle_initial', 'last_name', 'profile_picture');
-        }])
-            ->latest()
-            ->paginate(10);
+        $query = Module::with(['user' => function ($q) {
+            $q->select('id', 'first_name', 'middle_initial', 'last_name', 'profile_picture');
+        }, 'department', 'course']);
+
+        // Apply filters
+        if ($request->filled('course_code')) {
+            $query->where('course_code', $request->course_code);
+        }
+
+        if ($request->filled('department_id')) {
+            $query->where('department_id', $request->department_id);
+        }
+
+        if ($request->filled('course_id')) {
+            $query->where('course_id', $request->course_id);
+        }
+
+        $modules = $query->latest()->paginate(10)->appends($request->query());
+
+        // Get filter options
+        $courseCodes = Module::select('course_code')->distinct()->orderBy('course_code')->pluck('course_code');
+        $departments = Department::orderBy('department_name')->get();
+        $courses = Course::orderBy('course_name')->get();
 
         if ($modules->isNotEmpty()) {
             $firstModule = $modules->first();
@@ -31,7 +49,12 @@ class ModuleController extends Controller
                 'user_profile'   => $firstModule->user ? $firstModule->user->profile_picture : 'No profile',
             ]);
         }
-        return view('admin.admin_manage_module', ['modules' => $modules]);
+        return view('admin.admin_manage_module', [
+            'modules'     => $modules,
+            'courseCodes' => $courseCodes,
+            'departments' => $departments,
+            'courses'     => $courses,
+        ]);
     }
 
     public function create()

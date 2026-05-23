@@ -82,6 +82,7 @@
                     <x-my-button type="submit">Update Password</x-my-button>
                 </div> --}}
                 <div class="flex items-center justify-end gap-4">
+                    <x-my-secondary-button type="button" onclick="window.history.back()">Cancel</x-my-secondary-button>
                     <x-my-button type="submit">
                         Change password
                     </x-my-button>

@@ -143,6 +143,7 @@
             </section>
             <hr role="presentation" class="my-10 w-full border-t border-zinc-950/5 ">
             <div class="flex justify-end gap-2">
+                <x-my-secondary-button type="button" onclick="window.history.back()">Cancel</x-my-secondary-button>
                 <x-my-button type="submit">Save changes</x-my-button>
             </div>
         </form>

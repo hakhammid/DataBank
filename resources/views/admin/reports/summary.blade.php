@@ -226,9 +226,76 @@
             </div>
         </div>
 
-        <!-- Faculty Upload Summary -->
-        <div class="bg-white rounded-xl border border-zinc-200 shadow-sm mb-8 overflow-hidden">
-            <div class="p-6 border-b border-zinc-200 bg-white flex items-center justify-between">
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Faculty Uploads Bar Chart -->
+            <div class="lg:col-span-2 bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden flex flex-col">
+                <div class="p-6 border-b border-zinc-200 bg-white">
+                    <h2 class="text-lg font-bold text-zinc-800 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        Top Faculty Uploaders
+                    </h2>
+                </div>
+                <div class="p-6 flex-1 relative min-h-[300px]">
+                    <canvas id="facultyChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Department Breakdown Doughnut Chart -->
+            <div class="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden flex flex-col">
+                <div class="p-6 border-b border-zinc-200 bg-white">
+                    <h2 class="text-lg font-bold text-zinc-800 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+                        </svg>
+                        Modules by Department
+                    </h2>
+                </div>
+                <div class="p-6 flex-1 relative flex items-center justify-center min-h-[300px]">
+                    <canvas id="departmentChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabbed Detailed Reports -->
+        <div x-data="{ activeTab: 'faculty' }" class="mb-8">
+            <!-- Tabs Navigation -->
+            <div class="flex space-x-1 bg-zinc-100/50 p-1 rounded-xl mb-6 border border-zinc-200">
+                <button @click="activeTab = 'faculty'" 
+                    :class="activeTab === 'faculty' ? 'bg-white shadow-sm text-zinc-900 font-semibold border-zinc-200' : 'text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100 font-medium border-transparent'"
+                    class="flex-1 py-2.5 px-4 rounded-lg text-sm transition-all border flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    Faculty Uploads
+                </button>
+                <button @click="activeTab = 'departments'" 
+                    :class="activeTab === 'departments' ? 'bg-white shadow-sm text-zinc-900 font-semibold border-zinc-200' : 'text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100 font-medium border-transparent'"
+                    class="flex-1 py-2.5 px-4 rounded-lg text-sm transition-all border flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                    Department Breakdown
+                </button>
+                <button @click="activeTab = 'students'" 
+                    :class="activeTab === 'students' ? 'bg-white shadow-sm text-zinc-900 font-semibold border-zinc-200' : 'text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100 font-medium border-transparent'"
+                    class="flex-1 py-2.5 px-4 rounded-lg text-sm transition-all border flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Student Downloads
+                </button>
+            </div>
+
+            <!-- Tab Contents -->
+            <div class="relative">
+                
+                <!-- Faculty Upload Summary -->
+                <div x-show="activeTab === 'faculty'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" class="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
+                    <div class="p-6 border-b border-zinc-200 bg-white flex items-center justify-between">
                 <div>
                     <h2 class="text-lg font-bold text-zinc-800 flex items-center gap-2">
                         <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -240,36 +307,41 @@
                 </div>
             </div>
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-zinc-200" id="facultyTable">
-                    <thead class="bg-zinc-50/50">
+                <table class="min-w-full" id="facultyTable">
+                    <thead class="bg-zinc-50/80 border-b border-zinc-200">
                         <tr>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-zinc-500 uppercase tracking-wider">Faculty Name</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-zinc-500 uppercase tracking-wider">Department</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-zinc-500 uppercase tracking-wider">Course Codes Handled</th>
-                            <th class="px-6 py-4 text-right text-xs font-bold text-zinc-500 uppercase tracking-wider">Total Modules</th>
+                            <th class="px-6 py-5 text-left text-xs font-bold text-zinc-500 uppercase tracking-wider">Faculty Name</th>
+                            <th class="px-6 py-5 text-left text-xs font-bold text-zinc-500 uppercase tracking-wider">Department</th>
+                            <th class="px-6 py-5 text-left text-xs font-bold text-zinc-500 uppercase tracking-wider">Course Codes Handled</th>
+                            <th class="px-6 py-5 text-right text-xs font-bold text-zinc-500 uppercase tracking-wider">Total Modules</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-zinc-200">
+                    <tbody class="bg-white divide-y divide-zinc-100">
                         @forelse($facultyUploadSummary as $faculty)
-                        <tr class="hover:bg-zinc-50/50 even:bg-zinc-50/30 transition-colors">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-bold text-zinc-900">{{ $faculty['faculty_name'] }}</div>
+                        <tr class="hover:bg-zinc-50/50 transition-colors group">
+                            <td class="px-6 py-5 whitespace-nowrap">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-sm font-black text-indigo-700 border border-indigo-200 shadow-sm group-hover:scale-105 transition-transform">
+                                        {{ substr($faculty['faculty_name'], 0, 1) }}
+                                    </div>
+                                    <div class="text-sm font-bold text-zinc-900">{{ $faculty['faculty_name'] }}</div>
+                                </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600">
+                            <td class="px-6 py-5 whitespace-nowrap text-sm text-zinc-600">
                                 {{ $faculty['department'] }}
                             </td>
-                            <td class="px-6 py-4">
+                            <td class="px-6 py-5">
                                 <div class="flex flex-wrap gap-2">
                                     @foreach($faculty['course_breakdown'] as $course)
-                                    <span class="inline-flex items-center px-3 py-1 text-xs font-bold bg-indigo-50 text-indigo-700 rounded-md border border-indigo-100 shadow-sm">
+                                    <span class="inline-flex items-center px-3 py-1 text-xs font-bold bg-indigo-50/80 text-indigo-700 rounded-lg border border-indigo-100 shadow-sm">
                                         {{ $course['course_code'] }} 
-                                        <span class="ml-1.5 px-1.5 py-0.5 rounded bg-white text-indigo-600 text-[10px] font-black border border-indigo-100">{{ $course['count'] }}</span>
+                                        <span class="ml-2 px-1.5 py-0.5 rounded-md bg-white text-indigo-600 text-[10px] font-black border border-indigo-100/50 shadow-sm">{{ $course['count'] }}</span>
                                     </span>
                                     @endforeach
                                 </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right">
-                                <span class="px-4 py-1.5 inline-flex text-sm leading-5 font-black rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 shadow-sm">
+                            <td class="px-6 py-5 whitespace-nowrap text-right">
+                                <span class="px-4 py-2 inline-flex text-sm leading-5 font-black rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm">
                                     {{ $faculty['total_modules'] }}
                                 </span>
                             </td>
@@ -288,11 +360,11 @@
                     </tbody>
                 </table>
             </div>
-        </div>
+                </div>
 
-        <!-- Department Breakdown -->
-        <div class="bg-white rounded-xl border border-zinc-200 shadow-sm mb-8 overflow-hidden">
-            <div class="p-6 border-b border-zinc-200 bg-zinc-50/30 flex items-center justify-between">
+                <!-- Department Breakdown -->
+                <div x-cloak x-show="activeTab === 'departments'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" class="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
+                    <div class="p-6 border-b border-zinc-200 bg-zinc-50/30 flex items-center justify-between">
                 <div>
                     <h2 class="text-lg font-bold text-zinc-800 flex items-center gap-2">
                         <svg class="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -304,32 +376,37 @@
                 </div>
             </div>
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-zinc-200">
-                    <thead class="bg-zinc-50/50">
+                <table class="min-w-full">
+                    <thead class="bg-zinc-50/80 border-b border-zinc-200">
                         <tr>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-zinc-500 uppercase tracking-wider">Department Name</th>
-                            <th class="px-6 py-4 text-right text-xs font-bold text-zinc-500 uppercase tracking-wider">Total Modules</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-zinc-500 uppercase tracking-wider">Degree Programs</th>
+                            <th class="px-6 py-5 text-left text-xs font-bold text-zinc-500 uppercase tracking-wider">Department Name</th>
+                            <th class="px-6 py-5 text-right text-xs font-bold text-zinc-500 uppercase tracking-wider">Total Modules</th>
+                            <th class="px-6 py-5 text-left text-xs font-bold text-zinc-500 uppercase tracking-wider">Degree Programs</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-zinc-200">
+                    <tbody class="bg-white divide-y divide-zinc-100">
                         @forelse($departmentBreakdown as $dept)
-                        <tr class="hover:bg-zinc-50/50 even:bg-zinc-50/30 transition-colors">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-bold text-zinc-900">{{ $dept['department_name'] }}</div>
+                        <tr class="hover:bg-zinc-50/50 transition-colors group">
+                            <td class="px-6 py-5 whitespace-nowrap">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-sm font-black text-purple-700 border border-purple-200 shadow-sm group-hover:scale-105 transition-transform">
+                                        {{ substr($dept['department_name'], 0, 1) }}
+                                    </div>
+                                    <div class="text-sm font-bold text-zinc-900">{{ $dept['department_name'] }}</div>
+                                </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right">
-                                <span class="px-4 py-1.5 inline-flex text-sm leading-5 font-black rounded-full bg-purple-100 text-purple-800 border border-purple-200 shadow-sm">
+                            <td class="px-6 py-5 whitespace-nowrap text-right">
+                                <span class="px-4 py-2 inline-flex text-sm leading-5 font-black rounded-lg bg-purple-50 text-purple-700 border border-purple-200 shadow-sm">
                                     {{ $dept['total_modules'] }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4">
+                            <td class="px-6 py-5">
                                 <div class="flex flex-wrap gap-2">
                                     @foreach($dept['degree_programs'] as $program)
                                     @if($program)
-                                        <a href="{{ route('reports.individual', $program->id) }}" class="inline-flex items-center px-3 py-1.5 text-xs font-bold bg-zinc-100 text-zinc-700 hover:bg-zinc-900 hover:text-white rounded-lg border border-zinc-200 shadow-sm transition-all" title="View individual report for {{ $program->course_name }}">
+                                        <a href="{{ route('reports.individual', $program->id) }}" class="inline-flex items-center px-3 py-1.5 text-xs font-bold bg-zinc-50 text-zinc-700 hover:bg-zinc-900 hover:text-white rounded-lg border border-zinc-200 shadow-sm transition-all" title="View individual report for {{ $program->course_name }}">
                                             {{ $program->course_name }}
-                                            <svg class="w-3.5 h-3.5 ml-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                                            <svg class="w-3.5 h-3.5 ml-2 opacity-40 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                                         </a>
                                     @endif
                                     @endforeach
@@ -346,11 +423,11 @@
                     </tbody>
                 </table>
             </div>
-        </div>
+                </div>
 
-        <!-- Student Download Report -->
-        <div class="bg-white rounded-xl border border-zinc-200 shadow-sm mb-8 overflow-hidden">
-            <div class="p-6 border-b border-zinc-200 bg-zinc-50/30 flex items-center justify-between">
+                <!-- Student Download Report -->
+                <div x-cloak x-show="activeTab === 'students'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" class="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
+                    <div class="p-6 border-b border-zinc-200 bg-zinc-50/30 flex items-center justify-between">
                 <div>
                     <h2 class="text-lg font-bold text-zinc-800 flex items-center gap-2">
                         <svg class="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -378,9 +455,9 @@
                             <span class="w-2 h-2 rounded-full bg-blue-600 shadow-sm"></span>
                             <span class="px-3 py-1 bg-white text-blue-700 rounded-lg border border-blue-200 shadow-sm uppercase tracking-wide text-xs">{{ $program['degree_program'] }}</span>
                         </h4>
-                        <div class="overflow-x-auto rounded-xl border border-zinc-200 shadow-md">
+                        <div class="overflow-x-auto ring-1 ring-zinc-200 sm:rounded-lg shadow-sm">
                             <table class="min-w-full divide-y divide-zinc-200 bg-white">
-                                <thead class="bg-zinc-50">
+                                <thead class="bg-zinc-50/80 border-b border-zinc-200">
                                     <tr>
                                         <th class="px-6 py-4 text-left text-xs font-bold text-zinc-500 uppercase tracking-wider">Student Name</th>
                                         <th class="px-6 py-4 text-center text-xs font-bold text-zinc-500 uppercase tracking-wider">ID Number</th>
@@ -390,10 +467,10 @@
                                 </thead>
                                 <tbody class="divide-y divide-zinc-100">
                                     @foreach($program['students'] as $student)
-                                    <tr class="hover:bg-zinc-50/50 even:bg-zinc-50/20 transition-colors">
+                                    <tr class="hover:bg-zinc-50/50 transition-colors group">
                                         <td class="px-6 py-4 text-sm font-bold text-zinc-900">
                                             <div class="flex items-center gap-3">
-                                                <div class="w-8 h-8 rounded-full bg-zinc-200 flex items-center justify-center text-xs font-black text-zinc-600 border-2 border-white shadow-sm">
+                                                <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-sm font-black text-orange-700 border border-orange-200 shadow-sm group-hover:scale-105 transition-transform">
                                                     {{ substr($student['name'], 0, 1) }}
                                                 </div>
                                                 {{ $student['name'] }}
@@ -432,6 +509,7 @@
                 </div>
                 @endforelse
             </div>
+            </div>
         </div>
 
     </main>
@@ -443,9 +521,107 @@
         }
     </style>
 
-    {{-- html2pdf Library --}}
+    {{-- Chart.js & html2pdf Library --}}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Data from Backend
+            const facultyData = @json($facultyUploadSummary);
+            const departmentData = @json($departmentBreakdown);
+
+            // 1. Prepare Faculty Data (Top 10 max to keep chart readable)
+            // Sort by total modules descending
+            const sortedFaculty = facultyData.sort((a, b) => b.total_modules - a.total_modules).slice(0, 10);
+            
+            const facultyNames = sortedFaculty.map(f => f.faculty_name);
+            const facultyCounts = sortedFaculty.map(f => f.total_modules);
+
+            const ctxFaculty = document.getElementById('facultyChart').getContext('2d');
+            new Chart(ctxFaculty, {
+                type: 'bar',
+                data: {
+                    labels: facultyNames,
+                    datasets: [{
+                        label: 'Modules Uploaded',
+                        data: facultyCounts,
+                        backgroundColor: 'rgba(99, 102, 241, 0.8)', // Indigo
+                        borderColor: 'rgba(79, 70, 229, 1)',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.raw} modules`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { precision: 0 } // No decimals
+                        },
+                        x: {
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 2. Prepare Department Data
+            const deptNames = departmentData.map(d => d.department_name);
+            const deptCounts = departmentData.map(d => d.total_modules);
+
+            // Palette for doughnut chart
+            const bgColors = [
+                'rgba(168, 85, 247, 0.8)', // Purple
+                'rgba(59, 130, 246, 0.8)', // Blue
+                'rgba(16, 185, 129, 0.8)', // Emerald
+                'rgba(245, 158, 11, 0.8)', // Amber
+                'rgba(239, 68, 68, 0.8)',  // Red
+                'rgba(236, 72, 153, 0.8)', // Pink
+            ];
+
+            const ctxDept = document.getElementById('departmentChart').getContext('2d');
+            new Chart(ctxDept, {
+                type: 'doughnut',
+                data: {
+                    labels: deptNames,
+                    datasets: [{
+                        data: deptCounts,
+                        backgroundColor: bgColors,
+                        borderWidth: 2,
+                        borderColor: '#ffffff',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '65%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20
+                            }
+                        }
+                    }
+                }
+            });
+        });
+
         function exportToPDF() {
             const url = new URL("{{ route('reports.print.summary') }}", window.location.origin);
             const params = new URLSearchParams(window.location.search);
