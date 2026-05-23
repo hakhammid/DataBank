@@ -348,4 +348,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/upload-status', [ModuleController::class, 'uploadStatus'])->name('upload-status');
 });
 
+// API: Get degree programs by department (used for AJAX filtering)
+Route::get('/api/departments/{department}/courses', [CourseController::class, 'getByDepartment'])
+    ->name('api.departments.courses');
+
 require __DIR__ . '/auth.php';

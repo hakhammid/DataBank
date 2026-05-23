@@ -21,6 +21,7 @@ class Course extends Model
      */
     protected $fillable = [
         'course_name',
+        'department_id',
     ];
 
     /**
@@ -36,6 +37,14 @@ class Course extends Model
      */
 
     /**
+     * Get the department that owns this course.
+     */
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
+    }
+
+    /**
      * Get the user that owns the module.
      */
     public function users()
@@ -45,7 +54,7 @@ class Course extends Model
 
     public function allCourses()
     {
-        return self::latest()->paginate(10);
+        return self::with('department')->latest()->paginate(10);
     }
 
     public function modules()

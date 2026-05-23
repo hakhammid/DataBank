@@ -120,14 +120,9 @@
 
                 <div>
                     <label class="text-sm font-medium text-zinc-900">Degree Program</label>
-                    <select name="course_id" required
-                        class="mt-1 w-full rounded-lg border border-zinc-200 p-2 text-sm">
-                        <option value="" disabled selected>Select program</option>
-                        @foreach($courses as $course)
-                            <option value="{{ $course->id }}" {{ old('course_id') == $course->id ? 'selected' : '' }}>
-                                {{ $course->course_name }}
-                            </option>
-                        @endforeach
+                    <select name="course_id" id="course_id" required disabled
+                        class="mt-1 w-full rounded-lg border border-zinc-200 p-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                        <option value="" disabled selected>Select a department first</option>
                     </select>
                 </div>
 
@@ -243,6 +238,47 @@
                 showToast('Please upload at least one PDF file.');
             }
         });
+
+        // Department -> Degree Program AJAX filter
+        const departmentSelect = document.querySelector('select[name="department_id"]');
+        const courseSelect = document.getElementById('course_id');
+        const oldCourseId = '{{ old("course_id") }}';
+
+        departmentSelect.addEventListener('change', function () {
+            const departmentId = this.value;
+            if (!departmentId) {
+                courseSelect.innerHTML = '<option value="" disabled selected>Select a department first</option>';
+                courseSelect.disabled = true;
+                return;
+            }
+            courseSelect.innerHTML = '<option value="" disabled selected>Loading...</option>';
+            courseSelect.disabled = true;
+
+            fetch(`/api/departments/${departmentId}/courses`)
+                .then(r => r.json())
+                .then(courses => {
+                    courseSelect.innerHTML = '<option value="" disabled selected>Select program</option>';
+                    if (!courses.length) {
+                        courseSelect.innerHTML = '<option value="" disabled selected>No programs available</option>';
+                        courseSelect.disabled = true;
+                        return;
+                    }
+                    courses.forEach(c => {
+                        const opt = document.createElement('option');
+                        opt.value = c.id;
+                        opt.textContent = c.course_name;
+                        if (oldCourseId && oldCourseId == c.id) opt.selected = true;
+                        courseSelect.appendChild(opt);
+                    });
+                    courseSelect.disabled = false;
+                })
+                .catch(() => {
+                    courseSelect.innerHTML = '<option value="" disabled selected>Error loading</option>';
+                    courseSelect.disabled = true;
+                });
+        });
+
+        if (departmentSelect.value) departmentSelect.dispatchEvent(new Event('change'));
     </script>
 </x-admin-layout>
 

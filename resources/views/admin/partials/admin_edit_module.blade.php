@@ -168,13 +168,9 @@
                         <span data-slot="control"
                             class="group relative block w-full before:absolute before:inset-px before:rounded-[calc(theme(borderRadius.lg)-1px)] before:bg-white dark:before:hidden after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:ring-inset after:ring-transparent after:has-[[data-focus]]:ring-2 after:has-[[data-focus]]:ring-blue-500 has-[[data-disabled]]:opacity-50 before:has-[[data-disabled]]:bg-zinc-950/5 before:has-[[data-disabled]]:shadow-none">
                             <select
-                                class="h-[3rem] relative block w-full appearance-none rounded-lg py-[calc(theme(spacing[2.5])-1px)] sm:py-[calc(theme(spacing[1.5])-1px)] pl-[calc(theme(spacing[3.5])-1px)] pr-[calc(theme(spacing.10)-1px)] sm:pl-[calc(theme(spacing.3)-1px)] sm:pr-[calc(theme(spacing.9)-1px)] [&_optgroup]:font-semibold text-base/6 text-zinc-950 placeholder:text-zinc-500 sm:text-sm/6 border border-zinc-950/10 data-[hover]:border-zinc-950/20 dark:border-white/10 dark:data-[hover]:border-white/20 bg-transparent dark:bg-white/5 dark:*:bg-zinc-800 focus:outline-none data-[invalid]:border-red-500 data-[invalid]:data-[hover]:border-red-500 data-[disabled]:border-zinc-950/20 data-[disabled]:opacity-100"
-                                id="course_id" data-headlessui-state="" name="course_id" required>
-                                <option value="" disabled selected>Select Degree Program</option>
-                                @foreach($courses as $course)
-                                <option value="{{ $course->id }}" {{ $module->course_id == $course->id ? 'selected' : ''
-                                    }}>{{ $course->course_name }}</option>
-                                @endforeach
+                                class="h-[3rem] relative block w-full appearance-none rounded-lg py-[calc(theme(spacing[2.5])-1px)] sm:py-[calc(theme(spacing[1.5])-1px)] pl-[calc(theme(spacing[3.5])-1px)] pr-[calc(theme(spacing.10)-1px)] sm:pl-[calc(theme(spacing.3)-1px)] sm:pr-[calc(theme(spacing.9)-1px)] [&_optgroup]:font-semibold text-base/6 text-zinc-950 placeholder:text-zinc-500 sm:text-sm/6 border border-zinc-950/10 data-[hover]:border-zinc-950/20 dark:border-white/10 dark:data-[hover]:border-white/20 bg-transparent dark:bg-white/5 dark:*:bg-zinc-800 focus:outline-none data-[invalid]:border-red-500 data-[invalid]:data-[hover]:border-red-500 data-[disabled]:border-zinc-950/20 data-[disabled]:opacity-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                                id="course_id" data-headlessui-state="" name="course_id" required disabled>
+                                <option value="" disabled selected>Loading...</option>
                             </select>
                         </span>
                     </span>
@@ -489,6 +485,53 @@
                     fileInput.click();
                 }
             });
+
+            // Department -> Degree Program AJAX filter
+            const deptSelect = document.getElementById('department_id');
+            const courseSelect = document.getElementById('course_id');
+            const currentCourseId = '{{ $module->course_id }}';
+
+            function loadCourses(departmentId, preselectId) {
+                if (!departmentId) {
+                    courseSelect.innerHTML = '<option value="" disabled selected>Select a department first</option>';
+                    courseSelect.disabled = true;
+                    return;
+                }
+                courseSelect.innerHTML = '<option value="" disabled selected>Loading...</option>';
+                courseSelect.disabled = true;
+
+                fetch(`/api/departments/${departmentId}/courses`)
+                    .then(r => r.json())
+                    .then(courses => {
+                        courseSelect.innerHTML = '<option value="" disabled selected>Select Degree Program</option>';
+                        if (!courses.length) {
+                            courseSelect.innerHTML = '<option value="" disabled selected>No programs available</option>';
+                            courseSelect.disabled = true;
+                            return;
+                        }
+                        courses.forEach(c => {
+                            const opt = document.createElement('option');
+                            opt.value = c.id;
+                            opt.textContent = c.course_name;
+                            if (preselectId && preselectId == c.id) opt.selected = true;
+                            courseSelect.appendChild(opt);
+                        });
+                        courseSelect.disabled = false;
+                    })
+                    .catch(() => {
+                        courseSelect.innerHTML = '<option value="" disabled selected>Error loading</option>';
+                        courseSelect.disabled = true;
+                    });
+            }
+
+            deptSelect.addEventListener('change', function () {
+                loadCourses(this.value, null);
+            });
+
+            // On load, pre-select current course
+            if (deptSelect.value) {
+                loadCourses(deptSelect.value, currentCourseId);
+            }
         });
     </script>
 </x-admin-layout>

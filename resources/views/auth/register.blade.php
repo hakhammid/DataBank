@@ -114,13 +114,10 @@
                                     </label>
                                     <div x-data="{ isOptionSelected: false }" class="relative z-20 bg-transparent">
                                         <select
-                                            class="shadow-theme-xs focus:border-primary focus:ring-primary/10 h-11 w-full appearance-none rounded-lg border border-zinc-300 bg-transparent bg-none px-4 py-2.5 pr-11 text-sm text-zinc-950  placeholder:text-zinc-400 focus:ring-3 focus:outline-hidden"
+                                            class="shadow-theme-xs focus:border-primary focus:ring-primary/10 h-11 w-full appearance-none rounded-lg border border-zinc-300 bg-transparent bg-none px-4 py-2.5 pr-11 text-sm text-zinc-950  placeholder:text-zinc-400 focus:ring-3 focus:outline-hidden disabled:opacity-50 disabled:cursor-not-allowed"
                                             :class="isOptionSelected && 'text-zinc-800 '" id="degree_program_id"
-                                            data-headlessui-state="" name="degree_program_id" required>
-                                            <option value="" disabled selected>Select Degree Program</option>
-                                            @foreach($degree_programs as $degree_program)
-                                            <option value="{{ $degree_program->id }}" {{ old('degree_program_id')==$degree_program->id ? 'selected' : '' }} class="text-zinc-800">{{ $degree_program->course_name }}</option>
-                                            @endforeach
+                                            data-headlessui-state="" name="degree_program_id" required disabled>
+                                            <option value="" disabled selected>Select a department first</option>
                                         </select>
                                         <span
                                             class="pointer-events-none absolute top-1/2 right-4 z-30 -translate-y-1/2 text-zinc-500">
@@ -215,52 +212,58 @@
     </div>
 </x-auth-layout>
 <script>
-    function dropdown() {
-        return {
-          options: [],
-          selected: [],
-          show: false,
-          open() {
-            this.show = true;
-          },
-          close() {
-            this.show = false;
-          },
-          isOpen() {
-            return this.show === true;
-          },
-          select(index, event) {
-            if (!this.options[index].selected) {
-              this.options[index].selected = true;
-              this.options[index].element = event.target;
-              this.selected.push(index);
-            } else {
-              this.selected.splice(this.selected.lastIndexOf(index), 1);
-              this.options[index].selected = false;
+    document.addEventListener('DOMContentLoaded', function () {
+        const departmentSelect = document.getElementById('department_id');
+        const degreeProgramSelect = document.getElementById('degree_program_id');
+        const oldDegreeProgram = '{{ old("degree_program_id") }}';
+
+        departmentSelect.addEventListener('change', function () {
+            const departmentId = this.value;
+
+            if (!departmentId) {
+                degreeProgramSelect.innerHTML = '<option value="" disabled selected>Select a department first</option>';
+                degreeProgramSelect.disabled = true;
+                return;
             }
-          },
-          remove(index, option) {
-            this.options[option].selected = false;
-            this.selected.splice(index, 1);
-          },
-          loadOptions() {
-            const options = document.getElementById("select").options;
-            for (let i = 0; i < options.length; i++) {
-              this.options.push({
-                value: options[i].value,
-                text: options[i].innerText,
-                selected:
-                  options[i].getAttribute("selected") != null
-                    ? options[i].getAttribute("selected")
-                    : false,
-              });
-            }
-          },
-          selectedValues() {
-            return this.selected.map((option) => {
-              return this.options[option].value;
-            });
-          },
-        };
-      }
+
+            // Show loading state
+            degreeProgramSelect.innerHTML = '<option value="" disabled selected>Loading...</option>';
+            degreeProgramSelect.disabled = true;
+
+            fetch(`/api/departments/${departmentId}/courses`)
+                .then(response => response.json())
+                .then(courses => {
+                    degreeProgramSelect.innerHTML = '<option value="" disabled selected>Select Degree Program</option>';
+
+                    if (courses.length === 0) {
+                        degreeProgramSelect.innerHTML = '<option value="" disabled selected>No degree programs available</option>';
+                        degreeProgramSelect.disabled = true;
+                        return;
+                    }
+
+                    courses.forEach(course => {
+                        const option = document.createElement('option');
+                        option.value = course.id;
+                        option.textContent = course.course_name;
+                        option.className = 'text-zinc-800';
+                        if (oldDegreeProgram && oldDegreeProgram == course.id) {
+                            option.selected = true;
+                        }
+                        degreeProgramSelect.appendChild(option);
+                    });
+
+                    degreeProgramSelect.disabled = false;
+                })
+                .catch(error => {
+                    console.error('Error fetching degree programs:', error);
+                    degreeProgramSelect.innerHTML = '<option value="" disabled selected>Error loading programs</option>';
+                    degreeProgramSelect.disabled = true;
+                });
+        });
+
+        // If there's an old department value (after validation error), trigger the change event
+        if (departmentSelect.value) {
+            departmentSelect.dispatchEvent(new Event('change'));
+        }
+    });
 </script>
