@@ -22,6 +22,7 @@
                         <tr>
                             {{-- <th class="px-4 py-3 font-semibold text-zinc-700">Id</th> --}}
                             <th class="px-4 py-3 font-semibold text-zinc-700">Degree Program</th>
+                            <th class="px-4 py-3 font-semibold text-zinc-700">Department</th>
                             <th class="px-4 py-3 font-semibold text-zinc-700">Actions</th>
                         </tr>
                     </thead>
@@ -55,9 +56,10 @@
                                 </x-slot>
                             </x-my-modal>
                             <tr class="border-b border-zinc-100 hover:bg-zinc-50 transition-colors duration-150 course-row"
-                                data-course-id="{{ $course->id }}" data-course-name="{{ $course->course_name }}">
+                                data-course-id="{{ $course->id }}" data-course-name="{{ $course->course_name }}" data-department-name="{{ $course->department->department_name ?? 'Unassigned' }}">
                                 {{-- <td class="px-4 py-3 text-zinc-900">{{ $course->id }}</td> --}}
                                 <td class="px-4 py-3 text-zinc-900">{{ $course->course_name }}</td>
+                                <td class="px-4 py-3 text-zinc-500">{{ $course->department->department_name ?? 'Unassigned' }}</td>
                                 <td class="py-3">
                                     <div class="flex gap-2 items-center">
                                         <a href="{{ route('admin.degree-program.edit', $course) }}"
@@ -83,7 +85,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="2" class="px-4 py-8 text-center text-zinc-500">
+                                <td colspan="3" class="px-4 py-8 text-center text-zinc-500">
                                     <div class="flex flex-col items-center gap-2">
                                         <svg class="w-12 h-12 text-zinc-300" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
@@ -197,8 +199,9 @@
                 courseRows.forEach(row => {
                     const courseName = row.dataset.courseName.toLowerCase();
                     const courseId = row.dataset.courseId.toLowerCase();
+                    const departmentName = (row.dataset.departmentName || '').toLowerCase();
 
-                    if (courseId.includes(searchTerm) || courseName.includes(searchTerm)) {
+                    if (courseId.includes(searchTerm) || courseName.includes(searchTerm) || departmentName.includes(searchTerm)) {
                         row.style.display = '';
                         visibleCount++;
                     } else {

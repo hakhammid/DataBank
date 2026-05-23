@@ -22,11 +22,9 @@ class RegisteredUserController extends Controller
     public function create(): View
     {
         $departments = Department::all();
-        $degree_programs = Course::all();
 
         return view('auth.register', [
             'departments' => $departments,
-            'degree_programs' => $degree_programs
         ]);
     }
 

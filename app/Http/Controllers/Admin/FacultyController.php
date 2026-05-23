@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\User;
+use App\Models\Course;
 use App\Models\Module;
 use App\Models\Department;
 use Illuminate\Http\Request;
@@ -32,9 +33,11 @@ class FacultyController extends Controller
     public function create()
     {
         $departments = Department::all();
+        $courses     = Course::all();
 
         return view('admin.partials.admin_add_faculty', [
             'departments' => $departments,
+            'courses'     => $courses,
         ]);
     }
 
@@ -46,6 +49,7 @@ class FacultyController extends Controller
             'last_name'         => ['required', 'string', 'max:255'],
             'email'         => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'department_id' => ['required', 'exists:departments,id'],
+            'course_id'     => ['nullable', 'exists:courses,id'],
             'profile_photo' => ['nullable', 'image', 'max:2048', 'mimes:jpeg,png,jpg,gif'],
             'password'      => ['required', Rules\Password::defaults()],
         ]);
@@ -65,6 +69,7 @@ class FacultyController extends Controller
             'last_name'         => $request->last_name,
             'email'             => $request->email,
             'department_id'     => $request->department_id,
+            'course_id'         => $request->course_id,
             'profile_picture'   => $imageName,
             'password'          => Hash::make($request->password),
             'usertype'          => 'faculty',
@@ -78,10 +83,12 @@ class FacultyController extends Controller
     public function edit(User $faculty)
     {
         $departments = Department::all();
+        $courses     = Course::all();
 
         return view('admin.partials.admin_edit_faculty', [
             'faculty'     => $faculty,
             'departments' => $departments,
+            'courses'     => $courses,
         ]);
     }
 
@@ -93,6 +100,7 @@ class FacultyController extends Controller
             'last_name'       => 'required|string|max:255',
             'email'           => 'required|string|email|max:255|unique:users,email,' . $faculty->id,
             'department_id'   => 'required|exists:departments,id',
+            'course_id'       => 'nullable|exists:courses,id',
             'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
@@ -101,6 +109,7 @@ class FacultyController extends Controller
         $faculty->last_name     = $validatedData['last_name'];
         $faculty->email         = $validatedData['email'];
         $faculty->department_id = $validatedData['department_id'];
+        $faculty->course_id     = $validatedData['course_id'] ?? null;
 
         if ($request->hasFile('profile_picture')) {
             if ($faculty->profile_picture && file_exists(public_path('images/' . $faculty->profile_picture))) {

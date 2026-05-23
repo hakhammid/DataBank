@@ -175,17 +175,13 @@
                         <span data-slot="control"
                             class="group relative block w-full before:absolute before:inset-px before:rounded-[calc(theme(borderRadius.lg)-1px)] before:bg-white dark:before:hidden after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:ring-inset after:ring-transparent after:has-[[data-focus]]:ring-2 after:has-[[data-focus]]:ring-blue-500 has-[[data-disabled]]:opacity-50 before:has-[[data-disabled]]:bg-zinc-950/5 before:has-[[data-disabled]]:shadow-none">
                             <select
-                                class="relative block w-full appearance-none rounded-lg py-[calc(theme(spacing[2.5])-1px)] sm:py-[calc(theme(spacing[1.5])-1px)] pl-[calc(theme(spacing[3.5])-1px)] pr-[calc(theme(spacing.10)-1px)] sm:pl-[calc(theme(spacing.3)-1px)] sm:pr-[calc(theme(spacing.9)-1px)] [&amp;_optgroup]:font-semibold text-base/6 text-zinc-950 placeholder:text-zinc-500 sm:text-sm/6 border border-zinc-950/10 data-[hover]:border-zinc-950/20 dark:border-white/10 dark:data-[hover]:border-white/20 bg-transparent dark:bg-white/5 dark:*:bg-zinc-800 focus:outline-none data-[invalid]:border-red-500 data-[invalid]:data-[hover]:border-red-500 data-[disabled]:border-zinc-950/20 data-[disabled]:opacity-100"
-                                id="course_id" data-headlessui-state="" name="course_id" required>
-                                <option value="" disabled selected>Select Degree Program</option>
-                                @foreach($courses as $course)
-                                <option value="{{ $course->id }}" {{ old('course_id')==$course->id ? 'selected' : ''
-                                    }}>{{ $course->course_name }}</option>
-                                @endforeach
+                                class="relative block w-full appearance-none rounded-lg py-[calc(theme(spacing[2.5])-1px)] sm:py-[calc(theme(spacing[1.5])-1px)] pl-[calc(theme(spacing[3.5])-1px)] pr-[calc(theme(spacing.10)-1px)] sm:pl-[calc(theme(spacing.3)-1px)] sm:pr-[calc(theme(spacing.9)-1px)] [&amp;_optgroup]:font-semibold text-base/6 text-zinc-950 placeholder:text-zinc-500 sm:text-sm/6 border border-zinc-950/10 data-[hover]:border-zinc-950/20 dark:border-white/10 dark:data-[hover]:border-white/20 bg-transparent dark:bg-white/5 dark:*:bg-zinc-800 focus:outline-none data-[invalid]:border-red-500 data-[invalid]:data-[hover]:border-red-500 data-[disabled]:border-zinc-950/20 data-[disabled]:opacity-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                                id="course_id" data-headlessui-state="" name="course_id" required disabled>
+                                <option value="" disabled selected>Select a department first</option>
                             </select>
                         </span>
                     </span>
-                    <x-input-error :messages="$errors->get('department_id')" class="mt-2" />
+                    <x-input-error :messages="$errors->get('course_id')" class="mt-2" />
                 </div>
             </section>
 
@@ -217,4 +213,59 @@
             </div>
         </form>
     </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const departmentSelect = document.getElementById('department_id');
+            const courseSelect = document.getElementById('course_id');
+            const oldCourseId = '{{ old("course_id") }}';
+
+            departmentSelect.addEventListener('change', function () {
+                const departmentId = this.value;
+
+                if (!departmentId) {
+                    courseSelect.innerHTML = '<option value="" disabled selected>Select a department first</option>';
+                    courseSelect.disabled = true;
+                    return;
+                }
+
+                courseSelect.innerHTML = '<option value="" disabled selected>Loading...</option>';
+                courseSelect.disabled = true;
+
+                fetch(`/api/departments/${departmentId}/courses`)
+                    .then(response => response.json())
+                    .then(courses => {
+                        courseSelect.innerHTML = '<option value="" disabled selected>Select Degree Program</option>';
+
+                        if (courses.length === 0) {
+                            courseSelect.innerHTML = '<option value="" disabled selected>No degree programs available</option>';
+                            courseSelect.disabled = true;
+                            return;
+                        }
+
+                        courses.forEach(course => {
+                            const option = document.createElement('option');
+                            option.value = course.id;
+                            option.textContent = course.course_name;
+                            if (oldCourseId && oldCourseId == course.id) {
+                                option.selected = true;
+                            }
+                            courseSelect.appendChild(option);
+                        });
+
+                        courseSelect.disabled = false;
+                    })
+                    .catch(error => {
+                        console.error('Error fetching degree programs:', error);
+                        courseSelect.innerHTML = '<option value="" disabled selected>Error loading programs</option>';
+                        courseSelect.disabled = true;
+                    });
+            });
+
+            // Trigger on page load if department is pre-selected (e.g. after validation error)
+            if (departmentSelect.value) {
+                departmentSelect.dispatchEvent(new Event('change'));
+            }
+        });
+    </script>
 </x-admin-layout>
