@@ -155,10 +155,10 @@
                     <tbody>
                         @forelse ($modules as $module)
                         <!-- Custom PDF Viewer Modal with Blur Effect -->
-                        <div x-data="{ showModuleModal: false }" x-show="showModuleModal"
+                        <div x-data="{ showModuleModal: false, showDownloadModal: false }" x-show="showModuleModal"
                             x-on:open-modal.window="if ($event.detail === 'view-module-{{$module->id}}') { showModuleModal = true; document.body.classList.add('overflow-hidden', 'backdrop-blur') }"
-                            x-on:close.stop="showModuleModal = false; document.body.classList.remove('overflow-hidden', 'backdrop-blur')"
-                            x-on:keydown.escape.window="showModuleModal = false; document.body.classList.remove('overflow-hidden', 'backdrop-blur')"
+                            x-on:close.stop="showDownloadModal = false; showModuleModal = false; document.body.classList.remove('overflow-hidden', 'backdrop-blur')"
+                            x-on:keydown.escape.window="showDownloadModal = false; showModuleModal = false; document.body.classList.remove('overflow-hidden', 'backdrop-blur')"
                             x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
                             x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"
                             x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
@@ -188,8 +188,7 @@
                                             ({{ $module->course_code }}) {{ $module->title }}
                                         </h3>
                                         <div class="flex items-center">
-                                            <a href="{{ asset('files/' . $module['file']) }}"
-                                                download="{{ $module->title }}.pdf"
+                                            <button type="button" x-on:click="showDownloadModal = true"
                                                 class="ml-4 bg-white/20 rounded-full p-2 transition-all duration-200 focus:outline-none relative group">
                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                                                     stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -200,7 +199,7 @@
                                                 </svg>
                                                 <span
                                                     class="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 bg-white text-zinc-800 text-xs rounded shadow-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap border border-zinc-100">Download</span>
-                                            </a>
+                                            </button>
                                             <button
                                                 x-on:click="showModuleModal = false; document.body.classList.remove('overflow-hidden', 'backdrop-blur')"
                                                 class="ml-4 bg-white/20 rounded-full p-2 transition-all duration-200 focus:outline-none">
@@ -227,6 +226,54 @@
                                             onmouseover="return false;" onmouseout="return false;"
                                             onload="this.contentWindow.document.body.style.cursor='default';">
                                         </iframe>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Download Confirmation Modal -->
+                            <div x-show="showDownloadModal"
+                                x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                                x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+                                class="fixed inset-0 z-[10000] flex items-center justify-center p-4" style="display: none;" x-cloak>
+                                
+                                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" x-on:click="showDownloadModal = false"></div>
+                                
+                                <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full max-w-lg mx-auto z-10"
+                                    x-transition:enter="ease-out duration-300"
+                                    x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                                    x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                                    x-transition:leave="ease-in duration-200"
+                                    x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                                    x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
+                                    
+                                    <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                                        <div class="sm:flex sm:items-start">
+                                            <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-zinc-100 sm:mx-0 sm:h-10 sm:w-10">
+                                                <svg class="h-6 w-6 text-zinc-900" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                                                </svg>
+                                            </div>
+                                            <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
+                                                <h3 class="text-base font-semibold leading-6 text-gray-900">Confirm Download</h3>
+                                                <div class="mt-2">
+                                                    <p class="text-sm text-gray-500">
+                                                        Are you sure you want to download "<span class="font-bold">{{ $module->title }}</span>"?
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 gap-2">
+                                        <a href="{{ asset('files/' . $module->file) }}" download="{{ $module->title }}.pdf"
+                                            x-on:click="showDownloadModal = false"
+                                            class="w-full inline-flex justify-center rounded-md bg-zinc-900 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-zinc-800 sm:ml-3 sm:w-auto">
+                                            Download
+                                        </a>
+                                        <button type="button" x-on:click="showDownloadModal = false"
+                                            class="w-full inline-flex justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto">
+                                            Cancel
+                                        </button>
                                     </div>
                                 </div>
                             </div>
