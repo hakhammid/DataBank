@@ -31,6 +31,7 @@ class Module extends Model
         'user_id',
         'department_id',
         'course_id',
+        'status',
         'created_at'
     ];
 
@@ -56,6 +57,11 @@ class Module extends Model
     public function allModules()
     {
         return self::latest()->get();
+    }
+
+    public function scopePublished($query)
+    {
+        return $query->where('status', 'published');
     }
     public function user()
     {

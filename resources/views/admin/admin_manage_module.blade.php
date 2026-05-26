@@ -147,6 +147,7 @@
 
                             <th class="px-4 py-3 font-semibold text-zinc-700">Views</th>
                             <th class="px-4 py-3 font-semibold text-zinc-700">Teacher</th>
+                            <th class="px-4 py-3 font-semibold text-zinc-700">Status</th>
                             <th class="px-4 py-3 font-semibold text-zinc-700">Date Posted</th>
                             <th class="px-4 py-3 font-semibold text-zinc-700">Actions</th>
                         </tr>
@@ -233,7 +234,7 @@
                         <tr class="border-b border-zinc-100 hover:bg-zinc-50 transition-colors duration-150 module-row"
                             data-module-id="{{ $module->id}}" data-module-title="{{ $module->title }}"
                             data-module-course-code="{{ $module->course_code }}"
-                            data-module-uploader-name="{{ $module->user->name }}">
+                            data-module-uploader-name="{{ $module->user?->name ?? 'N/A' }}">
                             <td class="px-4 py-3 font-medium text-zinc-900">{{ $module->course_code }}</td>
                             <td class="px-4 py-3 text-zinc-600">{{ $module->title }}</td>
 
@@ -242,23 +243,85 @@
                                 class="relative px-4 first:pl-[var(--gutter,theme(spacing.2))] last:pr-[var(--gutter,theme(spacing.2))] border-b border-zinc-950/5 dark:border-white/5 py-4 sm:first:pl-1 sm:last:pr-1">
                                 <div class="flex gap-2 items-center">
                                     <div class="w-8 h-8 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
-                                        <img src="{{ $module->user->profile_picture ? asset('images/' . $module->user->profile_picture) : asset('images/default_profile.png') }}"
+                                        <img src="{{ ($module->user && $module->user->profile_picture) ? asset('images/' . $module->user->profile_picture) : asset('images/default_profile.png') }}"
                                             alt="Profile Picture" class="w-full h-full object-cover">
                                     </div>
-                                    {{ $module->user->name }}
+                                    {{ $module->user?->name ?? 'Deleted Teacher' }}
                                 </div>
+                            </td>
+                            <td class="px-4 py-3">
+                                @if($module->status === 'published')
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-700 border border-emerald-500/20">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                        Published
+                                    </span>
+                                @elseif($module->status === 'rejected')
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-700 border border-rose-500/20">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                                        Rejected
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-700 border border-amber-500/20">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                        Pending
+                                    </span>
+                                @endif
                             </td>
                             <td class="px-4 py-3 text-zinc-600">{{ $module->created_at->format('M d, Y') }}</td>
                             <td class="py-3">
                                 <div class="flex gap-2 items-center">
-                                    {{-- <a href="{{ route('admin.module.edit', $module->id) }}"
-                                        class="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-zinc-900 hover:bg-zinc-900/5 transition-colors duration-200">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                        </svg>
-                                        Edit
-                                    </a> --}}
+                                    @if($module->status === 'pending')
+                                        <form method="POST" action="{{ route('admin.module.update-status', $module->id) }}" class="inline">
+                                            @csrf
+                                            @method('PATCH')
+                                            <input type="hidden" name="status" value="published">
+                                            <button type="submit"
+                                                class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 rounded-md shadow-sm transition-all duration-200 transform hover:scale-[1.02]">
+                                                <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                                                </svg>
+                                                Approve
+                                            </button>
+                                        </form>
+                                        <form method="POST" action="{{ route('admin.module.update-status', $module->id) }}" class="inline">
+                                            @csrf
+                                            @method('PATCH')
+                                            <input type="hidden" name="status" value="rejected">
+                                            <button type="submit"
+                                                class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 active:bg-rose-800 rounded-md shadow-sm transition-all duration-200 transform hover:scale-[1.02]">
+                                                <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                                Reject
+                                            </button>
+                                        </form>
+                                    @elseif($module->status === 'rejected')
+                                        <form method="POST" action="{{ route('admin.module.update-status', $module->id) }}" class="inline">
+                                            @csrf
+                                            @method('PATCH')
+                                            <input type="hidden" name="status" value="published">
+                                            <button type="submit"
+                                                class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-zinc-700 bg-white hover:bg-zinc-50 active:bg-zinc-100 border border-zinc-300 rounded-md shadow-sm transition-all duration-200">
+                                                <svg class="w-3.5 h-3.5 mr-1 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                                                </svg>
+                                                Approve
+                                            </button>
+                                        </form>
+                                    @else
+                                        <form method="POST" action="{{ route('admin.module.update-status', $module->id) }}" class="inline">
+                                            @csrf
+                                            @method('PATCH')
+                                            <input type="hidden" name="status" value="rejected">
+                                            <button type="submit"
+                                                class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-zinc-700 bg-white hover:bg-zinc-50 active:bg-zinc-100 border border-zinc-300 rounded-md shadow-sm transition-all duration-200">
+                                                <svg class="w-3.5 h-3.5 mr-1 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                                Reject
+                                            </button>
+                                        </form>
+                                    @endif
 
                                     <button x-on:click="$dispatch('open-modal', 'view-module-{{$module->id}}')"
                                         class="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-zinc-900 hover:bg-zinc-900/5 transition-colors duration-200">

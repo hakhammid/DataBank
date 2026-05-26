@@ -142,6 +142,7 @@ class FacultyController extends Controller
                 'semester' => strip_tags($validatedData['semester']),
                 'course_id' => strip_tags($validatedData['course_id']),
                 'department_id' => strip_tags($validatedData['department_id']),
+                'status' => 'pending',
             ];
 
             if ($request->hasFile('file')) {

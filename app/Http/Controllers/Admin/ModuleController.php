@@ -93,7 +93,8 @@ class ModuleController extends Controller
                 'semester'      => strip_tags($validatedData['semester']),
                 'course_id'     => strip_tags($validatedData['course_id']),
                 'department_id' => strip_tags($validatedData['department_id']),
-                'user_id'       => Auth::user()->id
+                'user_id'       => Auth::user()->id,
+                'status'        => 'published'
             ];
 
             if ($request->hasFile('file')) {
@@ -178,7 +179,8 @@ class ModuleController extends Controller
                             'semester' => strip_tags($validatedData['semester']),
                             'course_id' => strip_tags($validatedData['course_id']),
                             'department_id' => strip_tags($validatedData['department_id']),
-                            'user_id' => Auth::user()->id
+                            'user_id' => Auth::user()->id,
+                            'status' => 'published'
                         ]);
 
                         $uploadedCount++;
@@ -278,5 +280,19 @@ class ModuleController extends Controller
                 ->with('error', 'An error occurred while updating the module. Please try again.')
                 ->withInput();
         }
+    }
+
+    public function updateStatus(Request $request, Module $module)
+    {
+        $validated = $request->validate([
+            'status' => 'required|in:published,rejected'
+        ]);
+
+        $module->update([
+            'status' => $validated['status']
+        ]);
+
+        $statusText = $validated['status'] === 'published' ? 'published' : 'rejected';
+        return back()->with('success', "Module status updated to {$statusText} successfully.");
     }
 }

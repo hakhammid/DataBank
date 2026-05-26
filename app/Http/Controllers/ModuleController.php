@@ -245,6 +245,10 @@ class ModuleController extends Controller
 
     public function viewModule(Module $module, Request $request)
     {
+        if (Auth::user()->usertype === 'student' && $module->status !== 'published') {
+            abort(403, 'This module is pending approval and is not viewable by students.');
+        }
+
         $module->increment('number_of_views');
 
         $source = $request->query('source', 'student');

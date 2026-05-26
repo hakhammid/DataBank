@@ -26,6 +26,10 @@ class ModuleDownloadController extends Controller
         // Find the module
         $module = Module::findOrFail($id);
 
+        if ($user->usertype === 'student' && $module->status !== 'published') {
+            abort(403, 'This module is pending approval and cannot be downloaded.');
+        }
+
         // Log the download
         ModuleDownload::create([
             'user_id'       => $user->id,

@@ -148,11 +148,6 @@
                     </span>
                     <x-input-error :messages="$errors->get('department_id')" class="mt-2" />
                 </div>
-            </section>
-
-            <hr role="presentation" class="my-10 w-full border-t border-zinc-950/5">
-
-            <section class="grid gap-x-8 gap-y-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                 <div class="space-y-1">
                     <h2 class="text-base/7 font-semibold text-zinc-950 sm:text-sm/6">Degree Program</h2>
                     <span data-slot="control"
