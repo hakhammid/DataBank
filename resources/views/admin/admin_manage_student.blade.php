@@ -46,7 +46,7 @@
                                     </div>
                                 </td>
                                 <td class="px-4 py-3 text-zinc-600">{{ $student->email }}</td>
-                                <td class="px-4 py-3 text-zinc-600">{{ $student->course->course_name }}</td>
+                                <td class="px-4 py-3 text-zinc-600">{{ $student->course?->course_name ?? 'N/A' }}</td>
                                 <td class="py-3">
                                     <div class="flex gap-2 items-center">
                                         <a href="{{ route('admin-edit-student', $student->id) }}"

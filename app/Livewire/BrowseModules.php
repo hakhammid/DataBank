@@ -29,7 +29,6 @@ class BrowseModules extends Component
         'selectedDepartments' => ['except' => [], 'as' => 'dept'],
         'semester' => ['except' => ''],
         'selectedCourseCode' => ['except' => '', 'as' => 'code'],
-        'page' => ['except' => 1],
     ];
 
     protected $listeners = [
@@ -196,6 +195,7 @@ class BrowseModules extends Component
         $user = Auth::user();
 
         $hasResults = Module::query()
+            ->where('status', 'published')
             // Filter by user's course_id
             ->where('course_id', $user->course_id)
             ->when($this->search, function($query) {
@@ -267,6 +267,7 @@ class BrowseModules extends Component
 
             // Get course code groups with module counts
             $courseCodeGroups = Module::where('course_id', $user->course_id)
+                ->where('status', 'published')
                 ->when($this->semester, function($q) {
                     $q->where('semester', $this->semester);
                 })
@@ -288,6 +289,7 @@ class BrowseModules extends Component
             // Load recent modules for the "For You" feed if no course code is selected
             if (!$this->selectedCourseCode && empty($this->search) && empty($this->semester)) {
                 $recentModules = Module::query()
+                    ->where('status', 'published')
                     ->with([
                         'user' => fn($q) => $q->select('id', 'first_name', 'middle_initial', 'last_name', 'profile_picture', 'department_id'),
                         'user.department' => fn($q) => $q->select('id', 'department_name'),
@@ -302,6 +304,7 @@ class BrowseModules extends Component
             // Only load paginated modules when a course code is selected
             if ($this->selectedCourseCode) {
                 $modulesQuery = Module::query()
+                    ->where('status', 'published')
                     ->with([
                         'user' => fn($q) => $q->select('id', 'first_name', 'middle_initial', 'last_name', 'profile_picture', 'department_id'),
                         'user.department' => fn($q) => $q->select('id', 'department_name'),

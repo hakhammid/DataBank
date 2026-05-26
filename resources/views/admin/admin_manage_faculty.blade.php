@@ -26,7 +26,7 @@
                             <th class="px-4 py-3 font-semibold text-zinc-700">Name</th>
                             <th class="px-4 py-3 font-semibold text-zinc-700">Email</th>
                             <th class="px-4 py-3 font-semibold text-zinc-700">Department</th>
-                            <th class="px-4 py-3 font-semibold text-zinc-700">No# Uploaded Module</th>
+                            <th class="px-4 py-3 font-semibold text-zinc-700 whitespace-nowrap">Modules Uploaded</th>
                             <th class="px-4 py-3 font-semibold text-zinc-700">Actions</th>
                         </tr>
                     </thead>

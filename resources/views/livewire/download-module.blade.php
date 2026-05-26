@@ -1,5 +1,7 @@
 <div>
-    <button wire:click="download"
+    <!-- Download Button (Triggers Modal) -->
+    <button x-data
+            x-on:click.prevent="$dispatch('open-modal', 'confirm-download-{{ $module->id }}')"
             wire:loading.attr="disabled"
             wire:target="download"
             class="ml-4 bg-zinc-900 rounded-full p-2 transition-all duration-200 focus:outline-none relative group hover:bg-zinc-800 w-10 h-10 inline-flex items-center justify-center">
@@ -15,6 +17,35 @@
             <span wire:loading wire:target="download">Preparing Download...</span>
         </span>
     </button>
+
+    <!-- Confirmation Modal -->
+    <x-modal name="confirm-download-{{ $module->id }}" maxWidth="md" focusable>
+        <div class="p-6">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="flex size-10 shrink-0 items-center justify-center rounded-full bg-zinc-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-5 text-zinc-900">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                    </svg>
+                </div>
+                <h3 class="text-lg font-bold text-zinc-900">
+                    Confirm Download
+                </h3>
+            </div>
+
+            <p class="text-sm text-zinc-600 leading-relaxed">
+                Are you sure you want to download this module? This action will reduce your daily download quota by 1.
+            </p>
+
+            <div class="mt-6 flex justify-end gap-3">
+                <x-my-secondary-button type="button" x-on:click="$dispatch('close')">
+                    Cancel
+                </x-my-secondary-button>
+                <x-my-button wire:click="download" x-on:click="$dispatch('close')">
+                    Confirm
+                </x-my-button>
+            </div>
+        </div>
+    </x-modal>
 </div>
 
 <script>

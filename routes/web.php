@@ -203,6 +203,10 @@ Route::middleware('auth')->group(function () {
         ->middleware(['auth', 'verified'])
         ->name('admin.module.update');
 
+    Route::patch('/admin/module/update-status/{module}', [AdminModuleController::class, 'updateStatus'])
+        ->middleware(['auth', 'verified'])
+        ->name('admin.module.update-status');
+
     Route::delete('/admin/delete-module/{module}', [ModuleController::class, 'deleteModule'])
         ->middleware(['auth', 'verified'])
         ->name('admin.delete-module');
