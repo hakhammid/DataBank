@@ -10,14 +10,26 @@ use App\Http\Controllers\Controller;
 
 class CourseController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $courses = [];
+        $departments = [];
         if (Auth::check()) {
-            $courses = (new Course())->allCourses();
+            $departments = Department::orderBy('department_name')->get();
+
+            $query = Course::with('department');
+
+            if ($request->filled('department_id')) {
+                $query->where('department_id', $request->department_id);
+            }
+
+            $courses = $query->latest()->paginate(10)->appends($request->query());
         }
 
-        return view('admin.admin_manage_course', ['courses' => $courses]);
+        return view('admin.admin_manage_course', [
+            'courses' => $courses,
+            'departments' => $departments,
+        ]);
     }
 
     public function create()

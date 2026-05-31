@@ -220,28 +220,6 @@ class ModuleController extends Controller
         }
     }
 
-    /**
-     * Generate exactly like Google Classroom codes
-     * 6-7 characters, alphanumeric, uppercase
-     */
-    private function generateGoogleClassroomCode(): string
-    {
-        $length = rand(6, 7);
-        $characters = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
-        $charactersLength = strlen($characters);
-
-        do {
-            $code = '';
-            for ($i = 0; $i < $length; $i++) {
-                $code .= $characters[rand(0, $charactersLength - 1)];
-            }
-
-            $exists = Module::where('course_code', $code)->exists();
-        } while ($exists);
-
-        return $code;
-    }
-
 
     public function viewModule(Module $module, Request $request)
     {

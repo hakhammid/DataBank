@@ -9,9 +9,72 @@
             </x-my-secondary-button>
         </div>
 
-        <!-- Search Controls -->
-        <div class="mt-8">
-            <x-search-bar id="degreeProgramSearch" placeholder="Search degree programs..." />
+        <!-- Enhanced Search and Filter Controls -->
+        <div class="mt-8 bg-white rounded-xl border border-zinc-200 p-6 shadow-sm">
+            <div class="flex flex-col gap-5">
+                <!-- Search Row -->
+                <div class="flex flex-col lg:flex-row gap-4 items-start lg:items-end">
+                    <x-search-bar id="degreeProgramSearch" placeholder="Search degree programs..." />
+                </div>
+
+                <!-- Filter Form Row -->
+                <form method="GET" action="{{ route('admin.degree-program') }}" id="filterForm">
+                    <div class="flex flex-col sm:flex-row gap-3 items-end">
+                        <!-- Department Filter -->
+                        <div class="w-full sm:w-52">
+                            <label for="filterDepartment" class="block text-xs font-medium text-zinc-500 mb-1.5">
+                                <svg class="w-3.5 h-3.5 inline-block mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                                Department
+                            </label>
+                            <select name="department_id" id="filterDepartment"
+                                class="block w-full py-2.5 px-3 border border-zinc-300 rounded-lg bg-white text-sm text-zinc-700 focus:ring-2 focus:ring-zinc-900 focus:border-zinc-900 transition-all duration-200 cursor-pointer">
+                                <option value="">All Departments</option>
+                                @foreach($departments as $department)
+                                    <option value="{{ $department->id }}" {{ request('department_id') == $department->id ? 'selected' : '' }}>{{ $department->department_name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Filter Actions -->
+                        <div class="flex gap-2">
+                            <button type="submit"
+                                class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-zinc-900 text-white text-sm font-medium rounded-lg hover:bg-zinc-800 focus:ring-2 focus:ring-zinc-900 focus:ring-offset-2 transition-all duration-200">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                                </svg>
+                                Filter
+                            </button>
+                            @if(request()->filled('department_id'))
+                                <a href="{{ route('admin.degree-program') }}"
+                                    class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-white text-zinc-700 text-sm font-medium rounded-lg border border-zinc-300 hover:bg-zinc-50 focus:ring-2 focus:ring-zinc-900 focus:ring-offset-2 transition-all duration-200">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                    Clear
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Active Filters Display -->
+                @if(request()->filled('department_id'))
+                    <div class="flex flex-wrap items-center gap-2 pt-1">
+                        <span class="text-xs font-medium text-zinc-500">Active filters:</span>
+                        @php $activeDept = $departments->firstWhere('id', request('department_id')); @endphp
+                        @if($activeDept)
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-zinc-100 text-zinc-700">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                                {{ $activeDept->department_name }}
+                            </span>
+                        @endif
+                    </div>
+                @endif
+            </div>
         </div>
 
         <!-- Module Table -->
