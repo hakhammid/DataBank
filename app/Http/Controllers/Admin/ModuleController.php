@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Models\Course;
 use App\Models\Module;
 use App\Models\Department;
+use App\Models\ModuleEnrollment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use App\Http\Controllers\Controller;
 
@@ -17,7 +19,7 @@ class ModuleController extends Controller
     {
         $query = Module::with(['user' => function ($q) {
             $q->select('id', 'first_name', 'middle_initial', 'last_name', 'profile_picture');
-        }, 'department', 'course']);
+        }, 'department', 'courses']);
 
         // Apply filters
         if ($request->filled('course_code')) {
@@ -29,7 +31,9 @@ class ModuleController extends Controller
         }
 
         if ($request->filled('course_id')) {
-            $query->where('course_id', $request->course_id);
+            $query->whereHas('courses', function ($q) use ($request) {
+                $q->where('courses.id', $request->course_id);
+            });
         }
 
         $modules = $query->latest()->paginate(10)->appends($request->query());
@@ -76,14 +80,21 @@ class ModuleController extends Controller
                 'title'         => 'required|string|max:255',
                 'isMajor'       => 'required|in:0,1',
                 'semester'      => 'required|in:1st,2nd',
-                'course_id'     => 'required|exists:courses,id',
+                'course_ids'    => 'required|array|min:1',
+                'course_ids.*'  => 'exists:courses,id',
                 'department_id' => 'required|exists:departments,id',
-                'file'          => 'required|mimes:pdf|max:204800'
+                'file'          => 'required|mimes:pdf|max:204800',
+                'enrolled_students' => 'required|array|min:1',
+                'enrolled_students.*' => 'exists:users,id',
             ], [
                 'course_code.required' => 'Please enter a course code.',
+                'course_ids.required'  => 'Please select at least one degree program.',
+                'course_ids.min'       => 'Please select at least one degree program.',
                 'file.required' => 'Please upload a PDF file.',
                 'file.mimes'    => 'The file must be a PDF.',
                 'file.max'      => 'The file size must not exceed 200MB.',
+                'enrolled_students.required' => 'Please enroll at least one student.',
+                'enrolled_students.min'      => 'Please enroll at least one student.',
             ]);
 
             $cleanData = [
@@ -91,7 +102,6 @@ class ModuleController extends Controller
                 'title'         => strip_tags($validatedData['title']),
                 'isMajor'       => strip_tags($validatedData['isMajor']),
                 'semester'      => strip_tags($validatedData['semester']),
-                'course_id'     => strip_tags($validatedData['course_id']),
                 'department_id' => strip_tags($validatedData['department_id']),
                 'user_id'       => Auth::user()->id,
                 'status'        => 'published'
@@ -111,7 +121,22 @@ class ModuleController extends Controller
                 return redirect()->back()->withInput();
             }
 
-            Module::create($cleanData);
+            $module = Module::create($cleanData);
+
+            // Sync courses (degree programs) via pivot
+            $module->courses()->sync($validatedData['course_ids']);
+
+            // Handle student enrollments
+            if (!empty($validatedData['enrolled_students'])) {
+                foreach ($validatedData['enrolled_students'] as $studentId) {
+                    ModuleEnrollment::firstOrCreate([
+                        'user_id' => $studentId,
+                        'course_code' => $cleanData['course_code'],
+                    ], [
+                        'enrolled_by' => Auth::id(),
+                    ]);
+                }
+            }
 
             $request->session()->forget('file_info');
 
@@ -130,9 +155,9 @@ class ModuleController extends Controller
                 ->withErrors($e->errors())
                 ->withInput();
         } catch (\Exception $e) {
-            Log::error('Error creating multiple modules: ' . $e->getMessage());
+            Log::error('Error creating module: ' . $e->getMessage());
             return redirect()->back()
-                ->with('error', 'Failed to create modules. Please try again.')
+                ->with('error', 'Failed to create module. Please try again.')
                 ->withInput();
         }
     }
@@ -145,19 +170,26 @@ class ModuleController extends Controller
                 'title' => 'required|string|max:255',
                 'isMajor' => 'required|in:0,1',
                 'semester' => 'required|in:1st,2nd',
-                'course_id' => 'required|exists:courses,id',
+                'course_ids' => 'required|array|min:1',
+                'course_ids.*' => 'exists:courses,id',
                 'department_id' => 'required|exists:departments,id',
                 'files' => 'required|array|min:1',
-                'files.*' => 'required|mimes:pdf|max:204800'
+                'files.*' => 'required|mimes:pdf|max:204800',
+                'enrolled_students' => 'required|array|min:1',
+                'enrolled_students.*' => 'exists:users,id',
             ], [
                 'course_code.required' => 'Please enter a course code.',
+                'course_ids.required'  => 'Please select at least one degree program.',
+                'course_ids.min'       => 'Please select at least one degree program.',
                 'files.required' => 'Please upload at least one PDF file.',
                 'files.min' => 'Please upload at least one PDF file.',
                 'files.*.mimes' => 'All files must be PDFs.',
                 'files.*.max' => 'Each file size must not exceed 200MB.',
+                'enrolled_students.required' => 'Please enroll at least one student.',
+                'enrolled_students.min'      => 'Please enroll at least one student.',
             ]);
 
-            \Illuminate\Support\Facades\DB::beginTransaction();
+            DB::beginTransaction();
 
             try {
                 $uploadedCount = 0;
@@ -171,17 +203,19 @@ class ModuleController extends Controller
                         $fileName = time() . '_' . $index . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
                         $file->move(public_path('files'), $fileName);
 
-                        Module::create([
+                        $module = Module::create([
                             'course_code' => $sharedCourseCode,
                             'title' => $baseTitle,
                             'file' => $fileName,
                             'isMajor' => strip_tags($validatedData['isMajor']),
                             'semester' => strip_tags($validatedData['semester']),
-                            'course_id' => strip_tags($validatedData['course_id']),
                             'department_id' => strip_tags($validatedData['department_id']),
                             'user_id' => Auth::user()->id,
                             'status' => 'published'
                         ]);
+
+                        // Sync courses (degree programs) via pivot
+                        $module->courses()->sync($validatedData['course_ids']);
 
                         $uploadedCount++;
                     } catch (\Exception $e) {
@@ -190,7 +224,19 @@ class ModuleController extends Controller
                     }
                 }
 
-                \Illuminate\Support\Facades\DB::commit();
+                // Handle student enrollments (once for the course code)
+                if (!empty($validatedData['enrolled_students'])) {
+                    foreach ($validatedData['enrolled_students'] as $studentId) {
+                        ModuleEnrollment::firstOrCreate([
+                            'user_id' => $studentId,
+                            'course_code' => $sharedCourseCode,
+                        ], [
+                            'enrolled_by' => Auth::id(),
+                        ]);
+                    }
+                }
+
+                DB::commit();
 
                 $message = "Successfully created $uploadedCount modules.";
                 if (!empty($failedFiles)) {
@@ -199,7 +245,7 @@ class ModuleController extends Controller
 
                 return redirect()->route('admin.modules')->with(empty($failedFiles) ? 'success' : 'warning', $message);
             } catch (\Exception $e) {
-                \Illuminate\Support\Facades\DB::rollBack();
+                DB::rollBack();
                 throw $e;
             }
         } catch (ValidationException $e) {
@@ -219,10 +265,22 @@ class ModuleController extends Controller
         $courses = Course::all();
         $departments = Department::all();
 
+        // Get the currently selected course IDs from the pivot
+        $selectedCourseIds = $module->courses()->pluck('courses.id')->toArray();
+
+        // Get enrolled students for this course code
+        $enrolledStudents = ModuleEnrollment::where('course_code', $module->course_code)
+            ->with(['student:id,id_number,first_name,middle_initial,last_name,email,department_id,course_id',
+                     'student.department:id,department_name',
+                     'student.course:id,course_name'])
+            ->get();
+
         return view('admin.partials.admin_edit_module', [
             'module'  => $module,
             'courses' => $courses,
-            'departments' => $departments
+            'departments' => $departments,
+            'selectedCourseIds' => $selectedCourseIds,
+            'enrolledStudents' => $enrolledStudents,
         ]);
     }
 
@@ -238,13 +296,20 @@ class ModuleController extends Controller
                 'title' => 'required|string|max:255',
                 'isMajor' => 'required|in:0,1',
                 'semester' => 'required|in:1st,2nd',
-                'course_id' => 'required|exists:courses,id',
+                'course_ids' => 'required|array|min:1',
+                'course_ids.*' => 'exists:courses,id',
                 'department_id' => 'required|exists:departments,id',
-                'file' => 'nullable|mimes:pdf|max:204800'
+                'file' => 'nullable|mimes:pdf|max:204800',
+                'enrolled_students' => 'required|array|min:1',
+                'enrolled_students.*' => 'exists:users,id',
             ], [
                 'course_code.required' => 'Please enter a course code.',
+                'course_ids.required'  => 'Please select at least one degree program.',
+                'course_ids.min'       => 'Please select at least one degree program.',
                 'file.mimes' => 'The file must be a PDF.',
                 'file.max' => 'The file size must not exceed 200MB.',
+                'enrolled_students.required' => 'Please enroll at least one student.',
+                'enrolled_students.min'      => 'Please enroll at least one student.',
             ]);
 
             $cleanData = [
@@ -252,7 +317,6 @@ class ModuleController extends Controller
                 'title' => strip_tags($validatedData['title']),
                 'isMajor' => strip_tags($validatedData['isMajor']),
                 'semester' => strip_tags($validatedData['semester']),
-                'course_id' => strip_tags($validatedData['course_id']),
                 'department_id' => strip_tags($validatedData['department_id']),
             ];
 
@@ -267,7 +331,25 @@ class ModuleController extends Controller
                 $cleanData['file'] = $fileName;
             }
 
+            $oldCourseCode = $module->course_code;
             $module->update($cleanData);
+
+            // Sync courses (degree programs) via pivot
+            $module->courses()->sync($validatedData['course_ids']);
+
+            // Handle student enrollments
+            ModuleEnrollment::where('course_code', $oldCourseCode)->delete();
+
+            if (!empty($validatedData['enrolled_students'])) {
+                foreach ($validatedData['enrolled_students'] as $studentId) {
+                    ModuleEnrollment::firstOrCreate([
+                        'user_id' => $studentId,
+                        'course_code' => $cleanData['course_code'],
+                    ], [
+                        'enrolled_by' => Auth::id(),
+                    ]);
+                }
+            }
 
             return redirect()->route('admin.modules')->with('success', 'Module updated successfully.');
         } catch (ValidationException $e) {
@@ -275,7 +357,7 @@ class ModuleController extends Controller
                 ->withErrors($e->errors())
                 ->withInput();
         } catch (\Exception $e) {
-            Log::error('Error updating module by faculty: ' . $e->getMessage());
+            Log::error('Error updating module by admin: ' . $e->getMessage());
             return back()
                 ->with('error', 'An error occurred while updating the module. Please try again.')
                 ->withInput();

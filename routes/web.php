@@ -356,4 +356,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::get('/api/departments/{department}/courses', [CourseController::class, 'getByDepartment'])
     ->name('api.departments.courses');
 
+// API: Search students for enrollment
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/api/students/search', [ModuleController::class, 'searchStudents'])
+        ->name('api.students.search');
+    Route::post('/api/module/enroll-students', [ModuleController::class, 'enrollStudents'])
+        ->name('api.module.enroll');
+    Route::delete('/api/module/enrollment/{enrollment}', [ModuleController::class, 'removeEnrollment'])
+        ->name('api.module.enrollment.remove');
+});
+
 require __DIR__ . '/auth.php';

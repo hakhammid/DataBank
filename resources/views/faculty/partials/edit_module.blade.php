@@ -114,72 +114,92 @@
                 </div>
                 <div class="space-y-1">
                     <h2 class="text-base/7 font-semibold text-zinc-950 sm:text-sm/6">Course Status</h2>
-                    <span data-slot="control"
-                        class="relative block w-full before:absolute before:inset-px before:rounded-[calc(theme(borderRadius.lg)-1px)] before:bg-white before:shadow after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:ring-inset after:ring-transparent sm:after:focus-within:ring-2 sm:after:focus-within:ring-zinc-500 has-[[data-disabled]]:opacity-50 before:has-[[data-disabled]]:bg-zinc-950/5 before:has-[[data-disabled]]:shadow-none before:has-[[data-invalid]]:shadow-red-500/10">
-                        <span data-slot="control"
-                            class="group relative block w-full before:absolute before:inset-px before:rounded-[calc(theme(borderRadius.lg)-1px)] before:bg-white dark:before:hidden after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:ring-inset after:ring-transparent after:has-[[data-focus]]:ring-2 after:has-[[data-focus]]:ring-blue-500 has-[[data-disabled]]:opacity-50 before:has-[[data-disabled]]:bg-zinc-950/5 before:has-[[data-disabled]]:shadow-none">
-                            <select
-                                class="h-[3rem] relative block w-full appearance-none rounded-lg py-[calc(theme(spacing[2.5])-1px)] sm:py-[calc(theme(spacing[1.5])-1px)] pl-[calc(theme(spacing[3.5])-1px)] pr-[calc(theme(spacing.10)-1px)] sm:pl-[calc(theme(spacing.3)-1px)] sm:pr-[calc(theme(spacing.9)-1px)] [&_optgroup]:font-semibold text-base/6 text-zinc-950 placeholder:text-zinc-500 sm:text-sm/6 border border-zinc-950/10 data-[hover]:border-zinc-950/20 dark:border-white/10 dark:data-[hover]:border-white/20 bg-transparent dark:bg-white/5 dark:*:bg-zinc-800 focus:outline-none data-[invalid]:border-red-500 data-[invalid]:data-[hover]:border-red-500 data-[disabled]:border-zinc-950/20 data-[disabled]:opacity-100"
-                                id="isMajor" data-headlessui-state="" name="isMajor" required>
-                                <option value="" disabled selected>Select Course Status</option>
-                                <option value="1" {{ $module->isMajor == 1 ? 'selected' : '' }}>Major subject</option>
-                                <option value="0" {{ $module->isMajor == 0 ? 'selected' : '' }}>Minor subject</option>
-                            </select>
-                        </span>
-                    </span>
+                    <select name="isMajor" id="isMajor" required
+                        class="h-[3rem] w-full rounded-lg border border-gray-200 px-3 text-sm focus:outline focus:outline-2 focus:outline-primary">
+                        <option value="" disabled selected>Select Course Status</option>
+                        <option value="1" {{ $module->isMajor == 1 ? 'selected' : '' }}>Major subject</option>
+                        <option value="0" {{ $module->isMajor == 0 ? 'selected' : '' }}>Minor subject</option>
+                    </select>
                     <x-input-error :messages="$errors->get('isMajor')" class="mt-2" />
                 </div>
                 <div class="space-y-1">
-                    <h2 class="text-base/7 font-semibold text-zinc-950 sm:text-sm/6">Department</h2>
-                    <span data-slot="control"
-                        class="relative block w-full before:absolute before:inset-px before:rounded-[calc(theme(borderRadius.lg)-1px)] before:bg-white before:shadow after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:ring-inset after:ring-transparent sm:after:focus-within:ring-2 sm:after:focus-within:ring-zinc-500 has-[[data-disabled]]:opacity-50 before:has-[[data-disabled]]:bg-zinc-950/5 before:has-[[data-disabled]]:shadow-none before:has-[[data-invalid]]:shadow-red-500/10">
-                        <span data-slot="control"
-                            class="group relative block w-full before:absolute before:inset-px before:rounded-[calc(theme(borderRadius.lg)-1px)] before:bg-white dark:before:hidden after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:ring-inset after:ring-transparent after:has-[[data-focus]]:ring-2 after:has-[[data-focus]]:ring-blue-500 has-[[data-disabled]]:opacity-50 before:has-[[data-disabled]]:bg-zinc-950/5 before:has-[[data-disabled]]:shadow-none">
-                            <select
-                                class="h-[3rem] relative block w-full appearance-none rounded-lg py-[calc(theme(spacing[2.5])-1px)] sm:py-[calc(theme(spacing[1.5])-1px)] pl-[calc(theme(spacing[3.5])-1px)] pr-[calc(theme(spacing.10)-1px)] sm:pl-[calc(theme(spacing.3)-1px)] sm:pr-[calc(theme(spacing.9)-1px)] [&_optgroup]:font-semibold text-base/6 text-zinc-950 placeholder:text-zinc-500 sm:text-sm/6 border border-zinc-950/10 data-[hover]:border-zinc-950/20 dark:border-white/10 dark:data-[hover]:border-white/20 bg-transparent dark:bg-white/5 dark:*:bg-zinc-800 focus:outline-none data-[invalid]:border-red-500 data-[invalid]:data-[hover]:border-red-500 data-[disabled]:border-zinc-950/20 data-[disabled]:opacity-100"
-                                id="department_id" data-headlessui-state="" name="department_id" required>
-                                <option value="" disabled selected>Select Department</option>
-                                @foreach($departments as $department)
-                                <option value="{{ $department->id }}" {{ $module->department_id == $department->id ? 'selected' : ''
-                                    }}>{{ $department->department_name }}</option>
-                                @endforeach
-                            </select>
-                        </span>
-                    </span>
-                    <x-input-error :messages="$errors->get('department_id')" class="mt-2" />
-                </div>
-                <div class="space-y-1">
-                    <h2 class="text-base/7 font-semibold text-zinc-950 sm:text-sm/6">Degree Program</h2>
-                    <span data-slot="control"
-                        class="relative block w-full before:absolute before:inset-px before:rounded-[calc(theme(borderRadius.lg)-1px)] before:bg-white before:shadow after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:ring-inset after:ring-transparent sm:after:focus-within:ring-2 sm:after:focus-within:ring-zinc-500 has-[[data-disabled]]:opacity-50 before:has-[[data-disabled]]:bg-zinc-950/5 before:has-[[data-disabled]]:shadow-none before:has-[[data-invalid]]:shadow-red-500/10">
-                        <span data-slot="control"
-                            class="group relative block w-full before:absolute before:inset-px before:rounded-[calc(theme(borderRadius.lg)-1px)] before:bg-white dark:before:hidden after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:ring-inset after:ring-transparent after:has-[[data-focus]]:ring-2 after:has-[[data-focus]]:ring-blue-500 has-[[data-disabled]]:opacity-50 before:has-[[data-disabled]]:bg-zinc-950/5 before:has-[[data-disabled]]:shadow-none">
-                            <select
-                                class="h-[3rem] relative block w-full appearance-none rounded-lg py-[calc(theme(spacing[2.5])-1px)] sm:py-[calc(theme(spacing[1.5])-1px)] pl-[calc(theme(spacing[3.5])-1px)] pr-[calc(theme(spacing.10)-1px)] sm:pl-[calc(theme(spacing.3)-1px)] sm:pr-[calc(theme(spacing.9)-1px)] [&_optgroup]:font-semibold text-base/6 text-zinc-950 placeholder:text-zinc-500 sm:text-sm/6 border border-zinc-950/10 data-[hover]:border-zinc-950/20 dark:border-white/10 dark:data-[hover]:border-white/20 bg-transparent dark:bg-white/5 dark:*:bg-zinc-800 focus:outline-none data-[invalid]:border-red-500 data-[invalid]:data-[hover]:border-red-500 data-[disabled]:border-zinc-950/20 data-[disabled]:opacity-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                                id="course_id" data-headlessui-state="" name="course_id" required disabled>
-                                <option value="" disabled selected>Loading...</option>
-                            </select>
-                        </span>
-                    </span>
-                    <x-input-error :messages="$errors->get('course_id')" class="mt-2" />
-                </div>
-                <div class="space-y-1">
                     <h2 class="text-base/7 font-semibold text-zinc-950 sm:text-sm/6">Semester</h2>
-                    <span data-slot="control"
-                        class="relative block w-full before:absolute before:inset-px before:rounded-[calc(theme(borderRadius.lg)-1px)] before:bg-white before:shadow after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:ring-inset after:ring-transparent sm:after:focus-within:ring-2 sm:after:focus-within:ring-zinc-500 has-[[data-disabled]]:opacity-50 before:has-[[data-disabled]]:bg-zinc-950/5 before:has-[[data-disabled]]:shadow-none before:has-[[data-invalid]]:shadow-red-500/10">
-                        <span data-slot="control"
-                            class="group relative block w-full before:absolute before:inset-px before:rounded-[calc(theme(borderRadius.lg)-1px)] before:bg-white dark:before:hidden after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:ring-inset after:ring-transparent after:has-[[data-focus]]:ring-2 after:has-[[data-focus]]:ring-blue-500 has-[[data-disabled]]:opacity-50 before:has-[[data-disabled]]:bg-zinc-950/5 before:has-[[data-disabled]]:shadow-none">
-                            <select
-                                class="h-[3rem] relative block w-full appearance-none rounded-lg py-[calc(theme(spacing[2.5])-1px)] sm:py-[calc(theme(spacing[1.5])-1px)] pl-[calc(theme(spacing[3.5])-1px)] pr-[calc(theme(spacing.10)-1px)] sm:pl-[calc(theme(spacing.3)-1px)] sm:pr-[calc(theme(spacing.9)-1px)] [&_optgroup]:font-semibold text-base/6 text-zinc-950 placeholder:text-zinc-500 sm:text-sm/6 border border-zinc-950/10 data-[hover]:border-zinc-950/20 dark:border-white/10 dark:data-[hover]:border-white/20 bg-transparent dark:bg-white/5 dark:*:bg-zinc-800 focus:outline-none data-[invalid]:border-red-500 data-[invalid]:data-[hover]:border-red-500 data-[disabled]:border-zinc-950/20 data-[disabled]:opacity-100"
-                                id="semester" data-headlessui-state="" name="semester" required>
-                                <option value="" disabled selected>Select Semester</option>
-                                <option value="1st" {{ $module->semester == '1st' ? 'selected' : '' }}>1st Semester</option>
-                                <option value="2nd" {{ $module->semester == '2nd' ? 'selected' : '' }}>2nd Semester</option>
-                            </select>
-                        </span>
-                    </span>
+                    <select name="semester" id="semester" required
+                        class="h-[3rem] w-full rounded-lg border border-gray-200 px-3 text-sm focus:outline focus:outline-2 focus:outline-primary">
+                        <option value="" disabled selected>Select Semester</option>
+                        <option value="1st" {{ $module->semester == '1st' ? 'selected' : '' }}>1st Semester</option>
+                        <option value="2nd" {{ $module->semester == '2nd' ? 'selected' : '' }}>2nd Semester</option>
+                    </select>
                     <x-input-error :messages="$errors->get('semester')" class="mt-2" />
                 </div>
+            </section>
+
+            <hr role="presentation" class="my-10 w-full border-t border-zinc-950/5">
+
+            <!-- ================= DEPARTMENTS (multi-select filter) ================= -->
+            <section class="space-y-4">
+                <div>
+                    <h2 class="text-lg font-semibold text-zinc-900">Departments <span class="text-zinc-400 text-sm font-normal">(select to load degree programs)</span></h2>
+                    <p class="text-sm text-zinc-500 mt-1">Select one or more departments to see their degree programs below.</p>
+                </div>
+
+                <div id="department-checkboxes" class="rounded-lg border border-zinc-200 bg-white p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                    @foreach($departments as $department)
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" class="dept-checkbox rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900"
+                                value="{{ $department->id }}" id="dept-{{ $department->id }}"
+                                {{ $module->department_id == $department->id || in_array($department->id, old('department_ids', [])) ? 'checked' : '' }}>
+                            <label for="dept-{{ $department->id }}" class="text-sm text-zinc-700 cursor-pointer">{{ $department->department_name }}</label>
+                        </div>
+                    @endforeach
+                </div>
+                <!-- Hidden input for department_id (auto-set to first selected) -->
+                <input type="hidden" name="department_id" id="primary-department-id" value="{{ $module->department_id }}">
+            </section>
+
+            <!-- ================= DEGREE PROGRAMS (multi-select) ================= -->
+            <section class="space-y-4">
+                <div>
+                    <h2 class="text-lg font-semibold text-zinc-900">Degree Programs <span class="text-zinc-400 text-sm font-normal">(select multiple)</span></h2>
+                    <p class="text-sm text-zinc-500 mt-1">Select the degree programs whose students should see this module.</p>
+                </div>
+
+                <div id="course-checkboxes" class="rounded-lg border border-zinc-200 bg-white p-4 max-h-60 overflow-y-auto">
+                    <p class="text-sm text-zinc-400">Loading programs...</p>
+                </div>
+                @error('course_ids')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </section>
+
+            <hr role="presentation" class="my-10 w-full border-t border-zinc-950/5">
+
+            <!-- ================= STUDENT ENROLLMENT (required) ================= -->
+            <section class="space-y-4">
+                <div>
+                    <h2 class="text-lg font-semibold text-zinc-900">Enroll Students</h2>
+                    <p class="text-sm text-zinc-500 mt-1">Search and enroll students into this course code. Enrolled students will see this module regardless of their degree program.</p>
+                </div>
+
+                <div class="relative">
+                    <input type="text" id="student-search"
+                        class="w-full rounded-lg border border-zinc-200 p-3 text-sm focus:ring-2 focus:ring-zinc-900"
+                        placeholder="Search students by name, ID number, or email..." autocomplete="off">
+                    <div id="student-results"
+                        class="hidden absolute z-30 w-full mt-1 bg-white border border-zinc-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                    </div>
+                </div>
+
+                <!-- Selected students tags -->
+                <div id="enrolled-students-tags" class="flex flex-wrap gap-2"></div>
+
+                <!-- Hidden inputs for enrolled student IDs -->
+                <div id="enrolled-students-inputs"></div>
+
+                @error('enrolled_students')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+                <p id="enrollment-error" class="hidden text-sm text-red-600">Please enroll at least one student.</p>
             </section>
 
             <hr role="presentation" class="my-10 w-full border-t border-zinc-950/5">
@@ -205,8 +225,6 @@
             const pdfCanvas = document.getElementById("pdf-canvas");
             const toast = document.getElementById("toast");
             const toastMessage = document.getElementById("toast-message");
-            const successToast = document.getElementById("success-toast");
-            const successToastMessage = document.getElementById("success-toast-message");
             const fileError = document.getElementById("file-error");
 
             pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
@@ -248,14 +266,6 @@
                 toast.classList.remove('hidden');
                 setTimeout(() => {
                     toast.classList.add('hidden');
-                }, 3000);
-            }
-
-            function showSuccessToast(message) {
-                successToastMessage.textContent = message;
-                successToast.classList.remove('hidden');
-                setTimeout(() => {
-                    successToast.classList.add('hidden');
                 }, 3000);
             }
 
@@ -374,88 +384,43 @@
                 showErrorToast('{{ session('error') }}');
             @endif
 
-
             form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const requiredFields = this.querySelectorAll('[required]');
-                let isValid = true;
-                let fileMissing = false;
+                let hasError = false;
 
-                requiredFields.forEach(field => {
-                    if (field !== fileInput && !field.value.trim()) {
-                        isValid = false;
-                        field.classList.add('border-red-500', 'focus:border-red-500');
-                    } else if (field !== fileInput) {
-                        field.classList.remove('border-red-500', 'focus:border-red-500');
-                    }
-                });
-
-                // Check if a new file is uploaded or an existing file is present
+                // Check file
                 if (!fileInput.files.length && !existingPdfUrl) {
-                    isValid = false;
-                    fileMissing = true;
-                    dropzone.classList.add('border-red-500');
+                    e.preventDefault();
                     fileError.classList.remove('hidden');
+                    dropzone.classList.add('border-red-500');
+                    showErrorToast('A PDF file is required.');
+                    hasError = true;
                 } else {
                     dropzone.classList.remove('border-red-500');
                     fileError.classList.add('hidden');
                 }
 
-                if (!isValid) {
-                    if (fileMissing && ![...requiredFields].some(field => field !== fileInput && !field.value.trim())) {
-                        showErrorToast('A PDF file is required. Please upload a file.');
-                    } else if (!fileMissing && [...requiredFields].some(field => field !== fileInput && !field.value.trim())) {
-                        showErrorToast('Please fill in all required fields.');
-                    } else {
-                        showErrorToast('Please fill in all required fields and upload a PDF file.');
-                    }
-                    return;
+                // Check courses
+                const checkedCourses = document.querySelectorAll('input[name="course_ids[]"]:checked');
+                if (checkedCourses.length === 0) {
+                    e.preventDefault();
+                    if (!hasError) showErrorToast('Please select at least one degree program.');
+                    hasError = true;
                 }
 
-                form.submit();
+                // Check students
+                if (enrolledStudents.size === 0) {
+                    e.preventDefault();
+                    document.getElementById('enrollment-error').classList.remove('hidden');
+                    if (!hasError) showErrorToast('Please enroll at least one student.');
+                    hasError = true;
+                } else {
+                    document.getElementById('enrollment-error').classList.add('hidden');
+                }
+
+                if (hasError) return;
+
+                // Let it submit
             });
-
-            // form.addEventListener('submit', function(e) {
-            //     e.preventDefault();
-            //     const requiredFields = this.querySelectorAll('[required]');
-            //     let isValid = true;
-            //     let fileMissing = false;
-
-            //     requiredFields.forEach(field => {
-            //         if (field !== fileInput && !field.value.trim()) {
-            //             isValid = false;
-            //             field.classList.add('border-red-500', 'focus:border-red-500');
-            //         } else if (field !== fileInput) {
-            //             field.classList.remove('border-red-500', 'focus:border-red-500');
-            //         }
-            //     });
-
-            //     if (!fileInput.files.length) {
-            //         isValid = false;
-            //         fileMissing = true;
-            //         dropzone.classList.add('border-red-500');
-            //         fileError.classList.remove('hidden');
-            //     } else {
-            //         dropzone.classList.remove('border-red-500');
-            //         fileError.classList.add('hidden');
-            //     }
-
-            //     if (!isValid) {
-            //         if (fileMissing && ![...requiredFields].some(field => field !== fileInput && !field.value.trim())) {
-            //             showErrorToast('A PDF file is required. Please upload a file.');
-            //         } else if (!fileMissing && [...requiredFields].some(field => field !== fileInput && !field.value.trim())) {
-            //             showErrorToast('Please fill in all required fields.');
-            //         } else {
-            //             showErrorToast('Please fill in all required fields and upload a PDF file.');
-            //         }
-            //         return;
-            //     }
-
-            //     // showSuccessToast('Creating module...');
-            //     // setTimeout(() => {
-            //         form.submit();
-            //     // }, 1000);
-            // });
 
             document.querySelectorAll('[required]').forEach(field => {
                 field.addEventListener('input', function() {
@@ -473,51 +438,195 @@
                 }
             });
 
-            // Department -> Degree Program AJAX filter
-            const deptSelect = document.getElementById('department_id');
-            const courseSelect = document.getElementById('course_id');
-            const currentCourseId = '{{ $module->course_id }}';
+            // ================= DEPARTMENT CHECKBOXES -> DEGREE PROGRAM CHECKBOXES =================
+            const deptCheckboxes = document.querySelectorAll('.dept-checkbox');
+            const courseCheckboxes = document.getElementById('course-checkboxes');
+            const primaryDeptInput = document.getElementById('primary-department-id');
+            const selectedCourseIds = @json($selectedCourseIds ?? []);
 
-            function loadCourses(departmentId, preselectId) {
-                if (!departmentId) {
-                    courseSelect.innerHTML = '<option value="" disabled selected>Select a department first</option>';
-                    courseSelect.disabled = true;
+            function getSelectedDepartmentIds() {
+                return [...document.querySelectorAll('.dept-checkbox:checked')].map(cb => cb.value);
+            }
+
+            function loadCoursesForDepartments(departmentIds) {
+                // Set primary department_id to first selected
+                primaryDeptInput.value = departmentIds.length > 0 ? departmentIds[0] : '';
+
+                if (departmentIds.length === 0) {
+                    courseCheckboxes.innerHTML = '<p class="text-sm text-zinc-400">Select a department above first</p>';
                     return;
                 }
-                courseSelect.innerHTML = '<option value="" disabled selected>Loading...</option>';
-                courseSelect.disabled = true;
 
-                fetch(`/api/departments/${departmentId}/courses`)
-                    .then(r => r.json())
-                    .then(courses => {
-                        courseSelect.innerHTML = '<option value="" disabled selected>Select Degree Program</option>';
-                        if (!courses.length) {
-                            courseSelect.innerHTML = '<option value="" disabled selected>No programs available</option>';
-                            courseSelect.disabled = true;
+                courseCheckboxes.innerHTML = '<p class="text-sm text-zinc-400">Loading programs...</p>';
+
+                // Fetch courses for all selected departments
+                const fetches = departmentIds.map(id =>
+                    fetch(`/api/departments/${id}/courses`).then(r => r.json())
+                );
+
+                Promise.all(fetches)
+                    .then(results => {
+                        // Flatten and deduplicate
+                        const allCourses = [];
+                        const seen = new Set();
+                        results.forEach(courses => {
+                            courses.forEach(c => {
+                                if (!seen.has(c.id)) {
+                                    seen.add(c.id);
+                                    allCourses.push(c);
+                                }
+                            });
+                        });
+
+                        if (!allCourses.length) {
+                            courseCheckboxes.innerHTML = '<p class="text-sm text-zinc-400">No programs available for the selected departments</p>';
                             return;
                         }
-                        courses.forEach(c => {
-                            const opt = document.createElement('option');
-                            opt.value = c.id;
-                            opt.textContent = c.course_name;
-                            if (preselectId && preselectId == c.id) opt.selected = true;
-                            courseSelect.appendChild(opt);
+
+                        courseCheckboxes.innerHTML = '';
+                        allCourses.forEach(c => {
+                            const isChecked = selectedCourseIds.includes(c.id);
+                            const div = document.createElement('div');
+                            div.className = 'flex items-center gap-2 py-1';
+                            div.innerHTML = `
+                                <input type="checkbox" name="course_ids[]" value="${c.id}" id="course-${c.id}"
+                                    class="rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900"
+                                    ${isChecked ? 'checked' : ''}>
+                                <label for="course-${c.id}" class="text-sm text-zinc-700 cursor-pointer">${c.course_name}</label>
+                            `;
+                            courseCheckboxes.appendChild(div);
                         });
-                        courseSelect.disabled = false;
                     })
                     .catch(() => {
-                        courseSelect.innerHTML = '<option value="" disabled selected>Error loading</option>';
-                        courseSelect.disabled = true;
+                        courseCheckboxes.innerHTML = '<p class="text-sm text-red-500">Error loading programs</p>';
                     });
             }
 
-            deptSelect.addEventListener('change', function () {
-                loadCourses(this.value, null);
+            deptCheckboxes.forEach(cb => {
+                cb.addEventListener('change', () => {
+                    loadCoursesForDepartments(getSelectedDepartmentIds());
+                });
             });
 
-            // On load, pre-select current course
-            if (deptSelect.value) {
-                loadCourses(deptSelect.value, currentCourseId);
+            // On load, if departments were pre-selected
+            if (getSelectedDepartmentIds().length > 0) {
+                loadCoursesForDepartments(getSelectedDepartmentIds());
+            }
+
+            // ================= STUDENT ENROLLMENT SEARCH =================
+            const studentSearch = document.getElementById('student-search');
+            const studentResults = document.getElementById('student-results');
+            const enrolledTags = document.getElementById('enrolled-students-tags');
+            const enrolledInputsContainer = document.getElementById('enrolled-students-inputs');
+            const enrolledStudents = new Map();
+            let searchTimeout;
+
+            // Pre-populate enrolled students from server
+            const existingEnrollments = @json($enrolledStudents ?? []);
+            existingEnrollments.forEach(enrollment => {
+                if (enrollment.student) {
+                    const s = enrollment.student;
+                    const middle = s.middle_initial ? s.middle_initial + '. ' : '';
+                    enrolledStudents.set(s.id, {
+                        id: s.id,
+                        id_number: s.id_number,
+                        name: `${s.first_name} ${middle}${s.last_name}`,
+                        email: s.email,
+                        department: s.department ? s.department.department_name : 'N/A',
+                        course: s.course ? s.course.course_name : 'N/A',
+                    });
+                }
+            });
+            renderEnrolledStudents();
+
+            studentSearch.addEventListener('input', function () {
+                clearTimeout(searchTimeout);
+                const query = this.value.trim();
+
+                if (query.length < 2) {
+                    studentResults.classList.add('hidden');
+                    return;
+                }
+
+                searchTimeout = setTimeout(() => {
+                    fetch(`/api/students/search?q=${encodeURIComponent(query)}`)
+                        .then(r => r.json())
+                        .then(students => {
+                            if (!students.length) {
+                                studentResults.innerHTML = '<div class="p-3 text-sm text-zinc-400">No students found</div>';
+                                studentResults.classList.remove('hidden');
+                                return;
+                            }
+
+                            studentResults.innerHTML = '';
+                            students.forEach(s => {
+                                if (enrolledStudents.has(s.id)) return;
+
+                                const item = document.createElement('div');
+                                item.className = 'p-3 hover:bg-zinc-50 cursor-pointer border-b border-zinc-100 last:border-0';
+                                item.innerHTML = `
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-sm font-medium text-zinc-900">${s.name}</p>
+                                            <p class="text-xs text-zinc-500">${s.id_number} • ${s.department} • ${s.course}</p>
+                                        </div>
+                                        <span class="text-xs text-zinc-400">Click to enroll</span>
+                                    </div>
+                                `;
+                                item.addEventListener('click', () => {
+                                    addEnrolledStudent(s);
+                                    studentResults.classList.add('hidden');
+                                    studentSearch.value = '';
+                                });
+                                studentResults.appendChild(item);
+                            });
+                            studentResults.classList.remove('hidden');
+                        })
+                        .catch(() => {
+                            studentResults.innerHTML = '<div class="p-3 text-sm text-red-500">Error searching students</div>';
+                            studentResults.classList.remove('hidden');
+                        });
+                }, 300);
+            });
+
+            document.addEventListener('click', function (e) {
+                if (!studentSearch.contains(e.target) && !studentResults.contains(e.target)) {
+                    studentResults.classList.add('hidden');
+                }
+            });
+
+            function addEnrolledStudent(student) {
+                if (enrolledStudents.has(student.id)) return;
+                enrolledStudents.set(student.id, student);
+                document.getElementById('enrollment-error').classList.add('hidden');
+                renderEnrolledStudents();
+            }
+
+            window.removeEnrolledStudent = function(id) {
+                enrolledStudents.delete(id);
+                renderEnrolledStudents();
+            }
+
+            function renderEnrolledStudents() {
+                enrolledTags.innerHTML = '';
+                enrolledInputsContainer.innerHTML = '';
+
+                enrolledStudents.forEach((student, id) => {
+                    const tag = document.createElement('span');
+                    tag.className = 'inline-flex items-center gap-1 rounded-full bg-zinc-100 px-3 py-1.5 text-sm text-zinc-700';
+                    tag.innerHTML = `
+                        <span class="font-medium">${student.name}</span>
+                        <span class="text-zinc-400">(${student.id_number})</span>
+                        <button type="button" onclick="removeEnrolledStudent(${id})" class="ml-1 text-zinc-400 hover:text-red-500">×</button>
+                    `;
+                    enrolledTags.appendChild(tag);
+
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'enrolled_students[]';
+                    input.value = id;
+                    enrolledInputsContainer.appendChild(input);
+                });
             }
         });
     </script>

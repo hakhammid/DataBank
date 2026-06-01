@@ -5,6 +5,7 @@ use App\Models\User;
 use App\Models\Course;
 use App\Models\Department;
 use App\Models\ModuleDownload;
+use App\Models\ModuleEnrollment;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -30,7 +31,6 @@ class Module extends Model
         'semester',
         'user_id',
         'department_id',
-        'course_id',
         'status',
         'created_at'
     ];
@@ -73,13 +73,26 @@ class Module extends Model
         return $this->belongsTo(Department::class);
     }
 
-    public function course()
+    /**
+     * Get the courses (degree programs) this module targets.
+     * Many-to-many via module_courses pivot table.
+     */
+    public function courses()
     {
-        return $this->belongsTo(Course::class);
+        return $this->belongsToMany(Course::class, 'module_courses')
+                    ->withTimestamps();
     }
 
     public function moduleDownloads()
     {
         return $this->hasMany(ModuleDownload::class);
+    }
+
+    /**
+     * Get all enrollments for this module's course code.
+     */
+    public function enrollments()
+    {
+        return ModuleEnrollment::where('course_code', $this->course_code)->get();
     }
 }

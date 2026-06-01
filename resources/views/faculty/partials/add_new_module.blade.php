@@ -106,27 +106,6 @@
                 </div>
 
                 <div>
-                    <label class="text-sm font-medium text-zinc-900">Department</label>
-                    <select name="department_id" required
-                        class="mt-1 w-full rounded-lg border border-zinc-200 p-2 text-sm">
-                        <option value="" disabled selected>Select department</option>
-                        @foreach($departments as $department)
-                            <option value="{{ $department->id }}" {{ old('department_id') == $department->id ? 'selected' : '' }}>
-                                {{ $department->department_name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div>
-                    <label class="text-sm font-medium text-zinc-900">Degree Program</label>
-                    <select name="course_id" id="course_id" required disabled
-                        class="mt-1 w-full rounded-lg border border-zinc-200 p-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed">
-                        <option value="" disabled selected>Select a department first</option>
-                    </select>
-                </div>
-
-                <div>
                     <label class="text-sm font-medium text-zinc-900">Semester</label>
                     <select name="semester" required
                         class="mt-1 w-full rounded-lg border border-zinc-200 p-2 text-sm">
@@ -135,6 +114,74 @@
                         <option value="2nd" {{ old('semester') == '2nd' ? 'selected' : '' }}>2nd Semester</option>
                     </select>
                 </div>
+            </section>
+
+            <hr class="border-zinc-200">
+
+            <!-- ================= DEPARTMENTS (multi-select filter) ================= -->
+            <section class="space-y-4">
+                <div>
+                    <h2 class="text-lg font-semibold text-zinc-900">Departments <span class="text-zinc-400 text-sm font-normal">(select to load degree programs)</span></h2>
+                    <p class="text-sm text-zinc-500 mt-1">Select one or more departments to see their degree programs below.</p>
+                </div>
+
+                <div id="department-checkboxes" class="rounded-lg border border-zinc-200 bg-white p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                    @foreach($departments as $department)
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" class="dept-checkbox rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900"
+                                value="{{ $department->id }}" id="dept-{{ $department->id }}"
+                                {{ in_array($department->id, old('department_ids', [])) ? 'checked' : '' }}>
+                            <label for="dept-{{ $department->id }}" class="text-sm text-zinc-700 cursor-pointer">{{ $department->department_name }}</label>
+                        </div>
+                    @endforeach
+                </div>
+                <!-- Hidden input for department_id (auto-set to first selected) -->
+                <input type="hidden" name="department_id" id="primary-department-id" value="{{ old('department_id') }}">
+            </section>
+
+            <!-- ================= DEGREE PROGRAMS (multi-select) ================= -->
+            <section class="space-y-4">
+                <div>
+                    <h2 class="text-lg font-semibold text-zinc-900">Degree Programs <span class="text-zinc-400 text-sm font-normal">(select multiple)</span></h2>
+                    <p class="text-sm text-zinc-500 mt-1">Select the degree programs whose students should see this module.</p>
+                </div>
+
+                <div id="course-checkboxes" class="rounded-lg border border-zinc-200 bg-white p-4 max-h-60 overflow-y-auto">
+                    <p class="text-sm text-zinc-400">Select a department above first</p>
+                </div>
+                @error('course_ids')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </section>
+
+            <hr class="border-zinc-200">
+
+            <!-- ================= STUDENT ENROLLMENT (required) ================= -->
+            <section class="space-y-4">
+                <div>
+                    <h2 class="text-lg font-semibold text-zinc-900">Enroll Students</h2>
+                    <p class="text-sm text-zinc-500 mt-1">Search and enroll students into this course code. Enrolled students will see this module regardless of their degree program.</p>
+                </div>
+
+                <div class="relative">
+                    <input type="text" id="student-search"
+                        class="w-full rounded-lg border border-zinc-200 p-3 text-sm focus:ring-2 focus:ring-zinc-900"
+                        placeholder="Search students by name, ID number, or email..." autocomplete="off">
+                    <div id="student-results"
+                        class="hidden absolute z-30 w-full mt-1 bg-white border border-zinc-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                    </div>
+                </div>
+
+                <!-- Selected students tags -->
+                <div id="enrolled-students-tags" class="flex flex-wrap gap-2"></div>
+
+                <!-- Hidden inputs for enrolled student IDs -->
+                <div id="enrolled-students-inputs"></div>
+
+                @error('enrolled_students')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+                <p id="enrollment-error" class="hidden text-sm text-red-600">Please enroll at least one student.</p>
             </section>
 
             <hr class="border-zinc-200">
@@ -232,52 +279,205 @@
         }
 
         document.getElementById('module-form').addEventListener('submit', e => {
+            let hasError = false;
+
             if (!store.files.length) {
                 e.preventDefault();
                 error.classList.remove('hidden');
                 showToast('Please upload at least one PDF file.');
+                hasError = true;
             }
+
+            const checkedCourses = document.querySelectorAll('input[name="course_ids[]"]:checked');
+            if (checkedCourses.length === 0) {
+                e.preventDefault();
+                showToast('Please select at least one degree program.');
+                hasError = true;
+            }
+
+            if (enrolledStudents.size === 0) {
+                e.preventDefault();
+                document.getElementById('enrollment-error').classList.remove('hidden');
+                if (!hasError) showToast('Please enroll at least one student.');
+                hasError = true;
+            } else {
+                document.getElementById('enrollment-error').classList.add('hidden');
+            }
+
+            if (hasError) return;
         });
 
-        // Department -> Degree Program AJAX filter
-        const departmentSelect = document.querySelector('select[name="department_id"]');
-        const courseSelect = document.getElementById('course_id');
-        const oldCourseId = '{{ old("course_id") }}';
+        // ================= DEPARTMENT CHECKBOXES -> DEGREE PROGRAM CHECKBOXES =================
+        const deptCheckboxes = document.querySelectorAll('.dept-checkbox');
+        const courseCheckboxes = document.getElementById('course-checkboxes');
+        const primaryDeptInput = document.getElementById('primary-department-id');
+        const oldCourseIds = @json(old('course_ids', []));
 
-        departmentSelect.addEventListener('change', function () {
-            const departmentId = this.value;
-            if (!departmentId) {
-                courseSelect.innerHTML = '<option value="" disabled selected>Select a department first</option>';
-                courseSelect.disabled = true;
+        function getSelectedDepartmentIds() {
+            return [...document.querySelectorAll('.dept-checkbox:checked')].map(cb => cb.value);
+        }
+
+        function loadCoursesForDepartments(departmentIds) {
+            // Set primary department_id to first selected
+            primaryDeptInput.value = departmentIds.length > 0 ? departmentIds[0] : '';
+
+            if (departmentIds.length === 0) {
+                courseCheckboxes.innerHTML = '<p class="text-sm text-zinc-400">Select a department above first</p>';
                 return;
             }
-            courseSelect.innerHTML = '<option value="" disabled selected>Loading...</option>';
-            courseSelect.disabled = true;
 
-            fetch(`/api/departments/${departmentId}/courses`)
-                .then(r => r.json())
-                .then(courses => {
-                    courseSelect.innerHTML = '<option value="" disabled selected>Select program</option>';
-                    if (!courses.length) {
-                        courseSelect.innerHTML = '<option value="" disabled selected>No programs available</option>';
-                        courseSelect.disabled = true;
+            courseCheckboxes.innerHTML = '<p class="text-sm text-zinc-400">Loading programs...</p>';
+
+            // Fetch courses for all selected departments
+            const fetches = departmentIds.map(id =>
+                fetch(`/api/departments/${id}/courses`).then(r => r.json())
+            );
+
+            Promise.all(fetches)
+                .then(results => {
+                    // Flatten and deduplicate
+                    const allCourses = [];
+                    const seen = new Set();
+                    results.forEach(courses => {
+                        courses.forEach(c => {
+                            if (!seen.has(c.id)) {
+                                seen.add(c.id);
+                                allCourses.push(c);
+                            }
+                        });
+                    });
+
+                    if (!allCourses.length) {
+                        courseCheckboxes.innerHTML = '<p class="text-sm text-zinc-400">No programs available for the selected departments</p>';
                         return;
                     }
-                    courses.forEach(c => {
-                        const opt = document.createElement('option');
-                        opt.value = c.id;
-                        opt.textContent = c.course_name;
-                        if (oldCourseId && oldCourseId == c.id) opt.selected = true;
-                        courseSelect.appendChild(opt);
+
+                    courseCheckboxes.innerHTML = '';
+                    allCourses.forEach(c => {
+                        const isChecked = oldCourseIds.includes(String(c.id)) || oldCourseIds.includes(c.id);
+                        const div = document.createElement('div');
+                        div.className = 'flex items-center gap-2 py-1';
+                        div.innerHTML = `
+                            <input type="checkbox" name="course_ids[]" value="${c.id}" id="course-${c.id}"
+                                class="rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900"
+                                ${isChecked ? 'checked' : ''}>
+                            <label for="course-${c.id}" class="text-sm text-zinc-700 cursor-pointer">${c.course_name}</label>
+                        `;
+                        courseCheckboxes.appendChild(div);
                     });
-                    courseSelect.disabled = false;
                 })
                 .catch(() => {
-                    courseSelect.innerHTML = '<option value="" disabled selected>Error loading</option>';
-                    courseSelect.disabled = true;
+                    courseCheckboxes.innerHTML = '<p class="text-sm text-red-500">Error loading programs</p>';
                 });
+        }
+
+        deptCheckboxes.forEach(cb => {
+            cb.addEventListener('change', () => {
+                loadCoursesForDepartments(getSelectedDepartmentIds());
+            });
         });
 
-        if (departmentSelect.value) departmentSelect.dispatchEvent(new Event('change'));
+        // On load, if departments were pre-selected
+        if (getSelectedDepartmentIds().length > 0) {
+            loadCoursesForDepartments(getSelectedDepartmentIds());
+        }
+
+        // ================= STUDENT ENROLLMENT SEARCH =================
+        const studentSearch = document.getElementById('student-search');
+        const studentResults = document.getElementById('student-results');
+        const enrolledTags = document.getElementById('enrolled-students-tags');
+        const enrolledInputs = document.getElementById('enrolled-students-inputs');
+        let enrolledStudents = new Map();
+        let searchTimeout;
+
+        studentSearch.addEventListener('input', function () {
+            clearTimeout(searchTimeout);
+            const query = this.value.trim();
+
+            if (query.length < 2) {
+                studentResults.classList.add('hidden');
+                return;
+            }
+
+            searchTimeout = setTimeout(() => {
+                fetch(`/api/students/search?q=${encodeURIComponent(query)}`)
+                    .then(r => r.json())
+                    .then(students => {
+                        if (!students.length) {
+                            studentResults.innerHTML = '<div class="p-3 text-sm text-zinc-400">No students found</div>';
+                            studentResults.classList.remove('hidden');
+                            return;
+                        }
+
+                        studentResults.innerHTML = '';
+                        students.forEach(s => {
+                            if (enrolledStudents.has(s.id)) return;
+
+                            const item = document.createElement('div');
+                            item.className = 'p-3 hover:bg-zinc-50 cursor-pointer border-b border-zinc-100 last:border-0';
+                            item.innerHTML = `
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-zinc-900">${s.name}</p>
+                                        <p class="text-xs text-zinc-500">${s.id_number} • ${s.department} • ${s.course}</p>
+                                    </div>
+                                    <span class="text-xs text-zinc-400">Click to enroll</span>
+                                </div>
+                            `;
+                            item.addEventListener('click', () => {
+                                addEnrolledStudent(s);
+                                studentResults.classList.add('hidden');
+                                studentSearch.value = '';
+                            });
+                            studentResults.appendChild(item);
+                        });
+                        studentResults.classList.remove('hidden');
+                    })
+                    .catch(() => {
+                        studentResults.innerHTML = '<div class="p-3 text-sm text-red-500">Error searching students</div>';
+                        studentResults.classList.remove('hidden');
+                    });
+            }, 300);
+        });
+
+        document.addEventListener('click', function (e) {
+            if (!studentSearch.contains(e.target) && !studentResults.contains(e.target)) {
+                studentResults.classList.add('hidden');
+            }
+        });
+
+        function addEnrolledStudent(student) {
+            if (enrolledStudents.has(student.id)) return;
+            enrolledStudents.set(student.id, student);
+            document.getElementById('enrollment-error').classList.add('hidden');
+            renderEnrolledStudents();
+        }
+
+        function removeEnrolledStudent(id) {
+            enrolledStudents.delete(id);
+            renderEnrolledStudents();
+        }
+
+        function renderEnrolledStudents() {
+            enrolledTags.innerHTML = '';
+            enrolledInputs.innerHTML = '';
+
+            enrolledStudents.forEach((student, id) => {
+                const tag = document.createElement('span');
+                tag.className = 'inline-flex items-center gap-1 rounded-full bg-zinc-100 px-3 py-1.5 text-sm text-zinc-700';
+                tag.innerHTML = `
+                    <span class="font-medium">${student.name}</span>
+                    <span class="text-zinc-400">(${student.id_number})</span>
+                    <button type="button" onclick="removeEnrolledStudent(${id})" class="ml-1 text-zinc-400 hover:text-red-500">×</button>
+                `;
+                enrolledTags.appendChild(tag);
+
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'enrolled_students[]';
+                hiddenInput.value = id;
+                enrolledInputs.appendChild(hiddenInput);
+            });
+        }
     </script>
 </x-faculty-layout>

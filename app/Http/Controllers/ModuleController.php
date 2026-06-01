@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\Course;
 use App\Models\Department;
 use App\Models\Module;
+use App\Models\ModuleEnrollment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
@@ -82,14 +84,21 @@ class ModuleController extends Controller
                 'title' => 'required|string|max:255',
                 'isMajor' => 'required|in:0,1',
                 'semester' => 'required|in:1st,2nd',
-                'course_id' => 'required|exists:courses,id',
+                'course_ids' => 'required|array|min:1',
+                'course_ids.*' => 'exists:courses,id',
                 'department_id' => 'required|exists:departments,id',
-                'file' => 'required|mimes:pdf|max:204800'
+                'file' => 'required|mimes:pdf|max:204800',
+                'enrolled_students' => 'required|array|min:1',
+                'enrolled_students.*' => 'exists:users,id',
             ], [
                 'course_code.required' => 'Please enter a course code.',
+                'course_ids.required' => 'Please select at least one degree program.',
+                'course_ids.min' => 'Please select at least one degree program.',
                 'file.required' => 'Please upload a PDF file.',
                 'file.mimes' => 'The file must be a PDF.',
                 'file.max' => 'The file size must not exceed 200MB.',
+                'enrolled_students.required' => 'Please enroll at least one student.',
+                'enrolled_students.min' => 'Please enroll at least one student.',
             ]);
 
             $cleanData = [
@@ -97,7 +106,6 @@ class ModuleController extends Controller
                 'title' => strip_tags($validatedData['title']),
                 'isMajor' => strip_tags($validatedData['isMajor']),
                 'semester' => strip_tags($validatedData['semester']),
-                'course_id' => strip_tags($validatedData['course_id']),
                 'department_id' => strip_tags($validatedData['department_id']),
                 'user_id' => Auth::user()->id
             ];
@@ -116,7 +124,22 @@ class ModuleController extends Controller
                 return redirect()->back()->withInput();
             }
 
-            Module::create($cleanData);
+            $module = Module::create($cleanData);
+
+            // Sync courses (degree programs) via pivot
+            $module->courses()->sync($validatedData['course_ids']);
+
+            // Handle student enrollments
+            if (!empty($validatedData['enrolled_students'])) {
+                foreach ($validatedData['enrolled_students'] as $studentId) {
+                    ModuleEnrollment::firstOrCreate([
+                        'user_id' => $studentId,
+                        'course_code' => $cleanData['course_code'],
+                    ], [
+                        'enrolled_by' => Auth::id(),
+                    ]);
+                }
+            }
 
             return redirect()->route('faculty.home')->with('success', 'Module created successfully');
         } catch (ValidationException $e) {
@@ -141,16 +164,23 @@ class ModuleController extends Controller
                 'title' => 'required|string|max:255',
                 'isMajor' => 'required|in:0,1',
                 'semester' => 'required|in:1st,2nd',
-                'course_id' => 'required|exists:courses,id',
+                'course_ids' => 'required|array|min:1',
+                'course_ids.*' => 'exists:courses,id',
                 'department_id' => 'required|exists:departments,id',
                 'files' => 'required|array|min:1',
-                'files.*' => 'required|mimes:pdf|max:204800'
+                'files.*' => 'required|mimes:pdf|max:204800',
+                'enrolled_students' => 'required|array|min:1',
+                'enrolled_students.*' => 'exists:users,id',
             ], [
                 'course_code.required' => 'Please enter a course code.',
+                'course_ids.required' => 'Please select at least one degree program.',
+                'course_ids.min' => 'Please select at least one degree program.',
                 'files.required' => 'Please upload at least one PDF file.',
                 'files.min' => 'Please upload at least one PDF file.',
                 'files.*.mimes' => 'All files must be PDFs.',
                 'files.*.max' => 'Each file size must not exceed 200MB.',
+                'enrolled_students.required' => 'Please enroll at least one student.',
+                'enrolled_students.min' => 'Please enroll at least one student.',
             ]);
 
             DB::beginTransaction();
@@ -169,16 +199,18 @@ class ModuleController extends Controller
                         $file->move(public_path('files'), $fileName);
 
                         // All modules use the same title and course code
-                        Module::create([
+                        $module = Module::create([
                             'course_code' => $sharedCourseCode,
                             'title' => $baseTitle,
                             'file' => $fileName,
                             'isMajor' => strip_tags($validatedData['isMajor']),
                             'semester' => strip_tags($validatedData['semester']),
-                            'course_id' => strip_tags($validatedData['course_id']),
                             'department_id' => strip_tags($validatedData['department_id']),
                             'user_id' => Auth::user()->id
                         ]);
+
+                        // Sync courses (degree programs) via pivot
+                        $module->courses()->sync($validatedData['course_ids']);
 
                         $uploadedCount++;
                     } catch (\Exception $e) {
@@ -192,6 +224,18 @@ class ModuleController extends Controller
                     return redirect()->back()
                         ->with('error', 'Failed to create any modules. Please try again.')
                         ->withInput();
+                }
+
+                // Handle student enrollments (once for the course code)
+                if (!empty($validatedData['enrolled_students'])) {
+                    foreach ($validatedData['enrolled_students'] as $studentId) {
+                        ModuleEnrollment::firstOrCreate([
+                            'user_id' => $studentId,
+                            'course_code' => $sharedCourseCode,
+                        ], [
+                            'enrolled_by' => Auth::id(),
+                        ]);
+                    }
                 }
 
                 DB::commit();
@@ -237,5 +281,84 @@ class ModuleController extends Controller
         $remainingQuota = max(0, 5 - $downloadsToday);
 
         return view('student.view-module', compact('module', 'source', 'remainingQuota'));
+    }
+
+    /**
+     * Search students for enrollment (AJAX).
+     */
+    public function searchStudents(Request $request)
+    {
+        $query = $request->get('q', '');
+
+        if (strlen($query) < 2) {
+            return response()->json([]);
+        }
+
+        $students = User::where('usertype', 'student')
+            ->where(function ($q) use ($query) {
+                $q->where('first_name', 'like', "%{$query}%")
+                  ->orWhere('last_name', 'like', "%{$query}%")
+                  ->orWhere('id_number', 'like', "%{$query}%")
+                  ->orWhere('email', 'like', "%{$query}%");
+            })
+            ->with(['department:id,department_name', 'course:id,course_name'])
+            ->select('id', 'id_number', 'first_name', 'middle_initial', 'last_name', 'email', 'department_id', 'course_id')
+            ->limit(20)
+            ->get()
+            ->map(function ($student) {
+                return [
+                    'id' => $student->id,
+                    'id_number' => $student->id_number,
+                    'name' => $student->name,
+                    'email' => $student->email,
+                    'department' => $student->department ? $student->department->department_name : 'N/A',
+                    'course' => $student->course ? $student->course->course_name : 'N/A',
+                ];
+            });
+
+        return response()->json($students);
+    }
+
+    /**
+     * Enroll students into a course code.
+     */
+    public function enrollStudents(Request $request)
+    {
+        $validated = $request->validate([
+            'course_code' => 'required|string|max:255',
+            'student_ids' => 'required|array|min:1',
+            'student_ids.*' => 'exists:users,id',
+        ]);
+
+        $enrolled = 0;
+        foreach ($validated['student_ids'] as $studentId) {
+            $enrollment = ModuleEnrollment::firstOrCreate([
+                'user_id' => $studentId,
+                'course_code' => $validated['course_code'],
+            ], [
+                'enrolled_by' => Auth::id(),
+            ]);
+
+            if ($enrollment->wasRecentlyCreated) {
+                $enrolled++;
+            }
+        }
+
+        return response()->json([
+            'message' => "$enrolled student(s) enrolled successfully.",
+            'enrolled_count' => $enrolled,
+        ]);
+    }
+
+    /**
+     * Remove a student enrollment.
+     */
+    public function removeEnrollment(ModuleEnrollment $enrollment)
+    {
+        $enrollment->delete();
+
+        return response()->json([
+            'message' => 'Enrollment removed successfully.',
+        ]);
     }
 }

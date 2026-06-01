@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use App\Models\Module;
 use Livewire\Component;
 use App\Models\Department;
+use App\Models\ModuleEnrollment;
 use Livewire\WithPagination;
 use App\Models\ModuleDownload;
 use Illuminate\Support\Facades\Auth;
@@ -185,6 +186,36 @@ class BrowseModules extends Component
         $this->dispatch('searchStateChanged', isSearching: false);
     }
 
+    /**
+     * Build the base visibility scope for this student.
+     * A student can see a module if:
+     *   1. The module targets their degree program (via module_courses pivot), OR
+     *   2. The student is explicitly enrolled in the module's course_code
+     */
+    protected function applyVisibilityScope($query)
+    {
+        $user = Auth::user();
+
+        // Get course codes the student is enrolled in by faculty
+        $enrolledCourseCodes = ModuleEnrollment::where('user_id', $user->id)
+            ->pluck('course_code')
+            ->toArray();
+
+        $query->where(function ($q) use ($user, $enrolledCourseCodes) {
+            // Condition 1: Module targets the student's degree program
+            $q->whereHas('courses', function ($sub) use ($user) {
+                $sub->where('courses.id', $user->course_id);
+            });
+
+            // Condition 2: Student is explicitly enrolled in the course code
+            if (!empty($enrolledCourseCodes)) {
+                $q->orWhereIn('course_code', $enrolledCourseCodes);
+            }
+        });
+
+        return $query;
+    }
+
     protected function emitSearchStatus()
     {
         // Check authentication before proceeding
@@ -192,12 +223,10 @@ class BrowseModules extends Component
             return;
         }
 
-        $user = Auth::user();
+        $query = Module::query()->where('status', 'published');
+        $query = $this->applyVisibilityScope($query);
 
-        $hasResults = Module::query()
-            ->where('status', 'published')
-            // Filter by user's course_id
-            ->where('course_id', $user->course_id)
+        $hasResults = $query
             ->when($this->search, function($query) {
                 $query->where(function($q) {
                     $q->where('title', 'like', '%'.$this->search.'%')
@@ -265,9 +294,16 @@ class BrowseModules extends Component
         try {
             $user = Auth::user();
 
-            // Get course code groups with module counts
-            $courseCodeGroups = Module::where('course_id', $user->course_id)
-                ->where('status', 'published')
+            // Get enrolled course codes for this student
+            $enrolledCourseCodes = ModuleEnrollment::where('user_id', $user->id)
+                ->pluck('course_code')
+                ->toArray();
+
+            // Get course code groups with module counts (visible to this student)
+            $courseCodeQuery = Module::where('status', 'published');
+            $courseCodeQuery = $this->applyVisibilityScope($courseCodeQuery);
+
+            $courseCodeGroups = $courseCodeQuery
                 ->when($this->semester, function($q) {
                     $q->where('semester', $this->semester);
                 })
@@ -288,14 +324,15 @@ class BrowseModules extends Component
 
             // Load recent modules for the "For You" feed if no course code is selected
             if (!$this->selectedCourseCode && empty($this->search) && empty($this->semester)) {
-                $recentModules = Module::query()
+                $recentQuery = Module::query()
                     ->where('status', 'published')
                     ->with([
                         'user' => fn($q) => $q->select('id', 'first_name', 'middle_initial', 'last_name', 'profile_picture', 'department_id'),
                         'user.department' => fn($q) => $q->select('id', 'department_name'),
-                    ])
-                    ->where('course_id', $user->course_id)
-                    ->where('department_id', $user->department_id)
+                    ]);
+                $recentQuery = $this->applyVisibilityScope($recentQuery);
+
+                $recentModules = $recentQuery
                     ->latest()
                     ->take(6)
                     ->get();
@@ -308,8 +345,10 @@ class BrowseModules extends Component
                     ->with([
                         'user' => fn($q) => $q->select('id', 'first_name', 'middle_initial', 'last_name', 'profile_picture', 'department_id'),
                         'user.department' => fn($q) => $q->select('id', 'department_name'),
-                    ])
-                    ->where('course_id', $user->course_id)
+                    ]);
+                $modulesQuery = $this->applyVisibilityScope($modulesQuery);
+
+                $modulesQuery = $modulesQuery
                     ->where('course_code', $this->selectedCourseCode)
                     ->when($this->search, function($query) {
                         $query->where(function($q) {

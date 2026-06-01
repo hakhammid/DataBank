@@ -57,8 +57,13 @@ class Course extends Model
         return self::with('department')->latest()->paginate(10);
     }
 
+    /**
+     * Get the modules that target this course (degree program).
+     * Many-to-many via module_courses pivot table.
+     */
     public function modules()
     {
-        return $this->hasMany(Module::class);
+        return $this->belongsToMany(Module::class, 'module_courses')
+                    ->withTimestamps();
     }
 }

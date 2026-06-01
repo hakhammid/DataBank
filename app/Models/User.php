@@ -6,6 +6,7 @@ use App\Models\Course;
 use App\Models\Module;
 use App\Models\Department;
 use App\Models\ModuleDownload;
+use App\Models\ModuleEnrollment;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -111,5 +112,21 @@ class User extends Authenticatable
     public function moduleDownloads()
     {
         return $this->hasMany(ModuleDownload::class);
+    }
+
+    /**
+     * Get the course codes this student has been enrolled in by faculty.
+     */
+    public function enrolledCourseCodes(): HasMany
+    {
+        return $this->hasMany(ModuleEnrollment::class, 'user_id');
+    }
+
+    /**
+     * Get the enrollments this faculty member has created.
+     */
+    public function createdEnrollments(): HasMany
+    {
+        return $this->hasMany(ModuleEnrollment::class, 'enrolled_by');
     }
 }
