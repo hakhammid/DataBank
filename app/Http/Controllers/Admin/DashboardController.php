@@ -17,9 +17,7 @@ class DashboardController extends Controller
         $facultyCount = User::where('usertype', 'faculty')->count();
         $moduleCount  = Module::count();
 
-        $departments = Department::withCount('modules')->get()->map(function ($department) {
-            return $department;
-        });
+        $departments = Department::withCount('modules')->orderBy('modules_count', 'desc')->get();
 
         return view('admin.admin_home', [
             'studentCount'    => $studentCount,

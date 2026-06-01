@@ -14,7 +14,9 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('id_number')->unique();
-            $table->string('name');
+            $table->string('first_name');
+            $table->string('middle_initial', 10)->nullable();
+            $table->string('last_name');
             $table->string('email')->unique();
             $table->string('password');
             $table->string('usertype')->default('student');
@@ -25,6 +27,7 @@ return new class extends Migration
             $table->foreignId('course_id')->nullable()->constrained()->nullOnDelete();
 
             $table->rememberToken();
+            $table->softDeletes();
             $table->timestamps();
         });
 
