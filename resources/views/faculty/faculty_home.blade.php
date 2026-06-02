@@ -114,72 +114,7 @@
 
                 <!-- Pagination -->
                 @if($modules->hasPages())
-                <div class="mt-8 flex items-center justify-center">
-                    <div class="flex space-x-2">
-                        @if ($modules->onFirstPage())
-                        <span
-                            class="flex px-2 py-1 rounded border border-zinc-400 text-zinc-400 cursor-not-allowed items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="2">
-                                <path d="M15 6l-6 6l6 6" />
-                            </svg>
-                        </span>
-                        @else
-                        <a href="{{ $modules->previousPageUrl() }}"
-                            class="flex px-2 py-1 rounded border border-zinc-900 text-zinc-900 hover:bg-zinc-50 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="2">
-                                <path d="M15 6l-6 6l6 6" />
-                            </svg>
-                        </a>
-                        @endif
-
-                        @php
-                        $currentPage = $modules->currentPage();
-                        $lastPage = $modules->lastPage();
-                        $start = max($currentPage - 1, 1);
-                        $end = min($currentPage + 1, $lastPage);
-                        $pages = [];
-
-                        if ($start > 1) {
-                        $pages[] = 1;
-                        if ($start > 2) $pages[] = '...';
-                        }
-
-                        for ($i = $start; $i <= $end; $i++) { $pages[]=$i; } if ($end < $lastPage) { if ($end < $lastPage -
-                            1) $pages[]='...' ; $pages[]=$lastPage; } @endphp @foreach ($pages as $page) @if ($page=='...' )
-                            <span class="w-10 h-10 flex items-center justify-center">...</span>
-                            @elseif ($page == $currentPage)
-                            <span
-                                class="w-10 h-10 flex items-center justify-center rounded bg-zinc-900 text-white font-semibold">
-                                {{ $page }}
-                            </span>
-                            @else
-                            <a href="{{ $modules->url($page) }}"
-                                class="w-10 h-10 flex items-center justify-center rounded border border-zinc-900 text-zinc-900 hover:bg-zinc-900 hover:text-white transition">
-                                {{ $page }}
-                            </a>
-                            @endif
-                            @endforeach
-
-                            @if ($modules->hasMorePages())
-                            <a href="{{ $modules->nextPageUrl() }}"
-                                class="flex px-2 py-1 rounded border border-zinc-900 text-zinc-900 hover:bg-zinc-50 transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none"
-                                    stroke="currentColor" stroke-width="2">
-                                    <path d="M9 6l6 6l-6 6" />
-                                </svg>
-                            </a>
-                            @else
-                            <span class="flex px-2 py-1 rounded border border-zinc-400 text-zinc-400 cursor-not-allowed">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none"
-                                    stroke="currentColor" stroke-width="2">
-                                    <path d="M9 6l6 6l-6 6" />
-                                </svg>
-                            </span>
-                            @endif
-                    </div>
-                </div>
+                <x-pagination :paginator="$modules" />
                 @endif
                 @else
                 <!-- Empty State -->

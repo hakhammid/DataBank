@@ -36,15 +36,24 @@ class ModuleController extends Controller
             });
         }
 
-        $modules = $query->latest()->paginate(10)->appends($request->query());
+        $publishedQuery = clone $query;
+        $publishedQuery->where('status', 'published');
+        $publishedModules = $publishedQuery->latest()->paginate(10, ['*'], 'published_page')->appends($request->query());
 
+        $pendingQuery = clone $query;
+        $pendingQuery->where('status', 'pending');
+        $pendingModules = $pendingQuery->latest()->paginate(10, ['*'], 'pending_page')->appends($request->query());
+
+        $rejectedQuery = clone $query;
+        $rejectedQuery->where('status', 'rejected');
+        $rejectedModules = $rejectedQuery->latest()->paginate(10, ['*'], 'rejected_page')->appends($request->query());
         // Get filter options
         $courseCodes = Module::select('course_code')->distinct()->orderBy('course_code')->pluck('course_code');
         $departments = Department::orderBy('department_name')->get();
         $courses = Course::orderBy('course_name')->get();
 
-        if ($modules->isNotEmpty()) {
-            $firstModule = $modules->first();
+        if ($publishedModules->isNotEmpty()) {
+            $firstModule = $publishedModules->first();
             Log::info('Module Data:', [
                 'module_id'      => $firstModule->id,
                 'user_id'        => $firstModule->user_id,
@@ -54,10 +63,12 @@ class ModuleController extends Controller
             ]);
         }
         return view('admin.admin_manage_module', [
-            'modules'     => $modules,
-            'courseCodes' => $courseCodes,
-            'departments' => $departments,
-            'courses'     => $courses,
+            'publishedModules' => $publishedModules,
+            'pendingModules'   => $pendingModules,
+            'rejectedModules'  => $rejectedModules,
+            'courseCodes'      => $courseCodes,
+            'departments'      => $departments,
+            'courses'          => $courses,
         ]);
     }
 

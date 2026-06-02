@@ -337,9 +337,7 @@
             </div>
 
             @if($modules->hasPages())
-            <div class="px-6 py-4 border-t border-zinc-200">
-                {{ $modules->links() }}
-            </div>
+            <x-pagination :paginator="$modules" />
             @endif
         </div>
     </main>
