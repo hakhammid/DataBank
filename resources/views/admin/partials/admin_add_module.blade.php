@@ -89,10 +89,10 @@
                 </div>
 
                 <div>
-                    <label class="text-sm font-medium text-zinc-900">Course Title</label>
+                    <label class="text-sm font-medium text-zinc-900">Module Title</label>
                     <textarea name="title" required
                         class="mt-1 w-full rounded-lg border border-zinc-200 p-3 text-sm focus:ring-2 focus:ring-zinc-900"
-                        placeholder="Enter course title">{{ old('title') }}</textarea>
+                        placeholder="Enter module title">{{ old('title') }}</textarea>
                 </div>
 
                 <div>

@@ -114,7 +114,7 @@
                     <x-input-error :messages="$errors->get('course_code')" class="mt-2" />
                 </div>
                 <div class="space-y-1">
-                    <h2 class="text-base/7 font-semibold text-zinc-950 sm:text-sm/6">Course Title</h2>
+                    <h2 class="text-base/7 font-semibold text-zinc-950 sm:text-sm/6">Module Title</h2>
                     <input type="text" name="title" id="title" placeholder="" required
                         class="h-[3rem] peer block w-full text-sm px-4 pt-2 pb-2 text-zinc-900 bg-white rounded-[8px] border border-gray-200 appearance-none focus:border-transparent focus:outline focus:outline-2 focus:outline-primary focus:ring-0 font-normal"
                         value="{{ $module->title }}">

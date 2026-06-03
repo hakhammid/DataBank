@@ -107,8 +107,8 @@
                     <x-input-error :messages="$errors->get('course_code')" class="mt-2" />
                 </div>
                 <div class="space-y-1">
-                    <h2 class="text-base/7 font-semibold text-zinc-950 sm:text-sm/6">Course Title</h2>
-                    <textarea name="title" id="title" placeholder="" rows="2" required
+                    <h2 class="text-base/7 font-semibold text-zinc-950 sm:text-sm/6">Module Title</h2>
+                    <textarea name="title" id="title" placeholder="e.g. Week 1 - Introduction to Programming" rows="2" required
                         class="h-[3rem] peer block w-full text-sm h-[100px] px-4 pt-2 pb-2 text-zinc-900 bg-white rounded-[8px] border border-gray-200 appearance-none focus:border-transparent focus:outline focus:outline-2 focus:outline-primary focus:ring-0 overflow-hidden resize-none font-normal">{{ $module->title }}</textarea>
                     <x-input-error :messages="$errors->get('title')" class="mt-2" />
                 </div>

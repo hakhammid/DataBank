@@ -17,13 +17,15 @@ class ReportService
         $faculties = User::where('usertype', 'faculty')->get();
 
         // Build base query with filters
-        $moduleQuery = Module::with(['user', 'department', 'course']);
+        $moduleQuery = Module::with(['user', 'department', 'courses']);
 
         if ($request->filled('department_id')) {
             $moduleQuery->where('department_id', $request->department_id);
         }
         if ($request->filled('course_id')) {
-            $moduleQuery->where('course_id', $request->course_id);
+            $moduleQuery->whereHas('courses', function($q) use ($request) {
+                $q->where('courses.id', $request->course_id);
+            });
         }
         if ($request->filled('semester')) {
             $moduleQuery->where('semester', $request->semester);
@@ -45,7 +47,7 @@ class ReportService
                 $courseBreakdown = $facultyModules->groupBy('course_code')->map(function ($codeModules) {
                     return [
                         'course_code' => $codeModules->first()->course_code,
-                        'course_name' => $codeModules->first()->course?->course_name ?? 'N/A',
+                        'course_name' => $codeModules->first()->courses->first()?->course_name ?? 'N/A',
                         'count' => $codeModules->count(),
                     ];
                 })->values();
@@ -66,18 +68,18 @@ class ReportService
                 return [
                     'department_name' => $dept?->department_name ?? 'N/A',
                     'total_modules' => $deptModules->count(),
-                    'degree_programs' => $deptModules->pluck('course')->unique('id')->filter()->values(),
+                    'degree_programs' => $deptModules->flatMap->courses->unique('id')->values(),
                 ];
             })->values();
 
         // Student download data
-        $downloadQuery = \App\Models\ModuleDownload::with(['user.department', 'user.course', 'module.user', 'module.department', 'module.course']);
+        $downloadQuery = \App\Models\ModuleDownload::with(['user.department', 'user.course', 'module.user', 'module.department', 'module.courses']);
 
         if ($request->filled('department_id')) {
             $downloadQuery->whereHas('module', fn($q) => $q->where('department_id', $request->department_id));
         }
         if ($request->filled('course_id')) {
-            $downloadQuery->whereHas('module', fn($q) => $q->where('course_id', $request->course_id));
+            $downloadQuery->whereHas('module.courses', fn($q) => $q->where('courses.id', $request->course_id));
         }
         if ($request->filled('semester')) {
             $downloadQuery->whereHas('module', fn($q) => $q->where('semester', $request->semester));
@@ -129,7 +131,9 @@ class ReportService
     {
         $semester = $request->input('semester');
 
-        $modulesQuery = Module::where('course_id', $course->id)
+        $modulesQuery = Module::whereHas('courses', function ($q) use ($course) {
+                $q->where('courses.id', $course->id);
+            })
             ->with(['user' => function ($query) {
                 $query->select('id', 'first_name', 'middle_initial', 'last_name', 'usertype', 'profile_picture');
             }])
@@ -147,7 +151,9 @@ class ReportService
         $allModules = $modulesQuery->orderBy('created_at', 'desc')->get();
 
         $statsQuery = function () use ($course, $semester) {
-            $q = Module::where('course_id', $course->id);
+            $q = Module::whereHas('courses', function ($q2) use ($course) {
+                $q2->where('courses.id', $course->id);
+            });
             if ($semester) $q->where('semester', $semester);
             return $q;
         };
@@ -167,14 +173,17 @@ class ReportService
         ];
 
         $uploaders = User::whereIn('id', function ($query) use ($course, $semester) {
-            $q = $query->select('user_id')
+            $q = $query->select('modules.user_id')
                 ->from('modules')
-                ->where('course_id', $course->id);
-            if ($semester) $q->where('semester', $semester);
+                ->join('module_courses', 'modules.id', '=', 'module_courses.module_id')
+                ->where('module_courses.course_id', $course->id);
+            if ($semester) $q->where('modules.semester', $semester);
             $q->distinct();
         })
             ->withCount(['modules' => function ($query) use ($course, $semester) {
-                $query->where('course_id', $course->id);
+                $query->whereHas('courses', function ($q2) use ($course) {
+                    $q2->where('courses.id', $course->id);
+                });
                 if ($semester) $query->where('semester', $semester);
             }])
             ->get();

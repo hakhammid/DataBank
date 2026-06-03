@@ -3,7 +3,7 @@
                     <thead class="border-b border-zinc-200">
                         <tr>
                             <th class="px-4 py-3 font-semibold text-zinc-700">Course Code</th>
-                            <th class="px-4 py-3 font-semibold text-zinc-700">Course Title</th>
+                            <th class="px-4 py-3 font-semibold text-zinc-700">Module Title</th>
 
                             <th class="px-4 py-3 font-semibold text-zinc-700">Views</th>
                             <th class="px-4 py-3 font-semibold text-zinc-700">Teacher</th>

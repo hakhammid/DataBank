@@ -92,15 +92,29 @@
 
                 <!-- Selected Course Code Header -->
                 <div class="mb-8 bg-gradient-to-r from-zinc-900 to-zinc-700 rounded-2xl p-6 text-white">
-                    <p class="text-zinc-300 text-sm mb-1">{{ $selectedCourse->course_name }}</p>
-                    <h2 class="text-2xl font-bold mb-2">{{ $selectedCourseCode }}</h2>
-                    <p class="text-zinc-200">
-                        @if($modules instanceof \Illuminate\Pagination\LengthAwarePaginator)
-                            {{ $modules->total() }} {{ Str::plural('Module', $modules->total()) }}
-                        @else
-                            0 Modules
-                        @endif
-                    </p>
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <div>
+                            <p class="text-zinc-300 text-sm mb-1">{{ $selectedCourse->course_name }}</p>
+                            <h2 class="text-2xl font-bold mb-2">{{ $selectedCourseCode }}</h2>
+                            <p class="text-zinc-200">
+                                @if($modules instanceof \Illuminate\Pagination\LengthAwarePaginator)
+                                    {{ $modules->total() }} {{ Str::plural('Module', $modules->total()) }}
+                                @else
+                                    0 Modules
+                                @endif
+                            </p>
+                        </div>
+                        <a href="{{ route('faculty.module.create.view', ['course_code' => $selectedCourseCode, 'course_id' => $selectedCourse->id]) }}"
+                           class="inline-flex items-center gap-2 rounded-lg bg-white text-zinc-900 px-5 py-2.5 text-sm font-semibold shadow hover:bg-zinc-100 transition self-start sm:self-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <polyline points="17 8 12 3 7 8" />
+                                <line x1="12" y1="3" x2="12" y2="15" />
+                            </svg>
+                            Upload Module Here
+                        </a>
+                    </div>
                 </div>
 
                 <!-- Modules Grid -->

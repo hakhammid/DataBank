@@ -51,14 +51,66 @@ class ModuleController extends Controller
         }
     }
 
-    public function createModuleView()
+    public function createModuleView(Request $request)
     {
         $courses = Course::all();
         $departments = Department::all();
 
+        $prefill = null;
+        $prefillCourseCode = $request->query('course_code');
+        $prefillCourseId = $request->query('course_id');
+
+        if ($prefillCourseCode && Auth::check()) {
+            /** @var User $user */
+            $user = Auth::user();
+
+            // Find an existing module by this faculty with this course code
+            $existingModule = Module::where('user_id', $user->id)
+                ->where('course_code', $prefillCourseCode)
+                ->first();
+
+            if ($existingModule) {
+                // Get degree program IDs from the existing module's pivot
+                $prefillCourseIds = $existingModule->courses()->pluck('courses.id')->toArray();
+
+                // Get enrolled students for this course code by this faculty
+                $prefillStudents = ModuleEnrollment::where('course_code', $prefillCourseCode)
+                    ->where('enrolled_by', $user->id)
+                    ->with(['student:id,id_number,first_name,middle_initial,last_name,email,department_id,course_id',
+                             'student.department:id,department_name',
+                             'student.course:id,course_name'])
+                    ->get()
+                    ->map(function ($enrollment) {
+                        $s = $enrollment->student;
+                        if (!$s) return null;
+                        return [
+                            'id' => $s->id,
+                            'id_number' => $s->id_number,
+                            'name' => $s->name,
+                            'email' => $s->email,
+                            'department' => $s->department ? $s->department->department_name : 'N/A',
+                            'course' => $s->course ? $s->course->course_name : 'N/A',
+                        ];
+                    })
+                    ->filter()
+                    ->values();
+
+                $prefill = [
+                    'course_code' => $prefillCourseCode,
+                    'course_id' => $prefillCourseId,
+                    'department_id' => $existingModule->department_id,
+                    'course_ids' => $prefillCourseIds,
+                    'isMajor' => $existingModule->isMajor,
+                    'semester' => $existingModule->semester,
+                    'students' => $prefillStudents,
+                ];
+            }
+        }
+
         return view('faculty.partials.add_new_module', [
             'courses' => $courses,
-            'departments' => $departments
+            'departments' => $departments,
+            'prefill' => $prefill,
         ]);
     }
 
@@ -72,7 +124,8 @@ class ModuleController extends Controller
 
         return view('faculty.partials.add_new_module', [
             'courses' => $courses,
-            'departments' => $departments
+            'departments' => $departments,
+            'prefill' => null,
         ]);
     }
 

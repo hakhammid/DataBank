@@ -331,14 +331,32 @@
                                 {{ $faculty['department'] }}
                             </td>
                             <td class="px-6 py-5">
-                                <div class="flex flex-wrap gap-2">
-                                    @foreach($faculty['course_breakdown'] as $course)
-                                    <span class="inline-flex items-center px-3 py-1 text-xs font-bold bg-indigo-50/80 text-indigo-700 rounded-lg border border-indigo-100 shadow-sm">
-                                        {{ $course['course_code'] }} 
-                                        <span class="ml-2 px-1.5 py-0.5 rounded-md bg-white text-indigo-600 text-[10px] font-black border border-indigo-100/50 shadow-sm">{{ $course['count'] }}</span>
-                                    </span>
-                                    @endforeach
-                                </div>
+                                <button type="button" data-modal-target="faculty-course-modal-{{ $loop->index }}" class="inline-flex items-center px-3 py-1.5 text-xs font-bold bg-indigo-50 text-indigo-700 hover:bg-indigo-600 hover:text-white rounded-lg border border-indigo-200 shadow-sm transition-all">
+                                    View Handled Courses ({{ count($faculty['course_breakdown']) }})
+                                </button>
+
+                                <x-my-modal id="faculty-course-modal-{{ $loop->index }}" title="Courses Handled by {{ $faculty['faculty_name'] }}" iconType="info">
+                                    <div class="mt-4">
+                                        <ul class="space-y-3">
+                                            @forelse($faculty['course_breakdown'] as $course)
+                                            <li class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
+                                                <div>
+                                                    <span class="font-bold text-gray-800">{{ $course['course_code'] }}</span>
+                                                    <span class="block text-xs text-gray-500 mt-1">{{ $course['course_name'] }}</span>
+                                                </div>
+                                                <span class="px-2.5 py-1 rounded-md bg-indigo-100 text-indigo-800 text-xs font-bold">
+                                                    {{ $course['count'] }} Modules
+                                                </span>
+                                            </li>
+                                            @empty
+                                            <li class="text-sm text-gray-500 italic">No courses handled.</li>
+                                            @endforelse
+                                        </ul>
+                                    </div>
+                                    <x-slot name="footer">
+                                        <x-my-secondary-button data-modal-close>Close</x-my-secondary-button>
+                                    </x-slot>
+                                </x-my-modal>
                             </td>
                             <td class="px-6 py-5 whitespace-nowrap text-right">
                                 <span class="px-4 py-2 inline-flex text-sm leading-5 font-black rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm">
@@ -401,16 +419,29 @@
                                 </span>
                             </td>
                             <td class="px-6 py-5">
-                                <div class="flex flex-wrap gap-2">
-                                    @foreach($dept['degree_programs'] as $program)
-                                    @if($program)
-                                        <a href="{{ route('reports.individual', $program->id) }}" class="inline-flex items-center px-3 py-1.5 text-xs font-bold bg-zinc-50 text-zinc-700 hover:bg-zinc-900 hover:text-white rounded-lg border border-zinc-200 shadow-sm transition-all" title="View individual report for {{ $program->course_name }}">
-                                            {{ $program->course_name }}
-                                            <svg class="w-3.5 h-3.5 ml-2 opacity-40 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-                                        </a>
-                                    @endif
-                                    @endforeach
-                                </div>
+                                <button type="button" data-modal-target="dept-program-modal-{{ $loop->index }}" class="inline-flex items-center px-3 py-1.5 text-xs font-bold bg-purple-50 text-purple-700 hover:bg-purple-600 hover:text-white rounded-lg border border-purple-200 shadow-sm transition-all">
+                                    View Degree Programs ({{ collect($dept['degree_programs'])->filter()->count() }})
+                                </button>
+
+                                <x-my-modal id="dept-program-modal-{{ $loop->index }}" title="Degree Programs - {{ $dept['department_name'] }}" iconType="info">
+                                    <div class="mt-4">
+                                        <div class="flex flex-col gap-3">
+                                            @forelse($dept['degree_programs'] as $program)
+                                            @if($program)
+                                                <a href="{{ route('reports.individual', $program->id) }}" class="flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors group">
+                                                    <span class="text-sm font-bold text-gray-800 group-hover:text-purple-700">{{ $program->course_name }}</span>
+                                                    <svg class="w-4 h-4 text-gray-400 group-hover:text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                                                </a>
+                                            @endif
+                                            @empty
+                                                <p class="text-sm text-gray-500 italic">No degree programs found.</p>
+                                            @endforelse
+                                        </div>
+                                    </div>
+                                    <x-slot name="footer">
+                                        <x-my-secondary-button data-modal-close>Close</x-my-secondary-button>
+                                    </x-slot>
+                                </x-my-modal>
                             </td>
                         </tr>
                         @empty

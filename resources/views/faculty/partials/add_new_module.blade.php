@@ -1,6 +1,23 @@
 <x-faculty-layout :title="'Create Modules'">
     <main class="flex-1 max-h-full p-5 lg:mt-[5rem] my-20 md:px-20">
         <h1 class="text-2xl font-semibold text-zinc-900">Create Modules</h1>
+
+        @if(!empty($prefill))
+        <div class="mt-4 mb-2 flex items-center gap-3 rounded-xl bg-emerald-50 border border-emerald-200 px-5 py-4">
+            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-600" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                    <polyline points="22 4 12 14.01 9 11.01" />
+                </svg>
+            </div>
+            <div>
+                <p class="text-sm font-semibold text-emerald-800">Uploading to existing course code: <span class="font-bold">{{ $prefill['course_code'] }}</span></p>
+                <p class="text-xs text-emerald-600 mt-0.5">Course code, department, degree programs, and enrolled students have been pre-filled. Just add your files and title.</p>
+            </div>
+        </div>
+        @endif
+
         <hr class="my-8 border-zinc-200">
 
         <!-- TOAST -->
@@ -80,28 +97,35 @@
             <section class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 <div>
                     <label class="text-sm font-medium text-zinc-900">Course Code</label>
-                    <input type="text" name="course_code" required
-                        class="mt-1 w-full rounded-lg border border-zinc-200 p-3 text-sm focus:ring-2 focus:ring-zinc-900"
-                        placeholder="Enter course code" value="{{ old('course_code') }}">
+                    @if(!empty($prefill))
+                        <input type="text" name="course_code" required readonly
+                            class="mt-1 w-full rounded-lg border border-zinc-200 bg-zinc-50 p-3 text-sm text-zinc-600 cursor-not-allowed"
+                            value="{{ $prefill['course_code'] }}">
+                        <p class="mt-1 text-xs text-zinc-400">Pre-filled from existing course code</p>
+                    @else
+                        <input type="text" name="course_code" required
+                            class="mt-1 w-full rounded-lg border border-zinc-200 p-3 text-sm focus:ring-2 focus:ring-zinc-900"
+                            placeholder="Enter course code" value="{{ old('course_code') }}">
+                    @endif
                     @error('course_code')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
 
                 <div>
-                    <label class="text-sm font-medium text-zinc-900">Course Title</label>
+                    <label class="text-sm font-medium text-zinc-900">Module Title</label>
                     <textarea name="title" required
                         class="mt-1 w-full rounded-lg border border-zinc-200 p-3 text-sm focus:ring-2 focus:ring-zinc-900"
-                        placeholder="Enter course title">{{ old('title') }}</textarea>
+                        placeholder="Enter module title">{{ old('title') }}</textarea>
                 </div>
 
                 <div>
                     <label class="text-sm font-medium text-zinc-900">Course Status</label>
                     <select name="isMajor" required
                         class="mt-1 w-full rounded-lg border border-zinc-200 p-2 text-sm">
-                        <option value="" disabled selected>Select status</option>
-                        <option value="1" {{ old('isMajor') == '1' ? 'selected' : '' }}>Major subject</option>
-                        <option value="0" {{ old('isMajor') == '0' ? 'selected' : '' }}>Minor subject</option>
+                        <option value="" disabled {{ !old('isMajor') && empty($prefill) ? 'selected' : '' }}>Select status</option>
+                        <option value="1" {{ old('isMajor') == '1' || (!old('isMajor') && !empty($prefill) && $prefill['isMajor'] == '1') ? 'selected' : '' }}>Major subject</option>
+                        <option value="0" {{ old('isMajor') == '0' || (!old('isMajor') && !empty($prefill) && $prefill['isMajor'] == '0') ? 'selected' : '' }}>Minor subject</option>
                     </select>
                 </div>
 
@@ -109,9 +133,9 @@
                     <label class="text-sm font-medium text-zinc-900">Semester</label>
                     <select name="semester" required
                         class="mt-1 w-full rounded-lg border border-zinc-200 p-2 text-sm">
-                        <option value="" disabled selected>Select semester</option>
-                        <option value="1st" {{ old('semester') == '1st' ? 'selected' : '' }}>1st Semester</option>
-                        <option value="2nd" {{ old('semester') == '2nd' ? 'selected' : '' }}>2nd Semester</option>
+                        <option value="" disabled {{ !old('semester') && empty($prefill) ? 'selected' : '' }}>Select semester</option>
+                        <option value="1st" {{ old('semester') == '1st' || (!old('semester') && !empty($prefill) && $prefill['semester'] == '1st') ? 'selected' : '' }}>1st Semester</option>
+                        <option value="2nd" {{ old('semester') == '2nd' || (!old('semester') && !empty($prefill) && $prefill['semester'] == '2nd') ? 'selected' : '' }}>2nd Semester</option>
                     </select>
                 </div>
             </section>
@@ -478,6 +502,58 @@
                 hiddenInput.value = id;
                 enrolledInputs.appendChild(hiddenInput);
             });
+        }
+
+        // ================= PREFILL FROM EXISTING COURSE CODE =================
+        const prefillData = @json($prefill ?? null);
+
+        if (prefillData) {
+            // 1. Auto-check the department checkbox for the prefilled department
+            const prefillDeptId = String(prefillData.department_id);
+            const deptCb = document.getElementById('dept-' + prefillDeptId);
+            if (deptCb && !deptCb.checked) {
+                deptCb.checked = true;
+            }
+
+            // Set primary department hidden input
+            primaryDeptInput.value = prefillDeptId;
+
+            // 2. Load degree programs and auto-check the prefilled ones
+            const prefillCourseIds = prefillData.course_ids || [];
+
+            // Fetch courses for the department, then check the right ones
+            fetch(`/api/departments/${prefillDeptId}/courses`)
+                .then(r => r.json())
+                .then(courses => {
+                    if (!courses.length) {
+                        courseCheckboxes.innerHTML = '<p class="text-sm text-zinc-400">No programs available</p>';
+                        return;
+                    }
+
+                    courseCheckboxes.innerHTML = '';
+                    courses.forEach(c => {
+                        const isChecked = prefillCourseIds.includes(c.id) || prefillCourseIds.includes(String(c.id));
+                        const div = document.createElement('div');
+                        div.className = 'flex items-center gap-2 py-1';
+                        div.innerHTML = `
+                            <input type="checkbox" name="course_ids[]" value="${c.id}" id="course-${c.id}"
+                                class="rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900"
+                                ${isChecked ? 'checked' : ''}>
+                            <label for="course-${c.id}" class="text-sm text-zinc-700 cursor-pointer">${c.course_name}</label>
+                        `;
+                        courseCheckboxes.appendChild(div);
+                    });
+                })
+                .catch(() => {
+                    courseCheckboxes.innerHTML = '<p class="text-sm text-red-500">Error loading programs</p>';
+                });
+
+            // 3. Pre-populate enrolled students
+            if (prefillData.students && prefillData.students.length > 0) {
+                prefillData.students.forEach(s => {
+                    addEnrolledStudent(s);
+                });
+            }
         }
     </script>
 </x-faculty-layout>
