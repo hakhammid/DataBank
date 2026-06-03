@@ -73,7 +73,7 @@
 
             <div>
                 <button type="submit"
-                    class="flex w-full justify-center rounded-md bg-[#2563eb] px-3 py-2.5 text-sm/6 font-semibold text-white shadow-sm hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+                    class="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition rounded-lg bg-primary shadow-theme-xs hover:bg-primary/90">
                     Reset Password
                 </button>
             </div>

@@ -5,9 +5,14 @@
             <h1 class="text-2xl/8 font-semibold text-zinc-950 sm:text-xl/8">
                 Students
             </h1>
-            <x-my-secondary-button onclick="window.location.href='{{ route('admin.student.create') }}'">
-                Create new student
-            </x-my-secondary-button>
+            <div class="flex gap-2">
+                <x-my-secondary-button data-modal-target="import-student-modal">
+                    Import Students
+                </x-my-secondary-button>
+                <x-my-secondary-button onclick="window.location.href='{{ route('admin.student.create') }}'">
+                    Create new student
+                </x-my-secondary-button>
+            </div>
         </div>
 
         <!-- Search Controls -->
@@ -95,33 +100,14 @@
     </main>
 
     <!-- Import Student Modal -->
-    <x-my-modal id="import-student-modal" title="Import Students via CSV" iconType="info">
-        <div class="mt-2">
-            <p class="text-sm text-zinc-500 mb-4">
-                Upload a CSV file containing student details. The file must have the following headers: <br>
-                <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">id_number, first_name, last_name, email, department_id, course_id, password</code>
-            </p>
-            <form id="import-student-form" method="POST" action="{{ route('admin.students.import') }}" enctype="multipart/form-data">
-                @csrf
-                <div class="mb-4">
-                    <input type="file" name="csv_file" accept=".csv" required
-                        class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none p-2">
-                </div>
-                <div class="flex justify-end gap-3 mt-6">
-                    <button data-modal-close type="button"
-                        class="inline-flex w-full justify-center rounded-lg bg-white px-4 py-2 text-sm font-semibold text-zinc-900 shadow-sm ring-1 ring-inset ring-zinc-300 hover:bg-zinc-50 sm:mt-0 sm:w-auto">
-                        Cancel
-                    </button>
-                    <button type="submit"
-                        class="inline-flex w-full justify-center rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-zinc-800 sm:w-auto">
-                        Import
-                    </button>
-                </div>
-            </form>
-        </div>
-        <x-slot name="footer">
-        </x-slot>
-    </x-my-modal>
+    <x-import-modal 
+        id="import-student-modal"
+        title="Import Students via CSV"
+        actionUrl="{{ route('admin.students.import') }}"
+        headers="id_number, first_name, last_name, email, department_id, course_id, password"
+        submitText="Import Students"
+        entityType="student"
+    />
 
     <!-- Delete Student Modal -->
     <x-my-modal id="delete-student-modal" title="Delete Student Confirmation" iconType="warning">

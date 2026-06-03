@@ -5,6 +5,9 @@
                 Faculties
             </h1>
             <div class="flex gap-2">
+                <x-my-secondary-button data-modal-target="import-faculty-modal">
+                    Import Faculties
+                </x-my-secondary-button>
                 <x-my-secondary-button onclick="window.location.href='{{ route('admin.faculty.create') }}'">
                     Create new faculty
                 </x-my-secondary-button>
@@ -98,33 +101,14 @@
         </div>
     </main>
     <!-- Import Faculty Modal -->
-    <x-my-modal id="import-faculty-modal" title="Import Faculties via CSV" iconType="info">
-        <div class="mt-2">
-            <p class="text-sm text-zinc-500 mb-4">
-                Upload a CSV file containing faculty details. The file must have the following headers: <br>
-                <code class="text-xs bg-gray-100 px-1 py-0.5 rounded">id_number, first_name, last_name, email, department_id, password</code>
-            </p>
-            <form id="import-faculty-form" method="POST" action="{{ route('admin.faculties.import') }}" enctype="multipart/form-data">
-                @csrf
-                <div class="mb-4">
-                    <input type="file" name="csv_file" accept=".csv" required
-                        class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none p-2">
-                </div>
-                <div class="flex justify-end gap-3 mt-6">
-                    <button data-modal-close type="button"
-                        class="inline-flex w-full justify-center rounded-lg bg-white px-4 py-2 text-sm font-semibold text-zinc-900 shadow-sm ring-1 ring-inset ring-zinc-300 hover:bg-zinc-50 sm:mt-0 sm:w-auto">
-                        Cancel
-                    </button>
-                    <button type="submit"
-                        class="inline-flex w-full justify-center rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-zinc-800 sm:w-auto">
-                        Import
-                    </button>
-                </div>
-            </form>
-        </div>
-        <x-slot name="footer">
-        </x-slot>
-    </x-my-modal>
+    <x-import-modal 
+        id="import-faculty-modal"
+        title="Import Faculties via CSV"
+        actionUrl="{{ route('admin.faculties.import') }}"
+        headers="id_number, first_name, last_name, email, department_id, password"
+        submitText="Import Faculties"
+        entityType="faculty"
+    />
 
     <x-my-modal id="delete-faculty-modal" title="Delete Faculty Confirmation" iconType="warning">
         <p class="text-sm text-gray-500">

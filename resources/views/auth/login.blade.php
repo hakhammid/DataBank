@@ -38,7 +38,7 @@
                                         Email<span class="text-error-500">*</span>
                                     </label>
                                     <input type="email" id="email" name="email" value="{{ old('email') }}"
-                                        placeholder="example@gmail.com" required autofocus
+                                        placeholder="Enter institutional email" required autofocus
                                         class="h-11 w-full rounded-lg border border-zinc-600 bg-transparent px-4 py-2.5 text-sm text-zinc-950 shadow-theme-xs placeholder:text-zinc-400 focus:border-primary focus:outline-hidden focus:ring-3 focus:ring-primary/10" />
                                 </div>
 

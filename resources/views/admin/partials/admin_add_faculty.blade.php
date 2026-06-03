@@ -164,7 +164,8 @@
 
             <div class="flex justify-end gap-2">
                 <x-my-secondary-button type="button" onclick="window.location.href='{{ route('admin.faculties') }}'">Cancel</x-my-secondary-button>
-                <x-my-button type="submit">Save faculty</x-my-button>
+                <x-my-secondary-button type="submit" name="save_action" value="add_another">Save & Add Another</x-my-secondary-button>
+                <x-my-button type="submit" name="save_action" value="save">Save faculty</x-my-button>
             </div>
         </form>
     </main>

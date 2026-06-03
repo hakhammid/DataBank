@@ -77,6 +77,10 @@ class FacultyController extends Controller
 
         event(new Registered($user));
 
+        if ($request->input('save_action') === 'add_another') {
+            return redirect()->route('admin.faculty.create')->with('success', 'Faculty added successfully.');
+        }
+
         return redirect()->route('admin.faculties')->with('success', 'Faculty added successfully.');
     }
 

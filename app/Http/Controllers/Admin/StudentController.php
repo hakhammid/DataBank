@@ -72,6 +72,10 @@ class StudentController extends Controller
 
         event(new Registered($user));
 
+        if ($request->input('save_action') === 'add_another') {
+            return redirect()->route('admin.student.create')->with('success', 'Student added successfully.');
+        }
+
         return redirect()->route('admin.students')->with('success', 'Student added successfully.');
     }
 
