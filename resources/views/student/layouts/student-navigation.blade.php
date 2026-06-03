@@ -42,6 +42,9 @@
 
                 <!-- Right Side -->
                 <div class="flex md:gap-5 gap-0 items-center">
+                    <!-- Notification Bell -->
+                    @livewire('notification-bell')
+
                     <!-- Download Quota -->
                     @livewire('download-quota')
 

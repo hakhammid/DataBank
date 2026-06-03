@@ -7,6 +7,7 @@ use App\Models\Module;
 use App\Models\Department;
 use App\Models\ModuleDownload;
 use App\Models\ModuleEnrollment;
+use App\Models\Notification;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -128,5 +129,21 @@ class User extends Authenticatable
     public function createdEnrollments(): HasMany
     {
         return $this->hasMany(ModuleEnrollment::class, 'enrolled_by');
+    }
+
+    /**
+     * Get all notifications for this user.
+     */
+    public function moduleNotifications(): HasMany
+    {
+        return $this->hasMany(Notification::class, 'user_id');
+    }
+
+    /**
+     * Get unread notifications count.
+     */
+    public function unreadNotificationsCount(): int
+    {
+        return $this->moduleNotifications()->whereNull('read_at')->count();
     }
 }

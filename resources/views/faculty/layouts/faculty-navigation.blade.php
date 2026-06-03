@@ -73,7 +73,10 @@
             </div>
 
             <!-- Right Side -->
-            <div class="flex items-center">
+            <div class="flex items-center gap-3">
+                <!-- Notification Bell -->
+                @livewire('notification-bell')
+
                 <div x-data="{ open: false }" class="flex items-center relative group">
                     <button @click="open = !open" class="relative flex items-center gap-3 focus:outline-none"
                             id="profile-menu-button">

@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use App\Http\Controllers\Controller;
+use App\Services\NotificationService;
 
 class ModuleController extends Controller
 {
@@ -149,6 +150,9 @@ class ModuleController extends Controller
                 }
             }
 
+            // Notify eligible students about the new published module
+            NotificationService::notifyStudentsOfNewModule($module);
+
             $request->session()->forget('file_info');
 
             return redirect()->route('admin.modules')->with('success', 'Module created successfully');
@@ -248,6 +252,17 @@ class ModuleController extends Controller
                 }
 
                 DB::commit();
+
+                // Notify eligible students about the new published modules
+                // Run after commit so the modules exist in the DB
+                $allModules = Module::where('course_code', $sharedCourseCode)
+                    ->where('user_id', Auth::id())
+                    ->latest()
+                    ->take($uploadedCount)
+                    ->get();
+                foreach ($allModules as $mod) {
+                    NotificationService::notifyStudentsOfNewModule($mod);
+                }
 
                 $message = "Successfully created $uploadedCount modules.";
                 if (!empty($failedFiles)) {
@@ -384,6 +399,12 @@ class ModuleController extends Controller
         $module->update([
             'status' => $validated['status']
         ]);
+
+        // Notify students when a module is published (approved)
+        if ($validated['status'] === 'published') {
+            NotificationService::notifyStudentsOfNewModule($module);
+            NotificationService::notifyFacultyOfPublishedModule($module);
+        }
 
         $statusText = $validated['status'] === 'published' ? 'published' : 'rejected';
         return back()->with('success', "Module status updated to {$statusText} successfully.");
