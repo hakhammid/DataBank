@@ -188,30 +188,23 @@ class BrowseModules extends Component
 
     /**
      * Build the base visibility scope for this student.
-     * A student can see a module if:
-     *   1. The module targets their degree program (via module_courses pivot), OR
-     *   2. The student is explicitly enrolled in the module's course_code
+     * A student can only see a module if they are explicitly enrolled in its course_code.
      */
     protected function applyVisibilityScope($query)
     {
         $user = Auth::user();
+
+        if ($user->usertype !== 'student') {
+            return $query;
+        }
 
         // Get course codes the student is enrolled in by faculty
         $enrolledCourseCodes = ModuleEnrollment::where('user_id', $user->id)
             ->pluck('course_code')
             ->toArray();
 
-        $query->where(function ($q) use ($user, $enrolledCourseCodes) {
-            // Condition 1: Module targets the student's degree program
-            $q->whereHas('courses', function ($sub) use ($user) {
-                $sub->where('courses.id', $user->course_id);
-            });
-
-            // Condition 2: Student is explicitly enrolled in the course code
-            if (!empty($enrolledCourseCodes)) {
-                $q->orWhereIn('course_code', $enrolledCourseCodes);
-            }
-        });
+        // Restrict to ONLY modules where the student is explicitly enrolled in the course code
+        $query->whereIn('course_code', $enrolledCourseCodes);
 
         return $query;
     }

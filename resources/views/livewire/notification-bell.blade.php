@@ -28,7 +28,7 @@
             x-transition:leave="transition ease-in duration-150"
             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
             x-transition:leave-end="opacity-0 translate-y-1 scale-95"
-            class="absolute right-0 mt-2 w-80 sm:w-96 rounded-xl shadow-xl bg-white ring-1 ring-zinc-200/70 z-50 overflow-hidden"
+            class="fixed inset-x-4 top-16 sm:absolute sm:inset-auto sm:right-0 sm:top-auto sm:mt-2 w-auto sm:w-96 rounded-xl shadow-xl bg-white ring-1 ring-zinc-200/70 z-[100] overflow-hidden"
             style="max-height: 28rem;">
 
             {{-- Header --}}

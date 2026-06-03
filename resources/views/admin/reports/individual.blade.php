@@ -239,107 +239,160 @@
         </div>
         @endif
 
-        <!-- Modules Table -->
-        <div class="mt-8 overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
-            <div class="p-6 border-b border-zinc-200 bg-white flex items-center justify-between">
-                <div>
-                    <h2 class="text-lg font-bold text-zinc-800 flex items-center gap-2">
-                        <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                        </svg>
-                        All Modules
-                    </h2>
-                    <p class="mt-1 text-sm text-zinc-500">Complete list of uploaded modules for this course</p>
-                </div>
-            </div>
+        @php
+            $modulesByCourseCode = $allModules->groupBy('course_code')->sortBy(function ($items, $key) {
+                return $key;
+            });
+        @endphp
 
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-zinc-200">
-                    <thead class="bg-zinc-50/50">
-                        <tr>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-zinc-500 uppercase tracking-wider">Module Title</th>
-                            <th class="px-6 py-4 text-center text-xs font-bold text-zinc-500 uppercase tracking-wider">Type</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-zinc-500 uppercase tracking-wider">Department</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-zinc-500 uppercase tracking-wider">Uploaded By</th>
-                            <th class="px-6 py-4 text-center text-xs font-bold text-zinc-500 uppercase tracking-wider">Views</th>
-                            <th class="px-6 py-4 text-center text-xs font-bold text-zinc-500 uppercase tracking-wider">Downloads</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-zinc-500 uppercase tracking-wider">Date Added</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-zinc-100">
-                        @forelse($modules as $module)
-                        <tr class="hover:bg-zinc-50/50 transition-colors">
-                            <td class="px-6 py-4">
-                                <div class="text-sm font-semibold text-zinc-900">{{ $module->title }}</div>
-                                <div class="text-[10px] font-medium text-zinc-500 mt-0.5 uppercase tracking-wider px-1.5 py-0.5 bg-zinc-100 rounded border border-zinc-200 w-fit">{{ $module->course_code }}</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex justify-center">
-                                    @if($module->isMajor)
-                                    <span class="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md bg-emerald-50 text-emerald-700 border border-emerald-100 shadow-sm">Major</span>
-                                    @else
-                                    <span class="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md bg-purple-50 text-purple-700 border border-purple-100 shadow-sm">Minor</span>
-                                    @endif
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600">
-                                {{ $module->department->department_name ?? 'N/A' }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center gap-2">
-                                    <div class="w-8 h-8 rounded-full bg-zinc-200 overflow-hidden flex-shrink-0 border border-zinc-300 shadow-sm">
-                                        <img src="{{ $module->user->profile_picture ? asset('images/' . $module->user->profile_picture) : asset('images/default_profile.png') }}"
-                                            alt="{{ $module->user->name }}" class="w-full h-full object-cover">
-                                    </div>
-                                    <div>
-                                        <div class="text-sm font-semibold text-zinc-900">{{ $module->user->name }}</div>
-                                        <div class="text-[10px] font-medium text-zinc-500 uppercase tracking-wider">{{ $module->user->usertype }}</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                <div class="flex justify-center">
-                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-700 font-bold border border-zinc-200 shadow-sm">
-                                        <svg class="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                                        {{ number_format($module->number_of_views) }}
-                                    </span>
-                                </div>
-                            </td>
-
-                            <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                <div class="flex justify-center">
-                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-indigo-50 text-indigo-700 font-bold border border-indigo-100 shadow-sm">
-                                        <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                                        {{ number_format($module->module_downloads_count) }}
-                                    </span>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-500 font-medium">
-                                <div class="flex items-center gap-1.5">
-                                    <svg class="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 00-2 2z" /></svg>
-                                    {{ $module->created_at->format('M d, Y') }}
-                                </div>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="7" class="px-6 py-12 text-center">
-                                <div class="flex flex-col items-center justify-center">
-                                    <svg class="w-12 h-12 text-zinc-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
-                                    <p class="text-zinc-500 font-medium">No modules found for this course</p>
-                                    <p class="text-sm text-zinc-400 mt-1">Try adjusting your filters</p>
-                                </div>
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-
-            @if($modules->hasPages())
-            <x-pagination :paginator="$modules" />
-            @endif
+        <!-- Modules by Course Code -->
+        <div class="mt-8 mb-4">
+            <h2 class="text-lg font-bold text-zinc-800 flex items-center gap-2">
+                <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+                Modules by Course Code
+            </h2>
+            <p class="mt-1 text-sm text-zinc-500">Select a course code to view its uploaded modules.</p>
         </div>
+
+        <div x-data="{ openModalFor: null }">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                @forelse($modulesByCourseCode as $courseCode => $groupedModules)
+                    @php $modalId = 'modal-' . md5($courseCode); @endphp
+                    <div @click="openModalFor = '{{ $modalId }}'" class="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm p-5 cursor-pointer hover:bg-blue-50 hover:border-blue-200 transition-colors group">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="text-lg font-bold text-zinc-900 group-hover:text-blue-700 transition-colors">{{ $courseCode }}</h3>
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider {{ $groupedModules->first()->isMajor ? 'bg-emerald-100 text-emerald-800' : 'bg-purple-100 text-purple-800' }}">
+                                {{ $groupedModules->first()->isMajor ? 'Major' : 'Minor' }}
+                            </span>
+                        </div>
+                        <p class="text-sm text-zinc-500 font-medium">{{ $groupedModules->count() }} {{ Str::plural('module', $groupedModules->count()) }}</p>
+                    </div>
+
+                    <!-- Modal for {{ $courseCode }} -->
+                    <div x-cloak x-show="openModalFor === '{{ $modalId }}'" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true" style="display: none;">
+                        <div x-show="openModalFor === '{{ $modalId }}'"
+                             x-transition:enter="ease-out duration-300"
+                             x-transition:enter-start="opacity-0"
+                             x-transition:enter-end="opacity-100"
+                             x-transition:leave="ease-in duration-200"
+                             x-transition:leave-start="opacity-100"
+                             x-transition:leave-end="opacity-0"
+                             class="fixed inset-0 bg-zinc-900/50 backdrop-blur-sm transition-opacity" 
+                             @click="openModalFor = null"></div>
+
+                        <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+                            <div x-show="openModalFor === '{{ $modalId }}'"
+                                 x-transition:enter="ease-out duration-300"
+                                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                                 x-transition:leave="ease-in duration-200"
+                                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                                 class="relative transform overflow-hidden rounded-xl bg-white text-left shadow-xl transition-all sm:my-8 w-full max-w-6xl">
+                                
+                                <!-- Modal Header -->
+                                <div class="bg-zinc-50 px-6 py-4 border-b border-zinc-200 flex justify-between items-center">
+                                    <h3 class="text-lg font-bold text-zinc-900 flex items-center gap-2" id="modal-title">
+                                        <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                        </svg>
+                                        Modules for {{ $courseCode }}
+                                    </h3>
+                                    <button @click="openModalFor = null" class="text-zinc-400 hover:text-zinc-600 transition-colors rounded-lg p-1 hover:bg-zinc-200">
+                                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+
+                                <!-- Modal Body (Table) -->
+                                <div class="bg-white max-h-[75vh] overflow-y-auto">
+                                    <table class="min-w-full divide-y divide-zinc-200">
+                                        <thead class="bg-zinc-50/50 sticky top-0 z-10">
+                                            <tr>
+                                                <th class="px-6 py-4 text-left text-xs font-bold text-zinc-500 uppercase tracking-wider">Module Title</th>
+                                                <th class="px-6 py-4 text-center text-xs font-bold text-zinc-500 uppercase tracking-wider">Type</th>
+                                                <th class="px-6 py-4 text-left text-xs font-bold text-zinc-500 uppercase tracking-wider">Department</th>
+                                                <th class="px-6 py-4 text-left text-xs font-bold text-zinc-500 uppercase tracking-wider">Uploaded By</th>
+                                                <th class="px-6 py-4 text-center text-xs font-bold text-zinc-500 uppercase tracking-wider">Views</th>
+                                                <th class="px-6 py-4 text-center text-xs font-bold text-zinc-500 uppercase tracking-wider">Downloads</th>
+                                                <th class="px-6 py-4 text-left text-xs font-bold text-zinc-500 uppercase tracking-wider">Date Added</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-zinc-100">
+                                            @foreach($groupedModules as $module)
+                                            <tr class="hover:bg-zinc-50/50 transition-colors">
+                                                <td class="px-6 py-4">
+                                                    <div class="text-sm font-semibold text-zinc-900">{{ $module->title }}</div>
+                                                    <div class="text-[10px] font-medium text-zinc-500 mt-0.5 uppercase tracking-wider px-1.5 py-0.5 bg-zinc-100 rounded border border-zinc-200 w-fit">{{ $module->course_code }}</div>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <div class="flex justify-center">
+                                                        @if($module->isMajor)
+                                                        <span class="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md bg-emerald-50 text-emerald-700 border border-emerald-100 shadow-sm">Major</span>
+                                                        @else
+                                                        <span class="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md bg-purple-50 text-purple-700 border border-purple-100 shadow-sm">Minor</span>
+                                                        @endif
+                                                    </div>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600">
+                                                    {{ $module->department->department_name ?? 'N/A' }}
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <div class="flex items-center gap-2">
+                                                        <div class="w-8 h-8 rounded-full bg-zinc-200 overflow-hidden flex-shrink-0 border border-zinc-300 shadow-sm">
+                                                            <img src="{{ $module->user->profile_picture ? asset('images/' . $module->user->profile_picture) : asset('images/default_profile.png') }}"
+                                                                alt="{{ $module->user->name }}" class="w-full h-full object-cover">
+                                                        </div>
+                                                        <div>
+                                                            <div class="text-sm font-semibold text-zinc-900">{{ $module->user->name }}</div>
+                                                            <div class="text-[10px] font-medium text-zinc-500 uppercase tracking-wider">{{ $module->user->usertype }}</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                                    <div class="flex justify-center">
+                                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-700 font-bold border border-zinc-200 shadow-sm">
+                                                            <svg class="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                                            {{ number_format($module->number_of_views) }}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                    
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                                    <div class="flex justify-center">
+                                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-indigo-50 text-indigo-700 font-bold border border-indigo-100 shadow-sm">
+                                                            <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                                                            {{ number_format($module->module_downloads_count) }}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-500 font-medium">
+                                                    <div class="flex items-center gap-1.5">
+                                                        <svg class="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 00-2 2z" /></svg>
+                                                        {{ $module->created_at->format('M d, Y') }}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="col-span-full p-8 text-center bg-white rounded-xl border border-zinc-200 shadow-sm">
+                        <div class="flex flex-col items-center justify-center">
+                            <svg class="w-12 h-12 text-zinc-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                            <p class="text-zinc-500 font-medium">No modules found for this course</p>
+                            <p class="text-sm text-zinc-400 mt-1">Try adjusting your filters</p>
+                        </div>
+                    </div>
+                @endforelse
+            </div>
     </main>
 
     {{-- Print Styles (disabled — printing is handled by the dedicated print layout) --}}

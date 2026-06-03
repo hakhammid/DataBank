@@ -7,6 +7,7 @@ use App\Models\Course;
 use App\Models\Department;
 use App\Models\Module;
 use App\Models\ModuleEnrollment;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
@@ -182,6 +183,16 @@ class ModuleController extends Controller
             // Sync courses (degree programs) via pivot
             $module->courses()->sync($validatedData['course_ids']);
 
+            // Notify admins
+            $admins = User::where('usertype', 'admin')->get();
+            foreach ($admins as $admin) {
+                Notification::create([
+                    'user_id' => $admin->id,
+                    'module_id' => $module->id,
+                    'message' => 'Faculty ' . Auth::user()->name . ' uploaded a new module: ' . $module->title,
+                ]);
+            }
+
             // Handle student enrollments
             if (!empty($validatedData['enrolled_students'])) {
                 foreach ($validatedData['enrolled_students'] as $studentId) {
@@ -265,6 +276,16 @@ class ModuleController extends Controller
                         // Sync courses (degree programs) via pivot
                         $module->courses()->sync($validatedData['course_ids']);
 
+                        // Notify admins
+                        $admins = User::where('usertype', 'admin')->get();
+                        foreach ($admins as $admin) {
+                            Notification::create([
+                                'user_id' => $admin->id,
+                                'module_id' => $module->id,
+                                'message' => 'Faculty ' . Auth::user()->name . ' uploaded a new module: ' . $module->title,
+                            ]);
+                        }
+
                         $uploadedCount++;
                     } catch (\Exception $e) {
                         $failedFiles[] = $file->getClientOriginalName();
@@ -320,8 +341,20 @@ class ModuleController extends Controller
 
     public function viewModule(Module $module, Request $request)
     {
-        if (Auth::user()->usertype === 'student' && $module->status !== 'published') {
-            abort(403, 'This module is pending approval and is not viewable by students.');
+        $user = Auth::user();
+        if ($user->usertype === 'student') {
+            if ($module->status !== 'published') {
+                abort(403, 'This module is pending approval and is not viewable by students.');
+            }
+
+            // Check if the student is explicitly enrolled in this module's course code
+            $isEnrolled = ModuleEnrollment::where('user_id', $user->id)
+                ->where('course_code', $module->course_code)
+                ->exists();
+
+            if (!$isEnrolled) {
+                abort(403, 'You are not enrolled in this module\'s course code.');
+            }
         }
 
         $module->increment('number_of_views');

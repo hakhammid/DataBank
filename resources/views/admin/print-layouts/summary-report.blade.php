@@ -5,7 +5,7 @@
     <style>
         @page {
             size: A4 portrait;
-            margin: 10mm 12mm;
+            margin: 12mm 15mm;
         }
 
         * {
@@ -15,11 +15,11 @@
         }
 
         body {
-            font-family: 'Times New Roman', Times, serif;
-            line-height: 1.2;
-            color: #000;
+            font-family: 'Arial', sans-serif;
+            line-height: 1.4;
+            color: #333;
             background: #fff;
-            font-size: 9pt;
+            font-size: 8.5pt;
         }
 
         .report-container {
@@ -30,167 +30,219 @@
         /* ── Header ── */
         .report-header {
             text-align: center;
-            padding-bottom: 6px;
-            border-bottom: 2.5px double #000;
-            margin-bottom: 8px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #111;
+            margin-bottom: 15px;
+            font-family: 'Times New Roman', Times, serif;
         }
 
         .report-header img {
-            width: 50px;
+            width: 60px;
             height: auto;
-            margin-bottom: 2px;
+            margin-bottom: 5px;
         }
 
         .institution-name {
-            font-size: 12pt;
+            font-size: 13pt;
             font-weight: bold;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
+            color: #111;
         }
 
         .institution-sub {
-            font-size: 8pt;
-            margin-bottom: 1px;
+            font-size: 9pt;
+            margin-bottom: 2px;
+            color: #444;
         }
 
         .report-title {
-            font-size: 10.5pt;
+            font-size: 11pt;
             font-weight: bold;
             text-transform: uppercase;
-            margin-top: 4px;
-            letter-spacing: 0.5px;
+            margin-top: 8px;
+            letter-spacing: 1px;
+            color: #000;
+            font-family: 'Arial', sans-serif;
         }
 
         .report-meta {
-            font-size: 7.5pt;
-            color: #333;
-            margin-top: 2px;
+            font-size: 8pt;
+            color: #666;
+            margin-top: 5px;
+            font-family: 'Arial', sans-serif;
         }
 
         /* ── Filter Info ── */
         .filter-info {
-            font-size: 7.5pt;
-            color: #333;
-            margin-bottom: 6px;
-            padding: 3px 6px;
-            border: 1px solid #999;
-            background: #fafafa;
+            font-size: 8pt;
+            color: #444;
+            margin-bottom: 15px;
+            padding: 8px 10px;
+            border-left: 3px solid #111;
+            background: #f8f9fa;
         }
 
         .filter-info strong {
-            color: #000;
+            color: #111;
+            margin-right: 5px;
         }
 
         /* ── Summary Stats ── */
         .stats-table {
             width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 8px;
+            border-collapse: separate;
+            border-spacing: 5px;
+            margin-bottom: 20px;
+            margin-left: -5px;
+            margin-right: -5px;
         }
 
         .stats-table td {
-            border: 1px solid #000;
+            border: 1px solid #ddd;
+            background: #fcfcfc;
             text-align: center;
-            padding: 4px 3px;
+            padding: 12px 5px;
+            border-radius: 4px;
         }
 
         .stats-table .stats-label {
-            font-size: 6.5pt;
+            font-size: 7.5pt;
             text-transform: uppercase;
             font-weight: bold;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.5px;
+            color: #666;
+            margin-top: 5px;
         }
 
         .stats-table .stats-value {
-            font-size: 12pt;
+            font-size: 16pt;
             font-weight: bold;
+            color: #222;
         }
 
         /* ── Section Heading ── */
         .section-heading {
-            font-size: 8.5pt;
+            font-size: 9.5pt;
             font-weight: bold;
             text-transform: uppercase;
-            margin: 8px 0 4px 0;
-            padding-bottom: 2px;
-            border-bottom: 1px solid #000;
+            margin: 20px 0 10px 0;
+            padding-bottom: 4px;
+            border-bottom: 2px solid #333;
+            color: #111;
         }
 
         /* ── Data Tables ── */
         .data-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 6px;
-            font-size: 7.5pt;
+            margin-bottom: 15px;
+            font-size: 8pt;
         }
 
         .data-table thead th {
-            background: #e0e0e0;
-            color: #000;
+            background: #f0f0f0;
+            color: #222;
             font-weight: bold;
-            padding: 3px 4px;
+            padding: 8px 6px;
             text-align: left;
-            font-size: 7pt;
+            font-size: 7.5pt;
             text-transform: uppercase;
-            border: 1px solid #000;
+            border: 1px solid #ccc;
+            border-bottom: 2px solid #888;
         }
 
         .data-table tbody td {
-            padding: 2.5px 4px;
-            border: 1px solid #000;
+            padding: 6px;
+            border: 1px solid #e0e0e0;
             vertical-align: top;
-            line-height: 1.25;
         }
 
         .data-table tbody tr:nth-child(even) {
-            background-color: #f5f5f5;
+            background-color: #fafafa;
         }
 
-        .text-right { text-align: right; }
-        .text-center { text-align: center; }
+        .text-right { text-align: right !important; }
+        .text-center { text-align: center !important; }
         .font-bold { font-weight: bold; }
 
         .data-table .total-row td {
             font-weight: bold;
-            background: #e0e0e0;
-            border-top: 1.5px solid #000;
+            background: #f0f0f0;
+            border-top: 2px solid #888;
+            color: #111;
         }
 
         /* ── Sub-section labels ── */
         .sub-label {
-            font-size: 8pt;
+            font-size: 9pt;
             font-weight: bold;
-            margin: 6px 0 3px 0;
-            padding: 2px 5px;
-            background: #eee;
-            border: 1px solid #aaa;
+            margin: 15px 0 8px 0;
+            padding: 5px 8px;
+            background: #e2e8f0;
+            border-left: 4px solid #475569;
+            color: #1e293b;
         }
 
         .sub-label-indent {
-            font-size: 7.5pt;
+            font-size: 8.5pt;
             font-weight: bold;
-            margin: 3px 0 2px 8px;
-            font-style: italic;
+            margin: 10px 0 6px 12px;
+            color: #334155;
+        }
+
+        .sub-label-indent::before {
+            content: "»";
+            margin-right: 6px;
+            color: #94a3b8;
         }
 
         /* ── Footer ── */
         .report-footer {
-            margin-top: 10px;
-            padding-top: 4px;
-            border-top: 1px solid #000;
-            font-size: 7pt;
-            color: #333;
+            margin-top: 30px;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+            font-size: 7.5pt;
+            color: #666;
             display: flex;
             justify-content: space-between;
+        }
+
+        /* ── Badges and Lists ── */
+        .badge {
+            display: inline-block;
+            background-color: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            padding: 3px 6px;
+            border-radius: 4px;
+            margin: 2px 2px 2px 0;
+            font-size: 7.5pt;
+            color: #334155;
+        }
+        .badge-count {
+            color: #64748b;
+            font-weight: 600;
+            margin-left: 3px;
+        }
+        .program-list {
+            margin: 0;
+            padding-left: 16px;
+            list-style-type: square;
+        }
+        .program-list li {
+            margin-bottom: 2px;
+            color: #444;
         }
 
         @media print {
             .no-print { display: none !important; }
             body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            .data-table thead th { background: #e0e0e0 !important; }
-            .data-table tbody tr:nth-child(even) { background-color: #f5f5f5 !important; }
-            .data-table .total-row td { background: #e0e0e0 !important; }
-            .sub-label { background: #eee !important; }
+            .data-table thead th { background: #f0f0f0 !important; }
+            .data-table tbody tr:nth-child(even) { background-color: #fafafa !important; }
+            .data-table .total-row td { background: #f0f0f0 !important; }
+            .sub-label { background: #e2e8f0 !important; }
+            .stats-table td { background: #fcfcfc !important; border: 1px solid #ccc !important; }
+            .badge { background-color: #f1f5f9 !important; border-color: #cbd5e1 !important; }
         }
     </style>
 </head>
@@ -279,7 +331,7 @@
                     <td>{{ $faculty['department'] }}</td>
                     <td>
                         @foreach($faculty['course_breakdown'] as $course)
-                            {{ $course['course_code'] }}({{ $course['count'] }}){{ !$loop->last ? ', ' : '' }}
+                            <span class="badge">{{ $course['course_code'] }} <span class="badge-count">({{ $course['count'] }})</span></span>
                         @endforeach
                     </td>
                     <td class="text-right font-bold">{{ $faculty['total_modules'] }}</td>
@@ -318,11 +370,13 @@
                     <td class="font-bold">{{ $dept['department_name'] }}</td>
                     <td class="text-right font-bold">{{ $dept['total_modules'] }}</td>
                     <td>
+                        <ul class="program-list">
                         @foreach($dept['degree_programs'] as $program)
                             @if($program)
-                                {{ $program->course_name }}{{ !$loop->last ? ', ' : '' }}
+                                <li>{{ $program->course_name }}</li>
                             @endif
                         @endforeach
+                        </ul>
                     </td>
                 </tr>
                 @php $deptGrandTotal += $dept['total_modules']; @endphp

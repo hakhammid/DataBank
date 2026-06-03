@@ -26,8 +26,19 @@ class ModuleDownloadController extends Controller
         // Find the module
         $module = Module::findOrFail($id);
 
-        if ($user->usertype === 'student' && $module->status !== 'published') {
-            abort(403, 'This module is pending approval and cannot be downloaded.');
+        if ($user->usertype === 'student') {
+            if ($module->status !== 'published') {
+                abort(403, 'This module is pending approval and cannot be downloaded.');
+            }
+
+            // Check if the student is explicitly enrolled in this module's course code
+            $isEnrolled = \App\Models\ModuleEnrollment::where('user_id', $user->id)
+                ->where('course_code', $module->course_code)
+                ->exists();
+
+            if (!$isEnrolled) {
+                abort(403, 'You are not enrolled in this module\'s course code and cannot download it.');
+            }
         }
 
         // Log the download
@@ -36,6 +47,10 @@ class ModuleDownloadController extends Controller
             'module_id'     => $module->id,
             'downloaded_at' => now(),
         ]);
+
+        if ($user->usertype === 'student') {
+            \App\Services\NotificationService::notifyFacultyOfDownload($module, $user);
+        }
 
         // Increase module view count
         $module->increment('number_of_views');

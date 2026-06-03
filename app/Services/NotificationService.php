@@ -113,4 +113,29 @@ class NotificationService
             return false;
         }
     }
+
+    /**
+     * Notify the faculty member when a student downloads their module.
+     */
+    public static function notifyFacultyOfDownload(Module $module, User $student): bool
+    {
+        try {
+            $faculty = $module->user;
+
+            if (!$faculty || $faculty->usertype !== 'faculty') {
+                return false;
+            }
+
+            Notification::create([
+                'user_id' => $faculty->id,
+                'module_id' => $module->id,
+                'message' => "Student {$student->name} ({$student->id_number}) downloaded your module \"{$module->title}\" ({$module->course_code}).",
+            ]);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error('NotificationService faculty download notify error: ' . $e->getMessage());
+            return false;
+        }
+    }
 }

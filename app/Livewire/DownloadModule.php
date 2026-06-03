@@ -73,6 +73,10 @@ class DownloadModule extends Component
             'downloaded_at' => now(),
         ]);
 
+        if (Auth::user()->usertype === 'student') {
+            \App\Services\NotificationService::notifyFacultyOfDownload($this->module, Auth::user());
+        }
+
         // Increment view count
         $this->module->increment('number_of_views');
 

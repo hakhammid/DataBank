@@ -419,118 +419,23 @@
                             <div aria-hidden="true" class="mt-1 flex-1">
 
                             </div>
-                            <!-- BOTTOM PROFILE -->
-                            <div class="max-lg:hidden flex flex-col border-t border-zinc-950/5 p-0
-                                    [&amp;>[data-slot=section]+[data-slot=section]]:mt-2.5">
-                                <span class="relative">
-                                    <!-- NAVBAR PROFILE DROPDOWN -->
-                                    <div @click.away="if (!event.target.closest('#logout-modal')) { isProfileMenuOpen = false }"
-                                        x-show.transition.opacity.duration.200ms="isProfileMenuOpen" x-cloak
-                                        class="z-1000 absolute mt-[-8rem] ml-[14rem] transform -translate-x-full bg-white rounded-md shadow-md w-[14rem]">
-                                        <ul class="flex flex-col p-2 my-2 space-y-1">
-                                            <div>
-                                                <x-admin-nav-link href="{{ route('admin-profile') }}"
-                                                    :active="request()->is('admin-profile')">
-                                                    <x-slot:icon>
-                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                                                            fill="none" stroke="currentColor" stroke-width="2"
-                                                            stroke-linecap="round" stroke-linejoin="round"
-                                                            class="h-5 w-5">
-                                                            <path d="M18 20a6 6 0 0 0-12 0" />
-                                                            <circle cx="12" cy="10" r="4" />
-                                                            <circle cx="12" cy="12" r="10" />
-                                                        </svg>
-                                                    </x-slot:icon>
-                                                    Profile
-                                                </x-admin-nav-link>
-                                            </div>
 
-                                            <div>
-                                                <x-admin-nav-link href="{{ route('admin-change-password') }}"
-                                                    :active="request()->is('admin-change-password')">
-                                                    <x-slot:icon>
-                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                                                            fill="none" stroke="currentColor" stroke-width="2"
-                                                            stroke-linecap="round" stroke-linejoin="round"
-                                                            class="h-5 w-5">
-                                                            <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
-                                                            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                                                        </svg>
-                                                    </x-slot:icon>
-                                                    Change Password
-                                                </x-admin-nav-link>
-                                            </div>
-                                            <div>
-                                                <x-admin-nav-link type="button" @click.prevent="$dispatch('open-logout-modal')"
-                                                    style="cursor: pointer;">
-                                                    <x-slot:icon>
-                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                                                            fill="none" stroke="currentColor" stroke-width="2"
-                                                            stroke-linecap="round" stroke-linejoin="round"
-                                                            class="h-5 w-5">
-                                                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                                                            <polyline points="16 17 21 12 16 7" />
-                                                            <line x1="21" x2="9" y1="12" y2="12" />
-                                                        </svg>
-                                                    </x-slot:icon>
-                                                    Sign Out
-                                                </x-admin-nav-link>
-                                            </div>
-                                        </ul>
-                                    </div>
-                                    <button id="headlessui-menu-button-:rb:"
-                                        @click="isProfileMenuOpen = !isProfileMenuOpen" type="button"
-                                        aria-haspopup="menu" data-headlessui-state=""
-                                        class="cursor-default flex w-full items-center gap-3 rounded-lg px-2 py-2.5 text-left text-base/6 font-medium text-zinc-950 sm:py-2 sm:text-sm/5 data-[slot=icon]:*:size-6 data-[slot=icon]:*:shrink-0 data-[slot=icon]:*:fill-zinc-500 sm:data-[slot=icon]:*:size-5 data-[slot=icon]:last:*:ml-auto data-[slot=icon]:last:*:size-5 sm:data-[slot=icon]:last:*:size-4 data-[slot=avatar]:*:-m-0.5 data-[slot=avatar]:*:size-7 data-[slot=avatar]:*:[--ring-opacity:10%] sm:data-[slot=avatar]:*:size-6 data-[hover]:bg-zinc-950/5 data-[slot=icon]:*:data-[hover]:fill-zinc-950 data-[active]:bg-zinc-950/5 data-[slot=icon]:*:data-[active]:fill-zinc-950 data-[slot=icon]:*:data-[current]:fill-zinc-950"
-                                        :data-open="isProfileMenuOpen ? '' : null" :data-active="isProfileMenuOpen ? '' : null" :aria-expanded="isProfileMenuOpen" aria-controls="headlessui-menu-items-:rc:">
-                                        <span
-                                            class="absolute left-1/2 top-1/2 size-[max(100%,2.75rem)] -translate-x-1/2 -translate-y-1/2 [@media(pointer:fine)]:hidden"
-                                            aria-hidden="true">
-                                        </span>
-                                        <span class="flex min-w-0 items-center gap-3">
-                                            <span data-slot="avatar"
-                                                class="size-10 border-[0.5px] border-zinc-950/20 inline-grid shrink-0 align-middle [--avatar-radius:20%] *:col-start-1 *:row-start-1 rounded-[--avatar-radius] *:rounded-[--avatar-radius]">
-                                                <img class="size-full"
-                                                    src="{{ Auth::user()->profile_picture ? asset('images/' . Auth::user()->profile_picture) : asset('images/default_profile.png') }}"
-                                                    alt="Profile Picture" draggable="false" ondragstart="return false;"
-                                                    onselectstart="return false;">
-                                            </span>
-                                            <span class="min-w-0">
-                                                <span class="block truncate text-sm/5 font-medium text-zinc-950">
-                                                    {{ Auth::user()->name }}
-                                                </span>
-                                                <span class="block truncate text-xs/5 font-normal text-zinc-500">
-                                                    {{ Auth::user()->email }}
-                                                </span>
-                                            </span>
-                                        </span>
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="cursor-pointer"
-                                            viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" data-slot="icon"
-                                            :class="{ 'transform rotate-180 transition-transform duration-300': isProfileMenuOpen, 'transition-transform duration-300': !isProfileMenuOpen }">
-                                            <path fill-rule="evenodd"
-                                                d="M11.78 9.78a.75.75 0 0 1-1.06 0L8 7.06 5.28 9.78a.75.75 0 0 1-1.06-1.06l3.25-3.25a.75.75 0 0 1 1.06 0l3.25 3.25a.75.75 0 0 1 0 1.06Z"
-                                                clip-rule="evenodd">
-                                            </path>
-                                        </svg>
-                                    </button>
-                                </span>
-                            </div>
                     </nav>
                 </div>
             </aside>
 
             <!-- MAIN CONTENT CONTAINER -->
-            <div class="flex flex-col flex-1 h-full overflow-y-scroll py-2 pr-2">
+            <div class="flex flex-col flex-1 h-full overflow-y-scroll pb-2 pr-2">
                 <div class="flex-shrink-0 rounded-lg lg:border-[0.5px] md:border-[0px] border-zinc-950/10">
                     <!-- NAVBAR MENU -->
                     <header
-                        class="flex-shrink-0 lg:hidden fixed top-0 left-0 right-0 z-30 bg-white shadow-sm w-full transition-all duration-300">
-                        <div class="flex items-center justify-between p-2">
+                        class="flex-shrink-0 sticky top-0 z-30 bg-white border-b border-zinc-950/10 w-full transition-all duration-300 rounded-t-lg">
+                        <div class="flex items-center justify-between p-2 lg:px-4 lg:py-3">
                             <div class="flex lg:hidden items-center space-x-3">
                                 <button id="sidebar-toggle" @click="toggleSidebarMenu()" class="p-2 rounded-md">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                                         stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round" class="md:h-6 md-w-6 w-7 h-7">
+                                        stroke-linejoin="round" class="md:h-6 md:w-6 w-7 h-7">
                                         <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                                         <path d="M4 8l16 0" />
                                         <path d="M4 16l16 0" />
@@ -538,14 +443,30 @@
                                 </button>
                             </div>
 
+                            <div class="hidden lg:flex items-center">
+                                <!-- Top Left Desktop Content -->
+                            </div>
+
                             <!-- NAVBAR PROFILE -->
-                            <div class="relative flex lg:hidden items-center space-x-3">
-                                <div class="relative">
-                                    <button @click="isProfileMenuOpen = !isProfileMenuOpen" class="p-2 rounded-md">
-                                        <img class="object-cover md:w-12 md:h-12 h-9 w-9 rounded-full bg-gray-200 border-[0.5px] border-zinc-950/10"
+                            <div class="relative flex items-center space-x-4 ml-auto">
+                                <!-- Notification Bell -->
+                                @livewire('notification-bell')
+                                
+                                <div class="relative" x-data="{ isProfileMenuOpen: false }">
+                                    <button @click="isProfileMenuOpen = !isProfileMenuOpen" class="flex items-center gap-2 p-1 rounded-md hover:bg-zinc-100 transition-colors focus:outline-none">
+                                        <img class="object-cover w-9 h-9 md:w-10 md:h-10 rounded-full bg-gray-200 border-[0.5px] border-zinc-950/10"
                                             src="{{ Auth::user()->profile_picture ? asset('images/' . Auth::user()->profile_picture) : asset('images/default_profile.png') }}"
                                             alt="Profile Picture" draggable="false" ondragstart="return false;"
                                             onselectstart="return false;" />
+                                        <div class="hidden lg:block text-left mr-1">
+                                            <p class="text-sm font-medium text-zinc-900 leading-tight">{{ Auth::user()->name }}</p>
+                                            <p class="text-xs text-zinc-500 leading-tight">{{ Auth::user()->email }}</p>
+                                        </div>
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="hidden lg:block h-4 w-4 text-zinc-500 transition-transform duration-300" 
+                                             viewBox="0 0 20 20" fill="currentColor"
+                                             :class="{ 'transform rotate-180': isProfileMenuOpen }">
+                                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                        </svg>
                                     </button>
                                     <!-- NAVBAR PROFILE DROPDOWN -->
                                     <div @click.away="isProfileMenuOpen = false" x-show="isProfileMenuOpen" x-cloak
@@ -555,7 +476,7 @@
                                         x-transition:leave="transition ease-in duration-150"
                                         x-transition:leave-start="opacity-100 transform scale-100"
                                         x-transition:leave-end="opacity-0 transform scale-95"
-                                        class="z-50 absolute right-0 mt-4 bg-white rounded-md shadow-lg w-[14rem] origin-top-right">
+                                        class="z-50 absolute right-0 mt-2 bg-white rounded-md shadow-lg w-[14rem] origin-top-right border border-zinc-100">
                                         <ul class="flex flex-col p-2 my-2 space-y-1">
                                             <div>
                                                 <x-admin-nav-link href="{{ route('admin-profile') }}"
@@ -615,7 +536,7 @@
                         </div>
                     </header>
                     <!-- MAIN CONTENT -->
-                    <div class="relative min-h-[calc(100vh-4rem)] mt-16 lg:mt-0">
+                    <div class="relative min-h-[calc(100vh-4rem)]">
                         {{-- LOADING STATE --}}
                         {{-- <div x-ref="loading" x-show="!loaded"
                             class="absolute inset-0 z-[50] flex items-center justify-center bg-white bg-opacity-100">

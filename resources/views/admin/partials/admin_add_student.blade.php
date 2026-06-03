@@ -128,7 +128,7 @@
                         <input type="email" aria-label="Faculty Email"
                             class="relative block w-full appearance-none rounded-lg px-[calc(theme(spacing[3.5])-1px)] py-[calc(theme(spacing[2.5])-1px)] sm:px-[calc(theme(spacing[3])-1px)] sm:py-[calc(theme(spacing[1.5])-1px)] text-base/6 text-zinc-950 placeholder:text-zinc-500 sm:text-sm/6  border border-zinc-950/10 data-[hover]:border-zinc-950/20  bg-transparent focus:outline-none data-[invalid]:border-red-500 data-[invalid]:data-[hover]:border-red-500 data-[disabled]:border-zinc-950/20"
                             id="add-student-email-input" data-headlessui-state="" value="{{ old('email') }}"
-                            placeholder="Enter the student email" name="email" required></span>
+                            placeholder="Enter institutional email" name="email" required></span>
                     <x-input-error :messages="$errors->get('email')" class="mt-2" />
                 </div>
             </section>
