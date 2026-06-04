@@ -95,7 +95,7 @@ Route::middleware('auth')->group(function () {
         ->middleware(['auth', 'verified'])
         ->name('faculty.home');
 
-    Route::get('/faculty/module/{module}', [FacultyController::class, 'viewModule'])
+    Route::get('/faculty/module/{module}', [ModuleController::class, 'viewModule'])
         ->middleware(['auth', 'verified'])
         ->name('faculty.view-module');
 

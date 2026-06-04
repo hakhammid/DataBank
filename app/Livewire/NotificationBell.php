@@ -67,7 +67,7 @@ class NotificationBell extends Component
 
         if (Auth::check()) {
             $notifications = Notification::where('user_id', Auth::id())
-                ->with(['module' => fn($q) => $q->select('id', 'course_code', 'title')])
+                ->with(['module' => fn($q) => $q->select('id', 'course_code', 'title'), 'module.courses:id'])
                 ->latest()
                 ->take(20)
                 ->get();

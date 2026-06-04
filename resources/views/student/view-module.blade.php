@@ -121,11 +121,14 @@
             padding-top: 4rem;
             background-color: #f3f4f6;
             position: relative;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .pdf-viewer {
             width: 100%;
             height: 100%;
+            min-height: 100vh;
             border: none;
             background: transparent;
         }
@@ -312,6 +315,9 @@
         </iframe>
     </main>
 
+    <!-- AI Assistant Chatbot -->
+    @livewire('ai-assistant', ['module' => $module])
+
     @livewireScripts
     <script>
         function handleBack() {
@@ -366,11 +372,14 @@
                 loading.style.opacity = '0';
                 setTimeout(() => {
                     loading.style.display = 'none';
-                    viewer.style.opacity = '1';
+                    if(viewer) viewer.style.opacity = '1';
                 }, 300);
             }
             document.body.classList.remove('loading');
         }
+        
+        // Failsafe for mobile browsers where iframe onload doesn't fire
+        setTimeout(handlePdfLoad, 2500);
 
         function handlePdfError() {
             const loading = document.getElementById('pdfLoading');

@@ -137,7 +137,7 @@
         </div>
 
         <!-- Module Table -->
-        <div class="mt-6 inline-block min-w-full align-middle sm:px-[--gutter]" x-data="{ activeTab: localStorage.getItem('activeModuleTab') || 'published' }" x-init="$watch('activeTab', value => localStorage.setItem('activeModuleTab', value))">
+        <div class="mt-6 inline-block min-w-full align-middle sm:px-[--gutter]" x-data="{ activeTab: new URLSearchParams(window.location.search).get('tab') || localStorage.getItem('activeModuleTab') || 'published' }" x-init="$watch('activeTab', value => localStorage.setItem('activeModuleTab', value))">
             <!-- Tabs -->
             <div class="flex gap-4 border-b border-zinc-200 mb-6 px-1">
                 <button @click="activeTab = 'published'" 

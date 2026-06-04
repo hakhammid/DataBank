@@ -69,7 +69,7 @@
 
                     <!-- File List -->
                     <div id="files-wrapper" class="hidden">
-                        <div id="files-list" class="space-y-2"></div>
+                        <div id="files-list" class="space-y-3"></div>
 
                         <button type="button"
                                 onclick="document.getElementById('file-input').click()"
@@ -112,12 +112,6 @@
                     @enderror
                 </div>
 
-                <div>
-                    <label class="text-sm font-medium text-zinc-900">Module Title</label>
-                    <textarea name="title" required
-                        class="mt-1 w-full rounded-lg border border-zinc-200 p-3 text-sm focus:ring-2 focus:ring-zinc-900"
-                        placeholder="Enter module title">{{ old('title') }}</textarea>
-                </div>
 
                 <div>
                     <label class="text-sm font-medium text-zinc-900">Course Status</label>
@@ -250,6 +244,14 @@
             render();
         }
 
+        // Store titles alongside files
+        let fileTitles = [];
+
+        function getDefaultTitle(filename) {
+            // Remove .pdf extension and clean up the name
+            return filename.replace(/\.pdf$/i, '').replace(/[_-]/g, ' ');
+        }
+
         function render() {
             list.innerHTML = '';
             const files = [...store.files];
@@ -258,6 +260,7 @@
                 empty.classList.remove('hidden');
                 wrapper.classList.add('hidden');
                 count.textContent = 'No files added';
+                fileTitles = [];
                 return;
             }
 
@@ -265,24 +268,37 @@
             wrapper.classList.remove('hidden');
             count.textContent = `${files.length} file${files.length > 1 ? 's' : ''}`;
 
+            // Ensure fileTitles array matches files length
+            while (fileTitles.length < files.length) {
+                fileTitles.push(getDefaultTitle(files[fileTitles.length].name));
+            }
+
             files.forEach((file, i) => {
                 const row = document.createElement('div');
-                row.className =
-                    'flex items-center justify-between rounded-xl border border-zinc-200 bg-white px-4 py-3';
+                row.className = 'rounded-xl border border-zinc-200 bg-white px-4 py-3';
 
                 row.innerHTML = `
-                    <div class="flex items-center gap-3 min-w-0">
-                        <span class="rounded-md bg-red-100 px-2 py-1 text-xs font-medium text-red-700">PDF</span>
-                        <div class="min-w-0">
-                            <p class="truncate text-sm font-medium text-zinc-900">${file.name}</p>
-                            <p class="text-xs text-zinc-500">${(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <span class="rounded-md bg-red-100 px-2 py-1 text-xs font-medium text-red-700 shrink-0">PDF</span>
+                            <div class="min-w-0">
+                                <p class="truncate text-sm font-medium text-zinc-900">${file.name}</p>
+                                <p class="text-xs text-zinc-500">${(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                            </div>
                         </div>
+                        <button type="button"
+                            onclick="removeFile(${i})"
+                            class="text-zinc-400 hover:text-red-600 text-lg shrink-0 ml-2">
+                            ×
+                        </button>
                     </div>
-                    <button type="button"
-                        onclick="removeFile(${i})"
-                        class="text-zinc-400 hover:text-red-600 text-lg">
-                        ×
-                    </button>
+                    <div class="mt-2">
+                        <input type="text" name="titles[]" required
+                            value="${fileTitles[i].replace(/"/g, '&quot;')}"
+                            placeholder="Enter module title for this file"
+                            oninput="fileTitles[${i}] = this.value"
+                            class="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm focus:ring-2 focus:ring-zinc-900 focus:border-zinc-900 placeholder:text-zinc-400">
+                    </div>
                 `;
                 list.appendChild(row);
             });
@@ -293,6 +309,7 @@
             [...store.files].forEach((f, i) => i !== index && dt.items.add(f));
             store = dt;
             input.files = dt.files;
+            fileTitles.splice(index, 1);
             render();
         }
 
@@ -309,6 +326,23 @@
                 e.preventDefault();
                 error.classList.remove('hidden');
                 showToast('Please upload at least one PDF file.');
+                hasError = true;
+            }
+
+            // Check that all module titles are filled
+            const titleInputs = document.querySelectorAll('input[name="titles[]"]');
+            let emptyTitles = false;
+            titleInputs.forEach(input => {
+                if (!input.value.trim()) {
+                    emptyTitles = true;
+                    input.classList.add('border-red-400');
+                } else {
+                    input.classList.remove('border-red-400');
+                }
+            });
+            if (emptyTitles) {
+                e.preventDefault();
+                if (!hasError) showToast('Please enter a title for each module.');
                 hasError = true;
             }
 

@@ -81,8 +81,18 @@
                         @php
                             $notifUrl = '#';
                             if ($notification->module) {
-                                if (Auth::user()->usertype === 'faculty') {
-                                    $notifUrl = route('faculty.view-module', $notification->module->id);
+                                if (Auth::user()->usertype === 'admin') {
+                                    $notifUrl = route('admin.modules', ['tab' => 'pending']);
+                                } elseif (Auth::user()->usertype === 'faculty') {
+                                    $moduleCourse = $notification->module->courses->first();
+                                    if ($moduleCourse) {
+                                        $notifUrl = route('faculty.home', [
+                                            'course_id' => $moduleCourse->id,
+                                            'course_code' => $notification->module->course_code,
+                                        ]);
+                                    } else {
+                                        $notifUrl = route('faculty.home');
+                                    }
                                 } else {
                                     $notifUrl = route('view-module', $notification->module->id);
                                 }

@@ -225,7 +225,8 @@ class ModuleController extends Controller
         try {
             $validatedData = $request->validate([
                 'course_code' => 'required|string|max:255',
-                'title' => 'required|string|max:255',
+                'titles' => 'required|array|min:1',
+                'titles.*' => 'required|string|max:255',
                 'isMajor' => 'required|in:0,1',
                 'semester' => 'required|in:1st,2nd',
                 'course_ids' => 'required|array|min:1',
@@ -237,6 +238,8 @@ class ModuleController extends Controller
                 'enrolled_students.*' => 'exists:users,id',
             ], [
                 'course_code.required' => 'Please enter a course code.',
+                'titles.required' => 'Please provide a title for each module.',
+                'titles.*.required' => 'Each module must have a title.',
                 'course_ids.required' => 'Please select at least one degree program.',
                 'course_ids.min' => 'Please select at least one degree program.',
                 'files.required' => 'Please upload at least one PDF file.',
@@ -252,7 +255,7 @@ class ModuleController extends Controller
             try {
                 $uploadedCount = 0;
                 $failedFiles = [];
-                $baseTitle = strip_tags($validatedData['title']);
+                $titles = array_map('strip_tags', $validatedData['titles']);
 
                 // Use the course code provided by the teacher
                 $sharedCourseCode = strip_tags($validatedData['course_code']);
@@ -262,10 +265,12 @@ class ModuleController extends Controller
                         $fileName = time() . '_' . $index . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
                         $file->move(public_path('files'), $fileName);
 
-                        // All modules use the same title and course code
+                        // Each module gets its own title from the titles array
+                        $moduleTitle = isset($titles[$index]) ? $titles[$index] : strip_tags($file->getClientOriginalName());
+
                         $module = Module::create([
                             'course_code' => $sharedCourseCode,
-                            'title' => $baseTitle,
+                            'title' => $moduleTitle,
                             'file' => $fileName,
                             'isMajor' => strip_tags($validatedData['isMajor']),
                             'semester' => strip_tags($validatedData['semester']),
