@@ -138,4 +138,39 @@ class NotificationService
             return false;
         }
     }
+
+    /**
+     * Notify the faculty member (module owner) that their module has been rejected by admin.
+     */
+    public static function notifyFacultyOfRejectedModule(Module $module): bool
+    {
+        try {
+            $faculty = $module->user;
+
+            if (!$faculty || $faculty->usertype !== 'faculty') {
+                return false;
+            }
+
+            // Avoid duplicate
+            $exists = Notification::where('user_id', $faculty->id)
+                ->where('module_id', $module->id)
+                ->where('message', 'like', '%has been rejected%')
+                ->exists();
+
+            if ($exists) {
+                return false;
+            }
+
+            Notification::create([
+                'user_id' => $faculty->id,
+                'module_id' => $module->id,
+                'message' => "Your module \"{$module->title}\" ({$module->course_code}) has been rejected by admin.",
+            ]);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error('NotificationService faculty reject notify error: ' . $e->getMessage());
+            return false;
+        }
+    }
 }

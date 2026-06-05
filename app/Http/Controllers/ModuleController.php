@@ -155,6 +155,17 @@ class ModuleController extends Controller
                 'enrolled_students.min' => 'Please enroll at least one student.',
             ]);
 
+            // Check if course_code is already used by another faculty
+            $existingModule = Module::where('course_code', $validatedData['course_code'])
+                ->where('user_id', '!=', Auth::id())
+                ->first();
+
+            if ($existingModule) {
+                throw ValidationException::withMessages([
+                    'course_code' => 'This course code is already in use by another faculty.',
+                ]);
+            }
+
             $cleanData = [
                 'course_code' => strip_tags($validatedData['course_code']),
                 'title' => strip_tags($validatedData['title']),
@@ -249,6 +260,17 @@ class ModuleController extends Controller
                 'enrolled_students.required' => 'Please enroll at least one student.',
                 'enrolled_students.min' => 'Please enroll at least one student.',
             ]);
+
+            // Check if course_code is already used by another faculty
+            $existingModule = Module::where('course_code', $validatedData['course_code'])
+                ->where('user_id', '!=', Auth::id())
+                ->first();
+
+            if ($existingModule) {
+                throw ValidationException::withMessages([
+                    'course_code' => 'This course code is already in use by another faculty.',
+                ]);
+            }
 
             DB::beginTransaction();
 

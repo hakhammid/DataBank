@@ -409,6 +409,8 @@ class ModuleController extends Controller
         if ($validated['status'] === 'published') {
             NotificationService::notifyStudentsOfNewModule($module);
             NotificationService::notifyFacultyOfPublishedModule($module);
+        } elseif ($validated['status'] === 'rejected') {
+            NotificationService::notifyFacultyOfRejectedModule($module);
         }
 
         $statusText = $validated['status'] === 'published' ? 'published' : 'rejected';

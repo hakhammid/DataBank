@@ -1,6 +1,6 @@
 <div wire:poll.30s="updateUnreadCount">
     {{-- Desktop Notification Bell --}}
-    <div class="relative" x-data="{ open: false }">
+    <div class="relative" x-data="{ open: false, confirmModal: false, deleteType: null, deleteId: null }" @click.outside="open = false">
         <button @click="open = !open"
             class="relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-zinc-100 transition-colors duration-150 focus:outline-none"
             aria-label="Notifications">
@@ -41,16 +41,24 @@
                         </span>
                     @endif
                 </div>
-                @if($unreadCount > 0)
-                    <button wire:click="markAllAsRead"
-                        class="text-xs font-medium text-zinc-500 hover:text-zinc-900 transition-colors duration-150">
-                        Mark all as read
-                    </button>
-                @endif
+                <div class="flex items-center gap-2">
+                    @if($unreadCount > 0)
+                        <button wire:click="markAllAsRead"
+                            class="text-xs font-medium text-zinc-500 hover:text-zinc-900 transition-colors duration-150">
+                            Mark all read
+                        </button>
+                    @endif
+                    @if($notifications->count() > 0)
+                        <button @click.stop="deleteType = 'all'; deleteId = null; confirmModal = true"
+                            class="text-xs font-medium text-red-400 hover:text-red-600 transition-colors duration-150">
+                            Clear all
+                        </button>
+                    @endif
+                </div>
             </div>
 
             {{-- Notification List --}}
-            <div class="overflow-y-auto" style="max-height: 22rem;">
+            <div x-show="!confirmModal" class="overflow-y-auto" style="max-height: 22rem;">
                 @forelse($notifications as $notification)
                     <div wire:key="notification-{{ $notification->id }}"
                         class="group relative flex items-start gap-3 px-4 py-3 border-b border-zinc-50 transition-colors duration-150 cursor-pointer
@@ -109,18 +117,36 @@
                             </p>
                         </a>
 
-                        {{-- Mark as Read Button (for unread only) --}}
-                        @if(is_null($notification->read_at))
-                            <button wire:click.stop="markAsRead({{ $notification->id }})"
-                                class="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-150 mt-1"
-                                title="Mark as read">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-zinc-400 hover:text-zinc-700"
+                        {{-- Action Buttons --}}
+                        <div class="flex-shrink-0 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150 mt-1">
+                            {{-- Mark as Read (for unread only) --}}
+                            @if(is_null($notification->read_at))
+                                <button wire:click.stop="markAsRead({{ $notification->id }})"
+                                    class="p-1 rounded hover:bg-zinc-200/60 transition-colors duration-150"
+                                    title="Mark as read">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-zinc-400 hover:text-zinc-700"
+                                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M20 6 9 17l-5-5" />
+                                    </svg>
+                                </button>
+                            @endif
+
+                            {{-- Delete Notification --}}
+                            <button @click.stop="deleteType = 'single'; deleteId = {{ $notification->id }}; confirmModal = true"
+                                class="p-1 rounded hover:bg-red-100 transition-colors duration-150"
+                                title="Delete notification">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-zinc-400 hover:text-red-500"
                                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                     stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M20 6 9 17l-5-5" />
+                                    <path d="M3 6h18" />
+                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                    <line x1="10" y1="11" x2="10" y2="17" />
+                                    <line x1="14" y1="11" x2="14" y2="17" />
                                 </svg>
                             </button>
-                        @endif
+                        </div>
                     </div>
                 @empty
                     {{-- Empty State --}}
@@ -137,6 +163,55 @@
                         <p class="text-xs text-zinc-300 mt-1">You'll be notified when new modules are uploaded</p>
                     </div>
                 @endforelse
+            </div>
+
+            {{-- Delete Confirmation Modal (compact) --}}
+            <div x-show="confirmModal" x-cloak
+                x-transition:enter="transition ease-out duration-150"
+                x-transition:enter-start="opacity-0 scale-95"
+                x-transition:enter-end="opacity-100 scale-100"
+                x-transition:leave="transition ease-in duration-100"
+                x-transition:leave-start="opacity-100 scale-100"
+                x-transition:leave-end="opacity-0 scale-95"
+                class="px-4 py-5">
+
+                <div class="flex items-center gap-3 mb-3">
+                    {{-- Warning Icon --}}
+                    <div class="w-9 h-9 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-red-500" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round">
+                            <path d="M3 6h18" />
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-semibold text-zinc-900 leading-tight">Delete<span x-show="deleteType === 'all'"> all</span> notification<span x-show="deleteType === 'all'">s</span>?</h4>
+                        <p class="text-xs text-zinc-500 leading-tight mt-0.5" x-text="deleteType === 'all' ? 'All notifications will be permanently removed.' : 'This notification will be permanently removed.'"></p>
+                    </div>
+                </div>
+
+                {{-- Action Buttons --}}
+                <div class="flex items-center gap-2">
+                    <button @click="confirmModal = false; deleteType = null; deleteId = null"
+                        class="flex-1 px-3 py-1.5 text-xs font-medium text-zinc-700 bg-zinc-100 hover:bg-zinc-200 rounded-lg transition-colors duration-150">
+                        Cancel
+                    </button>
+                    <button @click="
+                        if (deleteType === 'all') {
+                            $wire.deleteAllNotifications();
+                        } else {
+                            $wire.deleteNotification(deleteId);
+                        }
+                        confirmModal = false;
+                        deleteType = null;
+                        deleteId = null;
+                    "
+                        class="flex-1 px-3 py-1.5 text-xs font-medium text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors duration-150">
+                        Delete
+                    </button>
+                </div>
             </div>
         </div>
     </div>

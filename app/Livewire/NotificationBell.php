@@ -56,6 +56,26 @@ class NotificationBell extends Component
         $this->unreadCount = 0;
     }
 
+    public function deleteNotification($notificationId)
+    {
+        if (!Auth::check()) return;
+
+        Notification::where('id', $notificationId)
+            ->where('user_id', Auth::id())
+            ->delete();
+
+        $this->updateUnreadCount();
+    }
+
+    public function deleteAllNotifications()
+    {
+        if (!Auth::check()) return;
+
+        Notification::where('user_id', Auth::id())->delete();
+
+        $this->updateUnreadCount();
+    }
+
     public function handleLogout()
     {
         $this->reset();
