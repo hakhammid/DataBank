@@ -5,7 +5,14 @@
     <style>
         @page {
             size: A4 portrait;
-            margin: 12mm 15mm;
+            margin: 12mm 15mm 18mm 15mm;
+
+            @bottom-center {
+                content: "Page " counter(page) " of " counter(pages);
+                font-size: 7pt;
+                color: #999;
+                font-family: 'Arial', sans-serif;
+            }
         }
 
         * {
@@ -137,6 +144,7 @@
             padding-bottom: 4px;
             border-bottom: 2px solid #333;
             color: #111;
+            page-break-after: avoid;
         }
 
         /* ── Data Tables ── */
@@ -163,6 +171,10 @@
             padding: 6px;
             border: 1px solid #e0e0e0;
             vertical-align: top;
+        }
+
+        .data-table tbody tr {
+            page-break-inside: avoid;
         }
 
         .data-table tbody tr:nth-child(even) {
@@ -236,7 +248,7 @@
             <img src="{{ asset('logo/MSU-LOGO.jpg') }}" alt="MSU Logo">
             <div class="institution-sub">Republic of the Philippines</div>
             <div class="institution-name">Mindanao State University</div>
-            <div class="institution-sub">Marawi City</div>
+            <div class="institution-sub">Maguindanao</div>
             <div class="report-title">Individual Course Report</div>
             <div class="report-subtitle">{{ $course->course_name }}</div>
             <div class="report-meta">
@@ -307,57 +319,62 @@
 
         {{-- ── III. Module Inventory ── --}}
         <div class="section-heading">{{ $uploaders->isNotEmpty() ? 'III' : 'II' }}. Module Inventory</div>
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th style="width: 4%;">#</th>
-                    <th style="width: 28%;">Module Title</th>
-                    <th style="width: 10%;">Code</th>
-                    <th style="width: 7%; text-align: center;">Type</th>
-                    <th style="width: 18%;">Department</th>
-                    <th style="width: 15%;">Uploaded By</th>
-                    <th style="width: 9%; text-align: right;">Views</th>
-                    <th style="width: 9%; text-align: right;">Downloads</th>
-                </tr>
-            </thead>
-            <tbody>
-                @php
-                    $totalViews = 0;
-                    $totalDL = 0;
-                @endphp
-                @forelse($modules as $index => $module)
-                <tr>
-                    <td class="text-center">{{ $index + 1 }}</td>
-                    <td class="font-bold">{{ $module->title }}</td>
-                    <td><span class="badge">{{ $module->course_code }}</span></td>
-                    <td class="text-center">
-                        <span class="badge" style="background-color: {{ $module->isMajor ? '#e0f2fe' : '#f1f5f9' }}; border-color: {{ $module->isMajor ? '#7dd3fc' : '#cbd5e1' }}; color: {{ $module->isMajor ? '#0369a1' : '#334155' }}">
-                            {{ $module->isMajor ? 'Major' : 'Minor' }}
-                        </span>
-                    </td>
-                    <td>{{ $module->department->department_name ?? 'N/A' }}</td>
-                    <td>{{ $module->user->name }}</td>
-                    <td class="text-right">{{ number_format($module->number_of_views) }}</td>
-                    <td class="text-right">{{ number_format($module->module_downloads_count) }}</td>
-                </tr>
-                @php
-                    $totalViews += $module->number_of_views;
-                    $totalDL += $module->module_downloads_count;
-                @endphp
-                @empty
-                <tr>
-                    <td colspan="8" class="text-center" style="padding: 6px; font-style: italic; color: #666;">No modules found for this course.</td>
-                </tr>
-                @endforelse
-                @if(count($modules) > 0)
-                <tr class="total-row">
-                    <td colspan="6" class="text-right">Grand Total</td>
-                    <td class="text-right">{{ number_format($totalViews) }}</td>
-                    <td class="text-right">{{ number_format($totalDL) }}</td>
-                </tr>
-                @endif
-            </tbody>
+        
+        @php
+            $modulesByCourseCode = $modules->groupBy('course_code')->sortBy(function ($items, $key) {
+                return $key;
+            });
+            $totalViews = 0;
+            $totalDL = 0;
+        @endphp
+
+        @forelse($modulesByCourseCode as $courseCode => $groupedModules)
+            <div class="sub-label">{{ $courseCode }} <span style="font-weight: normal; color: #666;">({{ $groupedModules->count() }} {{ Str::plural('module', $groupedModules->count()) }})</span></div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width: 5%;">#</th>
+                        <th style="width: 40%;">Module Title</th>
+                        <th style="width: 10%; text-align: center;">Type</th>
+                        <th style="width: 25%;">Uploaded By</th>
+                        <th style="width: 10%; text-align: right;">Views</th>
+                        <th style="width: 10%; text-align: right;">Downloads</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($groupedModules as $index => $module)
+                    <tr>
+                        <td class="text-center">{{ $index + 1 }}</td>
+                        <td class="font-bold">{{ $module->title }}</td>
+                        <td class="text-center">
+                            <span class="badge" style="background-color: {{ $module->isMajor ? '#e0f2fe' : '#f1f5f9' }}; border-color: {{ $module->isMajor ? '#7dd3fc' : '#cbd5e1' }}; color: {{ $module->isMajor ? '#0369a1' : '#334155' }}">
+                                {{ $module->isMajor ? 'Major' : 'Minor' }}
+                            </span>
+                        </td>
+                        <td>{{ $module->user->name }}</td>
+                        <td class="text-right">{{ number_format($module->number_of_views) }}</td>
+                        <td class="text-right">{{ number_format($module->module_downloads_count) }}</td>
+                    </tr>
+                    @php
+                        $totalViews += $module->number_of_views;
+                        $totalDL += $module->module_downloads_count;
+                    @endphp
+                    @endforeach
+                </tbody>
+            </table>
+        @empty
+            <p style="text-align: center; padding: 15px; font-style: italic; color: #666; border: 1px dashed #ccc; background: #fafafa;">No modules found for this course.</p>
+        @endforelse
+
+        @if(count($modules) > 0)
+        <table class="data-table" style="margin-top: 5px;">
+            <tr class="total-row">
+                <td style="width: 80%; text-align: right;">Grand Total</td>
+                <td style="width: 10%; text-align: right;">{{ number_format($totalViews) }}</td>
+                <td style="width: 10%; text-align: right;">{{ number_format($totalDL) }}</td>
+            </tr>
         </table>
+        @endif
 
         {{-- ── Footer ── --}}
         <div class="report-footer">

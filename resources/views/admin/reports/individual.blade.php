@@ -326,7 +326,6 @@
                                             <tr class="hover:bg-zinc-50/50 transition-colors">
                                                 <td class="px-6 py-4">
                                                     <div class="text-sm font-semibold text-zinc-900">{{ $module->title }}</div>
-                                                    <div class="text-[10px] font-medium text-zinc-500 mt-0.5 uppercase tracking-wider px-1.5 py-0.5 bg-zinc-100 rounded border border-zinc-200 w-fit">{{ $module->course_code }}</div>
                                                 </td>
                                                 <td class="px-6 py-4 whitespace-nowrap">
                                                     <div class="flex justify-center">
@@ -389,6 +388,12 @@
                             <svg class="w-12 h-12 text-zinc-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
                             <p class="text-zinc-500 font-medium">No modules found for this course</p>
                             <p class="text-sm text-zinc-400 mt-1">Try adjusting your filters</p>
+                            @if($semester)
+                                <a href="{{ route('reports.individual', $course->id) }}" class="mt-3 inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                                    Clear semester filter
+                                </a>
+                            @endif
                         </div>
                     </div>
                 @endforelse
@@ -409,7 +414,41 @@
             const url = new URL("{{ route('reports.print.individual', $course->id) }}", window.location.origin);
             const params = new URLSearchParams(window.location.search);
             params.forEach((value, key) => url.searchParams.append(key, value));
-            window.open(url.toString(), '_blank');
+
+            // Show loading indicator
+            const btn = event.currentTarget;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Generating PDF...`;
+            btn.disabled = true;
+
+            fetch(url.toString())
+                .then(res => res.text())
+                .then(html => {
+                    const container = document.createElement('div');
+                    container.innerHTML = html;
+                    const reportEl = container.querySelector('.report-container') || container;
+
+                    const opt = {
+                        margin:       [12, 15, 12, 15],
+                        filename:     '{{ Str::slug($course->course_name) }}_Report_{{ now()->format("Ymd_His") }}.pdf',
+                        image:        { type: 'jpeg', quality: 0.98 },
+                        html2canvas:  { scale: 2, useCORS: true, logging: false },
+                        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+                    };
+
+                    html2pdf().set(opt).from(reportEl).save().then(() => {
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                    });
+                })
+                .catch(err => {
+                    console.error('PDF generation failed:', err);
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    // Fallback: open print layout
+                    window.open(url.toString(), '_blank');
+                });
         }
 
         function printReport() {

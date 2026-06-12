@@ -96,7 +96,7 @@
                                 <select name="course_id" class="w-full appearance-none border border-zinc-300 rounded-lg text-sm py-2.5 pl-3 pr-10 bg-white hover:border-zinc-400 focus:ring-2 focus:ring-zinc-900/20 focus:border-zinc-900 transition-colors shadow-sm">
                                     <option value="">All Programs</option>
                                     @foreach($courses as $course)
-                                        <option value="{{ $course->id }}" {{ ($filters['course_id'] ?? '') == $course->id ? 'selected' : '' }}>{{ $course->course_name }}</option>
+                                        <option value="{{ $course->id }}" data-department-id="{{ $course->department_id }}" {{ ($filters['course_id'] ?? '') == $course->id ? 'selected' : '' }}>{{ $course->course_name }}</option>
                                     @endforeach
                                 </select>
                                 <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-zinc-500">
@@ -127,7 +127,7 @@
                                 <select name="faculty_id" class="w-full appearance-none border border-zinc-300 rounded-lg text-sm py-2.5 pl-3 pr-10 bg-white hover:border-zinc-400 focus:ring-2 focus:ring-zinc-900/20 focus:border-zinc-900 transition-colors shadow-sm">
                                     <option value="">All Faculty</option>
                                     @foreach($faculties as $faculty)
-                                        <option value="{{ $faculty->id }}" {{ ($filters['faculty_id'] ?? '') == $faculty->id ? 'selected' : '' }}>{{ $faculty->name }}</option>
+                                        <option value="{{ $faculty->id }}" data-department-id="{{ $faculty->department_id }}" {{ ($filters['faculty_id'] ?? '') == $faculty->id ? 'selected' : '' }}>{{ $faculty->name }}</option>
                                     @endforeach
                                 </select>
                                 <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-zinc-500">
@@ -239,7 +239,17 @@
                     </h2>
                 </div>
                 <div class="p-6 flex-1 relative min-h-[300px]">
-                    <canvas id="facultyChart"></canvas>
+                    @if(count($facultyUploadSummary) > 0)
+                        <canvas id="facultyChart"></canvas>
+                    @else
+                        <div class="flex flex-col items-center justify-center h-full">
+                            <svg class="w-16 h-16 text-zinc-200 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                            <p class="text-zinc-400 font-semibold text-sm">No upload data to display</p>
+                            <p class="text-zinc-300 text-xs mt-1">Adjust your filters to see chart data</p>
+                        </div>
+                    @endif
                 </div>
             </div>
 
@@ -255,7 +265,18 @@
                     </h2>
                 </div>
                 <div class="p-6 flex-1 relative flex items-center justify-center min-h-[300px]">
-                    <canvas id="departmentChart"></canvas>
+                    @if(count($departmentBreakdown) > 0)
+                        <canvas id="departmentChart"></canvas>
+                    @else
+                        <div class="flex flex-col items-center justify-center h-full">
+                            <svg class="w-16 h-16 text-zinc-200 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+                            </svg>
+                            <p class="text-zinc-400 font-semibold text-sm">No department data to display</p>
+                            <p class="text-zinc-300 text-xs mt-1">Adjust your filters to see chart data</p>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -371,6 +392,12 @@
                                     <svg class="w-12 h-12 text-zinc-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
                                     <p class="text-zinc-500 font-bold">No faculty upload data found</p>
                                     <p class="text-sm text-zinc-400 mt-1">Try adjusting your filters to see results</p>
+                                    @if(array_filter($filters ?? []))
+                                        <a href="{{ route('reports.summary') }}" class="mt-3 inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                                            Clear all filters
+                                        </a>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -446,8 +473,18 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="3" class="px-6 py-12 text-center text-sm text-zinc-500 font-medium">
-                                No department data found
+                            <td colspan="3" class="px-6 py-12 text-center">
+                                <div class="flex flex-col items-center justify-center">
+                                    <svg class="w-12 h-12 text-zinc-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                                    <p class="text-zinc-500 font-bold">No department data found</p>
+                                    <p class="text-sm text-zinc-400 mt-1">Try adjusting your filters to see results</p>
+                                    @if(array_filter($filters ?? []))
+                                        <a href="{{ route('reports.summary') }}" class="mt-3 inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                                            Clear all filters
+                                        </a>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                         @endforelse
@@ -536,6 +573,12 @@
                         </svg>
                         <p class="text-zinc-500 font-medium">No student download data found</p>
                         <p class="text-sm text-zinc-400 mt-1">Try adjusting your filters</p>
+                        @if(array_filter($filters ?? []))
+                            <a href="{{ route('reports.summary') }}" class="mt-3 inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                                Clear all filters
+                            </a>
+                        @endif
                     </div>
                 </div>
                 @endforelse
@@ -557,115 +600,225 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Dependent Dropdown Filtering for Department -> Course/Faculty
+            const departmentSelect = document.querySelector('select[name="department_id"]');
+            const courseSelect = document.querySelector('select[name="course_id"]');
+            const facultySelect = document.querySelector('select[name="faculty_id"]');
+
+            function filterDropdowns() {
+                const selectedDept = departmentSelect.value;
+
+                // Filter Degree Programs
+                Array.from(courseSelect.options).forEach(option => {
+                    if (option.value === "") {
+                        option.hidden = false;
+                        option.disabled = false;
+                        return;
+                    }
+                    if (!selectedDept || option.dataset.departmentId === selectedDept) {
+                        option.hidden = false;
+                        option.disabled = false;
+                    } else {
+                        option.hidden = true;
+                        option.disabled = true;
+                        if (option.selected) courseSelect.value = "";
+                    }
+                });
+
+                // Filter Faculty Members
+                Array.from(facultySelect.options).forEach(option => {
+                    if (option.value === "") {
+                        option.hidden = false;
+                        option.disabled = false;
+                        return;
+                    }
+                    if (!selectedDept || option.dataset.departmentId === selectedDept) {
+                        option.hidden = false;
+                        option.disabled = false;
+                    } else {
+                        option.hidden = true;
+                        option.disabled = true;
+                        if (option.selected) facultySelect.value = "";
+                    }
+                });
+            }
+
+            if (departmentSelect && courseSelect && facultySelect) {
+                departmentSelect.addEventListener('change', filterDropdowns);
+                // Run once on load to apply initial state
+                filterDropdowns();
+            }
+
             // Data from Backend
             const facultyData = @json($facultyUploadSummary);
             const departmentData = @json($departmentBreakdown);
 
-            // 1. Prepare Faculty Data (Top 10 max to keep chart readable)
-            // Sort by total modules descending
-            const sortedFaculty = facultyData.sort((a, b) => b.total_modules - a.total_modules).slice(0, 10);
-            
-            const facultyNames = sortedFaculty.map(f => f.faculty_name);
-            const facultyCounts = sortedFaculty.map(f => f.total_modules);
+            // 1. Faculty Chart — only render if data exists
+            const facultyCanvas = document.getElementById('facultyChart');
+            if (facultyCanvas && facultyData.length > 0) {
+                const sortedFaculty = facultyData.sort((a, b) => b.total_modules - a.total_modules).slice(0, 10);
+                const facultyNames = sortedFaculty.map(f => f.faculty_name);
+                const facultyCounts = sortedFaculty.map(f => f.total_modules);
 
-            const ctxFaculty = document.getElementById('facultyChart').getContext('2d');
-            new Chart(ctxFaculty, {
-                type: 'bar',
-                data: {
-                    labels: facultyNames,
-                    datasets: [{
-                        label: 'Modules Uploaded',
-                        data: facultyCounts,
-                        backgroundColor: 'rgba(99, 102, 241, 0.8)', // Indigo
-                        borderColor: 'rgba(79, 70, 229, 1)',
-                        borderWidth: 1,
-                        borderRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return ` ${context.raw} modules`;
+                new Chart(facultyCanvas.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: facultyNames,
+                        datasets: [{
+                            label: 'Modules Uploaded',
+                            data: facultyCounts,
+                            backgroundColor: 'rgba(99, 102, 241, 0.8)',
+                            borderColor: 'rgba(79, 70, 229, 1)',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return ` ${context.raw} modules`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { precision: 0 }
+                            },
+                            x: {
+                                ticks: {
+                                    maxRotation: 45,
+                                    minRotation: 45
                                 }
                             }
                         }
+                    }
+                });
+            }
+
+            // 2. Department Chart — only render if data exists
+            const deptCanvas = document.getElementById('departmentChart');
+            if (deptCanvas && departmentData.length > 0) {
+                const deptNames = departmentData.map(d => d.department_name);
+                const deptCounts = departmentData.map(d => d.total_modules);
+
+                const bgColors = [
+                    'rgba(168, 85, 247, 0.8)',
+                    'rgba(59, 130, 246, 0.8)',
+                    'rgba(16, 185, 129, 0.8)',
+                    'rgba(245, 158, 11, 0.8)',
+                    'rgba(239, 68, 68, 0.8)',
+                    'rgba(236, 72, 153, 0.8)',
+                ];
+
+                new Chart(deptCanvas.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: deptNames,
+                        datasets: [{
+                            data: deptCounts,
+                            backgroundColor: bgColors,
+                            borderWidth: 2,
+                            borderColor: '#ffffff',
+                        }]
                     },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: { precision: 0 } // No decimals
-                        },
-                        x: {
-                            ticks: {
-                                maxRotation: 45,
-                                minRotation: 45
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '65%',
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    usePointStyle: true,
+                                    padding: 20
+                                }
                             }
                         }
                     }
-                }
-            });
-
-            // 2. Prepare Department Data
-            const deptNames = departmentData.map(d => d.department_name);
-            const deptCounts = departmentData.map(d => d.total_modules);
-
-            // Palette for doughnut chart
-            const bgColors = [
-                'rgba(168, 85, 247, 0.8)', // Purple
-                'rgba(59, 130, 246, 0.8)', // Blue
-                'rgba(16, 185, 129, 0.8)', // Emerald
-                'rgba(245, 158, 11, 0.8)', // Amber
-                'rgba(239, 68, 68, 0.8)',  // Red
-                'rgba(236, 72, 153, 0.8)', // Pink
-            ];
-
-            const ctxDept = document.getElementById('departmentChart').getContext('2d');
-            new Chart(ctxDept, {
-                type: 'doughnut',
-                data: {
-                    labels: deptNames,
-                    datasets: [{
-                        data: deptCounts,
-                        backgroundColor: bgColors,
-                        borderWidth: 2,
-                        borderColor: '#ffffff',
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '65%',
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                usePointStyle: true,
-                                padding: 20
-                            }
-                        }
-                    }
-                }
-            });
+                });
+            }
         });
 
         function exportToPDF() {
+            // Fetch the print layout and generate a real downloadable PDF via html2pdf.js
             const url = new URL("{{ route('reports.print.summary') }}", window.location.origin);
             const params = new URLSearchParams(window.location.search);
             params.forEach((value, key) => url.searchParams.append(key, value));
-            window.open(url.toString(), '_blank');
+
+            // Show loading indicator
+            const btn = event.currentTarget;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Generating PDF...`;
+            btn.disabled = true;
+
+            fetch(url.toString())
+                .then(res => res.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const reportEl = doc.querySelector('.report-container');
+                    const styleBlock = doc.querySelector('style');
+                    
+                    if (reportEl && styleBlock) {
+                        reportEl.prepend(styleBlock);
+                    }
+
+                    const opt = {
+                        margin:       [12, 15, 12, 15],
+                        filename:     'General_Summary_Report_{{ now()->format("Ymd_His") }}.pdf',
+                        image:        { type: 'jpeg', quality: 0.98 },
+                        html2canvas:  { scale: 2, useCORS: true, logging: false },
+                        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+                    };
+
+                    html2pdf().set(opt).from(reportEl || html).save().then(() => {
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                    });
+                })
+                .catch(err => {
+                    console.error('PDF generation failed:', err);
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    // Fallback: open print layout
+                    window.open(url.toString(), '_blank');
+                });
         }
 
         function printReport() {
             const url = new URL("{{ route('reports.print.summary') }}", window.location.origin);
             const params = new URLSearchParams(window.location.search);
             params.forEach((value, key) => url.searchParams.append(key, value));
-            window.open(url.toString(), '_blank');
+            
+            const iframe = document.getElementById('print-preview-iframe');
+            iframe.src = url.toString();
+            
+            document.getElementById('trigger-print-modal').click();
         }
     </script>
-</x-admin-layout>
 
+    <!-- Print Preview Modal -->
+    <x-my-modal id="print-modal" title="Report Print Preview" :showIcon="false" maxWidth="5xl">
+        <div class="mt-4 bg-zinc-100/50 rounded-xl overflow-hidden border border-zinc-200 p-2" style="height: 75vh; min-height: 500px;">
+            <iframe id="print-preview-iframe" class="w-full h-full bg-white border border-zinc-200 rounded-lg shadow-sm" src=""></iframe>
+        </div>
+        <x-slot name="footer">
+            <x-my-secondary-button data-modal-close>Close</x-my-secondary-button>
+            <button onclick="document.getElementById('print-preview-iframe').contentWindow.print()" class="px-5 py-2.5 bg-zinc-900 text-white font-medium text-sm rounded-lg hover:bg-zinc-800 transition-colors shadow-sm ml-3 flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+                Print Document
+            </button>
+        </x-slot>
+    </x-my-modal>
+
+    <!-- Hidden button to trigger modal -->
+    <button id="trigger-print-modal" data-modal-target="print-modal" class="hidden"></button>
+</x-admin-layout>

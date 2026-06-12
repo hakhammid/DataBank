@@ -1,5 +1,5 @@
 <x-admin-layout :title="'Create Modules'">
-    <main class="flex-1 max-h-full p-5 lg:mt-[5rem] my-20 md:px-20">
+    <main class="flex-1 max-h-full p-5 lg:mt-0 mt-20">
         <h1 class="text-2xl font-semibold text-zinc-900">Create Modules</h1>
         <hr class="my-8 border-zinc-200">
 
