@@ -1,386 +1,461 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>{{ $course->course_name }} Report - {{ config('constants.APP_TITLE') }}</title>
+    <title>{{ $course->course_name }} Activity Report - {{ config('constants.APP_TITLE') }}</title>
     <style>
         @page {
             size: A4 portrait;
-            margin: 12mm 15mm 18mm 15mm;
+            margin: 14mm;
 
             @bottom-center {
                 content: "Page " counter(page) " of " counter(pages);
-                font-size: 7pt;
-                color: #999;
-                font-family: 'Arial', sans-serif;
+                font-size: 8pt;
+                font-family: Arial, sans-serif;
             }
         }
 
         * {
-            margin: 0;
-            padding: 0;
             box-sizing: border-box;
         }
 
         body {
-            font-family: 'Arial', sans-serif;
-            line-height: 1.4;
-            color: #333;
+            margin: 0;
             background: #fff;
+            color: #111;
+            font-family: Arial, sans-serif;
             font-size: 8.5pt;
+            line-height: 1.35;
         }
 
         .report-container {
             width: 100%;
-            margin: 0 auto;
         }
 
-        /* ── Header ── */
         .report-header {
+            margin-bottom: 14px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #111;
             text-align: center;
-            padding-bottom: 15px;
-            border-bottom: 3px solid #111;
-            margin-bottom: 15px;
-            font-family: 'Times New Roman', Times, serif;
         }
 
         .report-header img {
-            width: 60px;
+            width: 58px;
             height: auto;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
 
-        .institution-name {
+        .institution {
+            font-family: "Times New Roman", Times, serif;
             font-size: 13pt;
             font-weight: bold;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #111;
         }
 
-        .institution-sub {
-            font-size: 9pt;
-            margin-bottom: 2px;
-            color: #444;
+        .header-small {
+            font-size: 8.5pt;
         }
 
         .report-title {
-            font-size: 11pt;
-            font-weight: bold;
-            text-transform: uppercase;
             margin-top: 8px;
-            letter-spacing: 1px;
-            color: #000;
-            font-family: 'Arial', sans-serif;
+            font-size: 12pt;
+            font-weight: bold;
+            letter-spacing: .5px;
+            text-transform: uppercase;
         }
 
         .report-subtitle {
+            margin-top: 3px;
+            color: #333;
             font-size: 10pt;
-            color: #444;
-            margin-top: 4px;
-            font-family: 'Arial', sans-serif;
+            font-weight: bold;
         }
 
         .report-meta {
-            font-size: 8pt;
-            color: #666;
             margin-top: 5px;
-            font-family: 'Arial', sans-serif;
-        }
-
-        /* ── Filter Info ── */
-        .filter-info {
-            font-size: 8pt;
             color: #444;
-            margin-bottom: 15px;
+            font-size: 8pt;
+        }
+
+        .scope-box {
+            margin-bottom: 12px;
             padding: 8px 10px;
-            border-left: 3px solid #111;
-            background: #f8f9fa;
+            border: 1px solid #999;
+            background: #f7f7f7;
         }
 
-        .filter-info strong {
-            color: #111;
-            margin-right: 5px;
-        }
-
-        /* ── Summary Stats ── */
-        .stats-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 5px;
-            margin-bottom: 20px;
-            margin-left: -5px;
-            margin-right: -5px;
-        }
-
-        .stats-table td {
-            border: 1px solid #ddd;
-            background: #fcfcfc;
-            text-align: center;
-            padding: 12px 5px;
-            border-radius: 4px;
-        }
-
-        .stats-table .stats-label {
-            font-size: 7.5pt;
-            text-transform: uppercase;
-            font-weight: bold;
-            letter-spacing: 0.5px;
-            color: #666;
-            margin-top: 5px;
-        }
-
-        .stats-table .stats-value {
-            font-size: 16pt;
-            font-weight: bold;
-            color: #222;
-        }
-
-        /* ── Section Heading ── */
         .section-heading {
+            margin: 16px 0 7px;
+            padding-bottom: 4px;
+            border-bottom: 1.5px solid #111;
             font-size: 9.5pt;
             font-weight: bold;
             text-transform: uppercase;
-            margin: 20px 0 10px 0;
-            padding-bottom: 4px;
-            border-bottom: 2px solid #333;
-            color: #111;
             page-break-after: avoid;
         }
 
-        /* ── Data Tables ── */
-        .data-table {
+        table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 15px;
-            font-size: 8pt;
+            page-break-inside: auto;
         }
 
-        .data-table thead th {
-            background: #f0f0f0;
-            color: #222;
-            font-weight: bold;
-            padding: 8px 6px;
-            text-align: left;
-            font-size: 7.5pt;
-            text-transform: uppercase;
-            border: 1px solid #ccc;
-            border-bottom: 2px solid #888;
-        }
-
-        .data-table tbody td {
-            padding: 6px;
-            border: 1px solid #e0e0e0;
+        th,
+        td {
+            border: 1px solid #d0d0d0;
+            padding: 5px 6px;
             vertical-align: top;
         }
 
-        .data-table tbody tr {
+        th {
+            background: #efefef;
+            color: #111;
+            font-size: 7.5pt;
+            font-weight: bold;
+            text-align: left;
+            text-transform: uppercase;
+        }
+
+        tr {
             page-break-inside: avoid;
         }
 
-        .data-table tbody tr:nth-child(even) {
-            background-color: #fafafa;
+        .stats-table {
+            margin-bottom: 12px;
         }
 
-        .text-right { text-align: right !important; }
-        .text-center { text-align: center !important; }
-        .font-bold { font-weight: bold; }
+        .stats-table td {
+            width: 16.666%;
+            text-align: center;
+        }
 
-        .data-table .total-row td {
+        .stat-value {
+            display: block;
+            font-size: 14pt;
             font-weight: bold;
-            background: #f0f0f0;
-            border-top: 2px solid #888;
-            color: #111;
         }
 
-        /* ── Footer ── */
-        .report-footer {
-            margin-top: 30px;
-            padding-top: 10px;
-            border-top: 1px solid #ddd;
-            font-size: 7.5pt;
+        .stat-label {
+            display: block;
+            margin-top: 2px;
+            color: #555;
+            font-size: 7.4pt;
+            text-transform: uppercase;
+        }
+
+        .text-right {
+            text-align: right !important;
+        }
+
+        .text-center {
+            text-align: center !important;
+        }
+
+        .font-bold {
+            font-weight: bold;
+        }
+
+        .muted {
             color: #666;
+        }
+
+        .sub-heading {
+            margin: 10px 0 4px;
+            font-size: 8.7pt;
+            font-weight: bold;
+        }
+
+        .report-footer {
+            margin-top: 22px;
+            padding-top: 8px;
+            border-top: 1px solid #bbb;
+            color: #555;
+            font-size: 7.5pt;
             display: flex;
             justify-content: space-between;
-        }
-
-        /* ── Badges and Lists ── */
-        .badge {
-            display: inline-block;
-            background-color: #f1f5f9;
-            border: 1px solid #cbd5e1;
-            padding: 3px 6px;
-            border-radius: 4px;
-            margin: 2px 2px 2px 0;
-            font-size: 7.5pt;
-            color: #334155;
-        }
-        .badge-count {
-            color: #64748b;
-            font-weight: 600;
-            margin-left: 3px;
-        }
-        .program-list {
-            margin: 0;
-            padding-left: 16px;
-            list-style-type: square;
-        }
-        .program-list li {
-            margin-bottom: 2px;
-            color: #444;
+            gap: 10px;
         }
 
         @media print {
-            .no-print { display: none !important; }
-            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            .data-table thead th { background: #f0f0f0 !important; }
-            .data-table tbody tr:nth-child(even) { background-color: #fafafa !important; }
-            .data-table .total-row td { background: #f0f0f0 !important; }
-            .stats-table td { background: #fcfcfc !important; border: 1px solid #ccc !important; }
-            .badge { background-color: #f1f5f9 !important; border-color: #cbd5e1 !important; }
+            body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="report-container">
+    @php
+        $modulesByCourseCode = $allModules->groupBy('course_code')->sortKeys();
+    @endphp
 
-        {{-- ── Report Header ── --}}
+    <div class="report-container">
         <div class="report-header">
             <img src="{{ asset('logo/MSU-LOGO.jpg') }}" alt="MSU Logo">
-            <div class="institution-sub">Republic of the Philippines</div>
-            <div class="institution-name">Mindanao State University</div>
-            <div class="institution-sub">Maguindanao</div>
-            <div class="report-title">Individual Course Report</div>
+            <div class="header-small">Republic of the Philippines</div>
+            <div class="institution">Mindanao State University</div>
+            <div class="header-small">Maguindanao</div>
+            <div class="report-title">Individual Course Activity Report</div>
             <div class="report-subtitle">{{ $course->course_name }}</div>
             <div class="report-meta">
-                Date Generated: {{ now()->format('F d, Y — h:i A') }}&nbsp;&nbsp;|&nbsp;&nbsp;Prepared by: {{ Auth::user()->name }}
+                Generated: {{ now()->format('F d, Y h:i A') }}
+                | Prepared by: {{ auth()->user()?->name ?? 'Administrator' }}
             </div>
         </div>
 
-        {{-- ── Applied Filters ── --}}
-        @if(!empty($semester))
-        <div class="filter-info">
-            <strong>Filter Applied:</strong> Semester: {{ $semester }}
+        <div class="scope-box">
+            <strong>Report Coverage:</strong>
+            Course-level module uploads, downloads, views, contributor activity, and downloader activity.
+            <br>
+            <strong>Semester Scope:</strong> {{ $semester ?: 'All semesters' }}
         </div>
-        @endif
 
-        {{-- ── I. Course Statistics ── --}}
-        <div class="section-heading">I. Course Statistics</div>
+        <div class="section-heading">I. Course Activity Summary</div>
         <table class="stats-table">
             <tr>
                 <td>
-                    <div class="stats-value">{{ $stats['total_modules'] }}</div>
-                    <div class="stats-label">Total Modules</div>
+                    <span class="stat-value">{{ number_format($stats['total_modules']) }}</span>
+                    <span class="stat-label">Modules</span>
                 </td>
                 <td>
-                    <div class="stats-value">{{ $stats['major_modules'] }}</div>
-                    <div class="stats-label">Major Subjects</div>
+                    <span class="stat-value">{{ number_format($stats['major_modules']) }}</span>
+                    <span class="stat-label">Major</span>
                 </td>
                 <td>
-                    <div class="stats-value">{{ $stats['minor_modules'] }}</div>
-                    <div class="stats-label">Minor Subjects</div>
+                    <span class="stat-value">{{ number_format($stats['minor_modules']) }}</span>
+                    <span class="stat-label">Minor</span>
                 </td>
                 <td>
-                    <div class="stats-value">{{ number_format($stats['total_views']) }}</div>
-                    <div class="stats-label">Total Views</div>
+                    <span class="stat-value">{{ number_format($stats['total_views']) }}</span>
+                    <span class="stat-label">Views</span>
                 </td>
                 <td>
-                    <div class="stats-value">{{ number_format($stats['total_downloads']) }}</div>
-                    <div class="stats-label">Total Downloads</div>
+                    <span class="stat-value">{{ number_format($stats['total_downloads']) }}</span>
+                    <span class="stat-label">Downloads</span>
                 </td>
                 <td>
-                    <div class="stats-value">{{ $stats['uploaders'] }}</div>
-                    <div class="stats-label">Contributors</div>
+                    <span class="stat-value">{{ number_format($stats['uploaders']) }}</span>
+                    <span class="stat-label">Contributors</span>
                 </td>
             </tr>
         </table>
 
-        {{-- ── II. Faculty Contributors ── --}}
-        @if($uploaders->isNotEmpty())
-        <div class="section-heading">II. Faculty Contributors</div>
-        <table class="data-table">
+        <div class="section-heading">II. Course Code Breakdown</div>
+        <table>
             <thead>
                 <tr>
-                    <th style="width: 5%;">#</th>
-                    <th style="width: 70%;">Faculty Name</th>
-                    <th style="width: 25%; text-align: right;">Modules Uploaded</th>
+                    <th style="width: 16%;">Course Code</th>
+                    <th style="width: 12%;" class="text-right">Modules</th>
+                    <th style="width: 12%;" class="text-right">Major</th>
+                    <th style="width: 12%;" class="text-right">Minor</th>
+                    <th style="width: 12%;" class="text-right">Views</th>
+                    <th style="width: 12%;" class="text-right">Downloads</th>
+                    <th style="width: 24%;">Latest Upload</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach($uploaders as $index => $uploader)
-                <tr>
-                    <td class="text-center">{{ $index + 1 }}</td>
-                    <td class="font-bold">{{ $uploader->name }}</td>
-                    <td class="text-right font-bold">{{ $uploader->modules_count }}</td>
-                </tr>
-                @endforeach
+                @forelse($courseCodeBreakdown as $row)
+                    <tr>
+                        <td class="font-bold">{{ $row['course_code'] }}</td>
+                        <td class="text-right">{{ number_format($row['modules']) }}</td>
+                        <td class="text-right">{{ number_format($row['major_modules']) }}</td>
+                        <td class="text-right">{{ number_format($row['minor_modules']) }}</td>
+                        <td class="text-right">{{ number_format($row['views']) }}</td>
+                        <td class="text-right">{{ number_format($row['downloads']) }}</td>
+                        <td>{{ $row['latest_upload'] ? \Carbon\Carbon::parse($row['latest_upload'])->format('M d, Y') : 'N/A' }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="7" class="text-center">No course-code data available.</td>
+                    </tr>
+                @endforelse
             </tbody>
         </table>
-        @endif
 
-        {{-- ── III. Module Inventory ── --}}
-        <div class="section-heading">{{ $uploaders->isNotEmpty() ? 'III' : 'II' }}. Module Inventory</div>
-        
-        @php
-            $modulesByCourseCode = $modules->groupBy('course_code')->sortBy(function ($items, $key) {
-                return $key;
-            });
-            $totalViews = 0;
-            $totalDL = 0;
-        @endphp
+        <div class="section-heading">III. Downloads by Role</div>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 35%;">Role</th>
+                    <th style="width: 25%;" class="text-right">Downloads</th>
+                    <th style="width: 25%;" class="text-right">Unique Users</th>
+                    <th style="width: 15%;">Last Activity</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($downloadActivityByRole as $roleActivity)
+                    <tr>
+                        <td class="font-bold">{{ ucfirst($roleActivity['role']) }}</td>
+                        <td class="text-right">{{ number_format($roleActivity['downloads']) }}</td>
+                        <td class="text-right">{{ number_format($roleActivity['unique_users']) }}</td>
+                        <td>{{ $roleActivity['last_activity'] ? \Carbon\Carbon::parse($roleActivity['last_activity'])->format('M d, Y') : 'N/A' }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="4" class="text-center">No download activity available.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
 
+        <div class="section-heading">IV. Recent Upload and Download Activity</div>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 13%;">Action</th>
+                    <th style="width: 20%;">Actor</th>
+                    <th style="width: 10%;">Role</th>
+                    <th style="width: 32%;">Module</th>
+                    <th style="width: 10%;">Code</th>
+                    <th style="width: 15%;">Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($activityFeed as $activity)
+                    <tr>
+                        <td class="font-bold">{{ $activity['label'] }}</td>
+                        <td>{{ $activity['actor'] }}</td>
+                        <td>{{ ucfirst($activity['role']) }}</td>
+                        <td>{{ $activity['module_title'] }}</td>
+                        <td>{{ $activity['course_code'] }}</td>
+                        <td>{{ \Carbon\Carbon::parse($activity['occurred_at'])->format('M d, Y h:i A') }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="6" class="text-center">No upload or download activity available.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+
+        <div class="section-heading">V. Faculty Contributors</div>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 5%;" class="text-center">#</th>
+                    <th style="width: 65%;">Faculty</th>
+                    <th style="width: 30%;" class="text-right">Modules Uploaded</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($uploaders as $index => $uploader)
+                    <tr>
+                        <td class="text-center">{{ $index + 1 }}</td>
+                        <td class="font-bold">{{ $uploader->name }}</td>
+                        <td class="text-right">{{ number_format($uploader->modules_count) }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="3" class="text-center">No contributors found.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+
+        <div class="section-heading">VI. Top Downloaders</div>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 5%;" class="text-center">#</th>
+                    <th style="width: 30%;">User</th>
+                    <th style="width: 15%;">ID Number</th>
+                    <th style="width: 15%;">Role</th>
+                    <th style="width: 15%;" class="text-right">Downloads</th>
+                    <th style="width: 20%;">Last Activity</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($downloaders as $index => $downloader)
+                    <tr>
+                        <td class="text-center">{{ $index + 1 }}</td>
+                        <td class="font-bold">{{ $downloader['name'] }}</td>
+                        <td>{{ $downloader['id_number'] }}</td>
+                        <td>{{ ucfirst($downloader['role']) }}</td>
+                        <td class="text-right">{{ number_format($downloader['download_count']) }}</td>
+                        <td>{{ $downloader['last_download'] ? \Carbon\Carbon::parse($downloader['last_download'])->format('M d, Y h:i A') : 'N/A' }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="6" class="text-center">No downloader data available.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+
+        <div class="section-heading">VII. Top Module Engagement</div>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 5%;" class="text-center">#</th>
+                    <th style="width: 35%;">Module</th>
+                    <th style="width: 12%;">Code</th>
+                    <th style="width: 20%;">Uploader</th>
+                    <th style="width: 10%;" class="text-right">Views</th>
+                    <th style="width: 10%;" class="text-right">Downloads</th>
+                    <th style="width: 8%;">Type</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($topModules as $index => $module)
+                    <tr>
+                        <td class="text-center">{{ $index + 1 }}</td>
+                        <td class="font-bold">{{ $module->title }}</td>
+                        <td>{{ $module->course_code }}</td>
+                        <td>{{ $module->user->name ?? 'Unknown' }}</td>
+                        <td class="text-right">{{ number_format($module->number_of_views ?? 0) }}</td>
+                        <td class="text-right">{{ number_format($module->module_downloads_count ?? 0) }}</td>
+                        <td>{{ $module->isMajor ? 'Major' : 'Minor' }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="7" class="text-center">No module engagement data available.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+
+        <div class="section-heading">VIII. Module Inventory</div>
         @forelse($modulesByCourseCode as $courseCode => $groupedModules)
-            <div class="sub-label">{{ $courseCode }} <span style="font-weight: normal; color: #666;">({{ $groupedModules->count() }} {{ Str::plural('module', $groupedModules->count()) }})</span></div>
-            <table class="data-table">
+            <div class="sub-heading">
+                {{ $courseCode }} <span class="muted">({{ $groupedModules->count() }} {{ Str::plural('module', $groupedModules->count()) }})</span>
+            </div>
+            <table style="margin-bottom: 8px;">
                 <thead>
                     <tr>
-                        <th style="width: 5%;">#</th>
-                        <th style="width: 40%;">Module Title</th>
-                        <th style="width: 10%; text-align: center;">Type</th>
-                        <th style="width: 25%;">Uploaded By</th>
-                        <th style="width: 10%; text-align: right;">Views</th>
-                        <th style="width: 10%; text-align: right;">Downloads</th>
+                        <th style="width: 5%;" class="text-center">#</th>
+                        <th style="width: 32%;">Module Title</th>
+                        <th style="width: 11%;">Type</th>
+                        <th style="width: 20%;">Uploaded By</th>
+                        <th style="width: 10%;" class="text-right">Views</th>
+                        <th style="width: 10%;" class="text-right">Downloads</th>
+                        <th style="width: 12%;">Date Added</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($groupedModules as $index => $module)
-                    <tr>
-                        <td class="text-center">{{ $index + 1 }}</td>
-                        <td class="font-bold">{{ $module->title }}</td>
-                        <td class="text-center">
-                            <span class="badge" style="background-color: {{ $module->isMajor ? '#e0f2fe' : '#f1f5f9' }}; border-color: {{ $module->isMajor ? '#7dd3fc' : '#cbd5e1' }}; color: {{ $module->isMajor ? '#0369a1' : '#334155' }}">
-                                {{ $module->isMajor ? 'Major' : 'Minor' }}
-                            </span>
-                        </td>
-                        <td>{{ $module->user->name }}</td>
-                        <td class="text-right">{{ number_format($module->number_of_views) }}</td>
-                        <td class="text-right">{{ number_format($module->module_downloads_count) }}</td>
-                    </tr>
-                    @php
-                        $totalViews += $module->number_of_views;
-                        $totalDL += $module->module_downloads_count;
-                    @endphp
+                        <tr>
+                            <td class="text-center">{{ $index + 1 }}</td>
+                            <td class="font-bold">{{ $module->title }}</td>
+                            <td>{{ $module->isMajor ? 'Major' : 'Minor' }}</td>
+                            <td>{{ $module->user->name ?? 'Unknown' }}</td>
+                            <td class="text-right">{{ number_format($module->number_of_views ?? 0) }}</td>
+                            <td class="text-right">{{ number_format($module->module_downloads_count ?? 0) }}</td>
+                            <td>{{ optional($module->created_at)->format('M d, Y') }}</td>
+                        </tr>
                     @endforeach
                 </tbody>
             </table>
         @empty
-            <p style="text-align: center; padding: 15px; font-style: italic; color: #666; border: 1px dashed #ccc; background: #fafafa;">No modules found for this course.</p>
+            <table>
+                <tr>
+                    <td class="text-center">No modules found for this course.</td>
+                </tr>
+            </table>
         @endforelse
 
-        @if(count($modules) > 0)
-        <table class="data-table" style="margin-top: 5px;">
-            <tr class="total-row">
-                <td style="width: 80%; text-align: right;">Grand Total</td>
-                <td style="width: 10%; text-align: right;">{{ number_format($totalViews) }}</td>
-                <td style="width: 10%; text-align: right;">{{ number_format($totalDL) }}</td>
-            </tr>
-        </table>
-        @endif
-
-        {{-- ── Footer ── --}}
         <div class="report-footer">
-            <span>&copy; {{ date('Y') }} Mindanao State University — Databanking Module System</span>
+            <span>&copy; {{ date('Y') }} Mindanao State University - MODUBANK</span>
             <span>Report ID: CRS-{{ $course->id }}-{{ now()->format('Ymd-His') }}</span>
-            <span>Generated by: {{ Auth::user()->name }}</span>
+            <span>Generated by: {{ auth()->user()?->name ?? 'Administrator' }}</span>
         </div>
     </div>
 

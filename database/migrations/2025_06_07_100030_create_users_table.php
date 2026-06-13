@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('middle_initial', 10)->nullable();
             $table->string('last_name');
             $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('usertype')->default('student');
             $table->string('profile_picture')->nullable();

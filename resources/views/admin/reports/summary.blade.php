@@ -1,160 +1,159 @@
-<x-admin-layout :title="'Reports - General'">
-    <main class="flex-1 max-h-full p-5 lg:mt-0 mt-20">
-        <!-- HEADER -->
-        <div class="flex flex-col items-start justify-between pb-6 space-y-4 lg:items-center lg:space-y-0 lg:flex-row">
-            <div>
-                <h1 class="text-2xl/8 font-semibold text-zinc-950 sm:text-xl/8">
-                    General Reports
-                </h1>
-                <p class="mt-2 text-sm text-zinc-600">Comprehensive overview of modules, faculty uploads, and student downloads</p>
-            </div>
-            <div class="flex gap-3">
-                <div class="relative" x-data="{ open: false }">
-                    <x-my-secondary-button @click="open = !open" @click.away="open = false">
-                        <svg class="w-5 h-5 text-zinc-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        Export
-                        <svg class="w-4 h-4 transition-transform duration-200" :class="{ 'rotate-180': open }"
-                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </x-my-secondary-button>
+<x-admin-layout :title="'Reports - Activity Summary'">
+    @php
+        $hasFilters = !empty(array_filter($filters ?? []));
+        $selectedDepartment = !empty($filters['department_id'] ?? null)
+            ? $departments->firstWhere('id', $filters['department_id'])
+            : null;
+        $selectedCourse = !empty($filters['course_id'] ?? null)
+            ? $courses->firstWhere('id', $filters['course_id'])
+            : null;
+        $selectedFaculty = !empty($filters['faculty_id'] ?? null)
+            ? $faculties->firstWhere('id', $filters['faculty_id'])
+            : null;
+        $filterBadges = collect();
 
-                    <div x-show="open" x-transition:enter="transition ease-out duration-200"
-                        x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
-                        x-transition:leave="transition ease-in duration-150"
-                        x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
-                        class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-zinc-200 z-50">
-                        <div class="py-1">
-                            <button onclick="exportToPDF()"
-                                class="w-full text-left px-4 py-3 text-sm text-zinc-700 hover:bg-gray-100 flex items-center gap-3 transition-colors duration-150">
-                                <svg class="w-5 h-5 text-zinc-900" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 1v5h5v10H6V3h7z" />
-                                    <path d="M8 13h8v2H8zm0 3h8v2H8zm0-6h3v2H8z" />
-                                </svg>
-                                Export to PDF
-                            </button>
-                            <button onclick="printReport()"
-                                class="w-full text-left px-4 py-3 text-sm text-zinc-700 hover:bg-gray-100 flex items-center gap-3 transition-colors duration-150">
-                                <svg class="w-5 h-5 text-zinc-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                                </svg>
-                                Print Report
-                            </button>
-                        </div>
-                    </div>
+        if ($selectedDepartment) {
+            $filterBadges->push(['label' => 'Department', 'value' => $selectedDepartment->department_name]);
+        }
+        if ($selectedCourse) {
+            $filterBadges->push(['label' => 'Program', 'value' => $selectedCourse->course_name]);
+        }
+        if (!empty($filters['semester'] ?? null)) {
+            $filterBadges->push(['label' => 'Semester', 'value' => $filters['semester']]);
+        }
+        if ($selectedFaculty) {
+            $filterBadges->push(['label' => 'Faculty', 'value' => $selectedFaculty->name]);
+        }
+    @endphp
+
+    <main class="flex-1 max-h-full p-5 lg:mt-0 mt-20">
+        <div class="flex flex-col gap-4 pb-6 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-wide text-zinc-500">Administrative report dashboard</p>
+                <h1 class="mt-1 text-2xl/8 font-semibold text-zinc-950 sm:text-xl/8">Activity Logging and Reporting</h1>
+                <p class="mt-2 max-w-3xl text-sm text-zinc-600">
+                    Monitor file uploads, downloads, module views, and role-based activity across the repository.
+                </p>
+            </div>
+
+            <div class="relative" x-data="{ open: false }">
+                <x-my-secondary-button @click="open = !open" @click.away="open = false">
+                    <svg class="w-5 h-5 text-zinc-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Export
+                    <svg class="w-4 h-4 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </x-my-secondary-button>
+
+                <div x-cloak x-show="open" x-transition class="absolute right-0 z-50 mt-2 w-48 overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-lg">
+                    <button onclick="exportToPDF(this)" class="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-zinc-700 transition-colors hover:bg-zinc-100">
+                        <svg class="w-5 h-5 text-zinc-900" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 1v5h5v10H6V3h7z" />
+                            <path d="M8 13h8v2H8zm0 3h8v2H8zm0-6h3v2H8z" />
+                        </svg>
+                        Export to PDF
+                    </button>
+                    <button onclick="printReport()" class="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-zinc-700 transition-colors hover:bg-zinc-100">
+                        <svg class="w-5 h-5 text-zinc-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                        </svg>
+                        Print Report
+                    </button>
                 </div>
             </div>
         </div>
 
-        <!-- Filter Section -->
-        <div class="bg-white rounded-xl border border-zinc-200 shadow-sm mb-8 overflow-hidden">
-            <div class="bg-zinc-50/80 border-b border-zinc-200 px-6 py-4 flex items-center justify-between">
+        <section class="mb-6 overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
+            <div class="flex flex-col gap-3 border-b border-zinc-200 bg-zinc-50/80 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
                 <div class="flex items-center gap-2">
                     <svg class="w-5 h-5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                     </svg>
-                    <h2 class="text-sm font-semibold text-zinc-800">Filter & Analyze Reports</h2>
+                    <h2 class="text-sm font-semibold text-zinc-800">Report Scope</h2>
                 </div>
-                @if(array_filter($filters ?? []))
-                    <a href="{{ route('reports.summary') }}" class="text-xs font-medium text-red-600 hover:text-red-700 flex items-center gap-1 transition-colors">
+                @if($hasFilters)
+                    <a href="{{ route('reports.summary') }}" class="inline-flex items-center gap-1 text-xs font-medium text-red-600 transition-colors hover:text-red-700">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
-                        Clear Active Filters
+                        Clear filters
                     </a>
                 @endif
             </div>
-            
+
             <div class="p-6">
                 <form method="GET" action="{{ route('reports.summary') }}">
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
-                        <!-- Department -->
+                    <div class="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
                         <div>
-                            <label class="block text-xs font-semibold text-zinc-600 mb-2 tracking-wide uppercase">Department</label>
-                            <div class="relative">
-                                <select name="department_id" class="w-full appearance-none border border-zinc-300 rounded-lg text-sm py-2.5 pl-3 pr-10 bg-white hover:border-zinc-400 focus:ring-2 focus:ring-zinc-900/20 focus:border-zinc-900 transition-colors shadow-sm">
-                                    <option value="">All Departments</option>
-                                    @foreach($departments as $dept)
-                                        <option value="{{ $dept->id }}" {{ ($filters['department_id'] ?? '') == $dept->id ? 'selected' : '' }}>{{ $dept->department_name }}</option>
-                                    @endforeach
-                                </select>
-                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-zinc-500">
-                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                                </div>
-                            </div>
+                            <label class="mb-2 block text-xs font-semibold uppercase tracking-wide text-zinc-600">Department</label>
+                            <select name="department_id" class="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm shadow-sm transition-colors hover:border-zinc-400 focus:border-zinc-900 focus:ring-2 focus:ring-zinc-900/20">
+                                <option value="">All Departments</option>
+                                @foreach($departments as $dept)
+                                    <option value="{{ $dept->id }}" {{ ($filters['department_id'] ?? '') == $dept->id ? 'selected' : '' }}>
+                                        {{ $dept->department_name }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
 
-                        <!-- Degree Program -->
                         <div>
-                            <label class="block text-xs font-semibold text-zinc-600 mb-2 tracking-wide uppercase">Degree Program</label>
-                            <div class="relative">
-                                <select name="course_id" class="w-full appearance-none border border-zinc-300 rounded-lg text-sm py-2.5 pl-3 pr-10 bg-white hover:border-zinc-400 focus:ring-2 focus:ring-zinc-900/20 focus:border-zinc-900 transition-colors shadow-sm">
-                                    <option value="">All Programs</option>
-                                    @foreach($courses as $course)
-                                        <option value="{{ $course->id }}" data-department-id="{{ $course->department_id }}" {{ ($filters['course_id'] ?? '') == $course->id ? 'selected' : '' }}>{{ $course->course_name }}</option>
-                                    @endforeach
-                                </select>
-                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-zinc-500">
-                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                                </div>
-                            </div>
+                            <label class="mb-2 block text-xs font-semibold uppercase tracking-wide text-zinc-600">Degree Program</label>
+                            <select name="course_id" class="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm shadow-sm transition-colors hover:border-zinc-400 focus:border-zinc-900 focus:ring-2 focus:ring-zinc-900/20">
+                                <option value="">All Programs</option>
+                                @foreach($courses as $course)
+                                    <option value="{{ $course->id }}" data-department-id="{{ $course->department_id }}" {{ ($filters['course_id'] ?? '') == $course->id ? 'selected' : '' }}>
+                                        {{ $course->course_name }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
 
-                        <!-- Semester -->
                         <div>
-                            <label class="block text-xs font-semibold text-zinc-600 mb-2 tracking-wide uppercase">Semester</label>
-                            <div class="relative">
-                                <select name="semester" class="w-full appearance-none border border-zinc-300 rounded-lg text-sm py-2.5 pl-3 pr-10 bg-white hover:border-zinc-400 focus:ring-2 focus:ring-zinc-900/20 focus:border-zinc-900 transition-colors shadow-sm">
-                                    <option value="">All Semesters</option>
-                                    <option value="1st" {{ ($filters['semester'] ?? '') == '1st' ? 'selected' : '' }}>1st Semester</option>
-                                    <option value="2nd" {{ ($filters['semester'] ?? '') == '2nd' ? 'selected' : '' }}>2nd Semester</option>
-                                </select>
-                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-zinc-500">
-                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                                </div>
-                            </div>
+                            <label class="mb-2 block text-xs font-semibold uppercase tracking-wide text-zinc-600">Semester</label>
+                            <select name="semester" class="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm shadow-sm transition-colors hover:border-zinc-400 focus:border-zinc-900 focus:ring-2 focus:ring-zinc-900/20">
+                                <option value="">All Semesters</option>
+                                <option value="1st" {{ ($filters['semester'] ?? '') == '1st' ? 'selected' : '' }}>1st Semester</option>
+                                <option value="2nd" {{ ($filters['semester'] ?? '') == '2nd' ? 'selected' : '' }}>2nd Semester</option>
+                            </select>
                         </div>
 
-                        <!-- Faculty -->
                         <div>
-                            <label class="block text-xs font-semibold text-zinc-600 mb-2 tracking-wide uppercase">Faculty Member</label>
-                            <div class="relative">
-                                <select name="faculty_id" class="w-full appearance-none border border-zinc-300 rounded-lg text-sm py-2.5 pl-3 pr-10 bg-white hover:border-zinc-400 focus:ring-2 focus:ring-zinc-900/20 focus:border-zinc-900 transition-colors shadow-sm">
-                                    <option value="">All Faculty</option>
-                                    @foreach($faculties as $faculty)
-                                        <option value="{{ $faculty->id }}" data-department-id="{{ $faculty->department_id }}" {{ ($filters['faculty_id'] ?? '') == $faculty->id ? 'selected' : '' }}>{{ $faculty->name }}</option>
-                                    @endforeach
-                                </select>
-                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-zinc-500">
-                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                                </div>
-                            </div>
+                            <label class="mb-2 block text-xs font-semibold uppercase tracking-wide text-zinc-600">Faculty Member</label>
+                            <select name="faculty_id" class="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm shadow-sm transition-colors hover:border-zinc-400 focus:border-zinc-900 focus:ring-2 focus:ring-zinc-900/20">
+                                <option value="">All Faculty</option>
+                                @foreach($faculties as $faculty)
+                                    <option value="{{ $faculty->id }}" data-department-id="{{ $faculty->department_id }}" {{ ($filters['faculty_id'] ?? '') == $faculty->id ? 'selected' : '' }}>
+                                        {{ $faculty->name }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
                     </div>
 
-                    <div class="flex flex-wrap items-center justify-between pt-4 border-t border-zinc-100">
-                        <div class="text-sm text-zinc-500">
-                            @if(array_filter($filters ?? []))
-                                Showing filtered results based on your selection.
-                            @else
-                                Showing all report data. Apply filters to narrow down.
-                            @endif
+                    <div class="mt-5 flex flex-col gap-4 border-t border-zinc-100 pt-5 lg:flex-row lg:items-center lg:justify-between">
+                        <div class="flex flex-wrap gap-2">
+                            @forelse($filterBadges as $badge)
+                                <span class="inline-flex items-center gap-2 rounded-md border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs text-zinc-700">
+                                    <span class="font-semibold text-zinc-500">{{ $badge['label'] }}</span>
+                                    <span class="font-medium text-zinc-900">{{ $badge['value'] }}</span>
+                                </span>
+                            @empty
+                                <span class="text-sm text-zinc-500">Showing the complete repository activity scope.</span>
+                            @endforelse
                         </div>
-                        <div class="flex items-center gap-3">
-                            @if(!empty($filters['course_id']))
-                            <a href="{{ route('reports.individual', $filters['course_id']) }}" class="px-5 py-2.5 bg-blue-50 text-blue-700 font-medium text-sm rounded-lg border border-blue-200 hover:bg-blue-100 hover:border-blue-300 transition-all shadow-sm flex items-center gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                                View Detailed Course Report
-                            </a>
+
+                        <div class="flex flex-wrap items-center gap-3">
+                            @if($selectedCourse)
+                                <a href="{{ route('reports.individual', $selectedCourse->id) }}" class="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-5 py-2.5 text-sm font-medium text-blue-700 shadow-sm transition-colors hover:bg-blue-100">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    Course Report
+                                </a>
                             @endif
-                            <button type="submit" class="px-6 py-2.5 bg-zinc-900 text-white font-medium text-sm rounded-lg hover:bg-zinc-800 transition-colors shadow-sm flex items-center gap-2">
+                            <button type="submit" class="inline-flex items-center gap-2 rounded-lg bg-zinc-900 px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-zinc-800">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                                 </svg>
@@ -164,661 +163,624 @@
                     </div>
                 </form>
             </div>
-        </div>
+        </section>
 
-        <!-- Stats Cards -->
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8" id="reportContent">
-            <div class="overflow-hidden rounded-xl border border-zinc-300 bg-white p-6 shadow-sm">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-zinc-600">Total Modules</p>
-                        <p class="text-3xl font-bold text-primary mt-2">{{ number_format($totalModules) }}</p>
-                    </div>
-                    <div class="p-3 rounded-lg bg-blue-50">
-                        <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-                        </svg>
-                    </div>
-                </div>
+        <section class="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+            <div class="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
+                <p class="text-xs font-semibold uppercase tracking-wide text-zinc-500">File Uploads</p>
+                <p class="mt-2 text-3xl font-bold text-blue-700">{{ number_format($totalModules) }}</p>
+                <p class="mt-1 text-xs text-zinc-500">Modules in scope</p>
             </div>
-            <div class="overflow-hidden rounded-xl border border-zinc-300 bg-white p-6 shadow-sm">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-zinc-600">Faculty Contributors</p>
-                        <p class="text-3xl font-bold text-green-600 mt-2">{{ number_format($totalFaculty) }}</p>
-                    </div>
-                    <div class="p-3 rounded-lg bg-green-50">
-                        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                    </div>
-                </div>
+            <div class="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
+                <p class="text-xs font-semibold uppercase tracking-wide text-zinc-500">Downloads</p>
+                <p class="mt-2 text-3xl font-bold text-indigo-700">{{ number_format($totalDownloads) }}</p>
+                <p class="mt-1 text-xs text-zinc-500">Download records</p>
             </div>
-            <div class="overflow-hidden rounded-xl border border-zinc-300 bg-white p-6 shadow-sm">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-zinc-600">Total Downloads</p>
-                        <p class="text-3xl font-bold text-indigo-600 mt-2">{{ number_format($totalDownloads) }}</p>
-                    </div>
-                    <div class="p-3 rounded-lg bg-indigo-50">
-                        <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                        </svg>
-                    </div>
-                </div>
+            <div class="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
+                <p class="text-xs font-semibold uppercase tracking-wide text-zinc-500">Module Views</p>
+                <p class="mt-2 text-3xl font-bold text-amber-700">{{ number_format($totalViews ?? 0) }}</p>
+                <p class="mt-1 text-xs text-zinc-500">Recorded views</p>
             </div>
-            <div class="overflow-hidden rounded-xl border border-zinc-300 bg-white p-6 shadow-sm">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-zinc-600">Total Students</p>
-                        <p class="text-3xl font-bold text-orange-600 mt-2">{{ number_format($totalStudents) }}</p>
-                    </div>
-                    <div class="p-3 rounded-lg bg-orange-50">
-                        <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
-                        </svg>
-                    </div>
-                </div>
+            <div class="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
+                <p class="text-xs font-semibold uppercase tracking-wide text-zinc-500">Contributors</p>
+                <p class="mt-2 text-3xl font-bold text-emerald-700">{{ number_format($totalFaculty) }}</p>
+                <p class="mt-1 text-xs text-zinc-500">Uploaders in scope</p>
             </div>
-        </div>
+            <div class="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
+                <p class="text-xs font-semibold uppercase tracking-wide text-zinc-500">Students</p>
+                <p class="mt-2 text-3xl font-bold text-rose-700">{{ number_format($totalStudents) }}</p>
+                <p class="mt-1 text-xs text-zinc-500">Registered learners</p>
+            </div>
+        </section>
 
-        <!-- Charts Section -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            <!-- Faculty Uploads Bar Chart -->
-            <div class="lg:col-span-2 bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden flex flex-col">
-                <div class="p-6 border-b border-zinc-200 bg-white">
-                    <h2 class="text-lg font-bold text-zinc-800 flex items-center gap-2">
-                        <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                        </svg>
-                        Top Faculty Uploaders
-                    </h2>
+        <div class="mb-8 grid grid-cols-1 gap-6 xl:grid-cols-2">
+            <section class="rounded-lg border border-zinc-200 bg-white shadow-sm">
+                <div class="border-b border-zinc-200 px-6 py-4">
+                    <h2 class="text-base font-bold text-zinc-900">User Role Summary</h2>
+                    <p class="mt-1 text-sm text-zinc-500">Faculty and student accounts across the system.</p>
                 </div>
-                <div class="p-6 flex-1 relative min-h-[300px]">
-                    @if(count($facultyUploadSummary) > 0)
-                        <canvas id="facultyChart"></canvas>
-                    @else
-                        <div class="flex flex-col items-center justify-center h-full">
-                            <svg class="w-16 h-16 text-zinc-200 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                            </svg>
-                            <p class="text-zinc-400 font-semibold text-sm">No upload data to display</p>
-                            <p class="text-zinc-300 text-xs mt-1">Adjust your filters to see chart data</p>
+                <div class="divide-y divide-zinc-100">
+                    @forelse($roleBreakdown as $role)
+                        <div class="flex items-center justify-between px-6 py-4">
+                            <div>
+                                <p class="text-sm font-semibold text-zinc-900">{{ ucfirst($role['role']) }}</p>
+                                <p class="text-xs text-zinc-500">Account role</p>
+                            </div>
+                            <span class="text-xl font-bold text-zinc-900">{{ number_format($role['total']) }}</span>
                         </div>
-                    @endif
+                    @empty
+                        <div class="px-6 py-8 text-center text-sm text-zinc-500">No user role data available.</div>
+                    @endforelse
                 </div>
-            </div>
+            </section>
 
-            <!-- Department Breakdown Doughnut Chart -->
-            <div class="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden flex flex-col">
-                <div class="p-6 border-b border-zinc-200 bg-white">
-                    <h2 class="text-lg font-bold text-zinc-800 flex items-center gap-2">
-                        <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
-                        </svg>
-                        Modules by Department
-                    </h2>
+            <section class="rounded-lg border border-zinc-200 bg-white shadow-sm">
+                <div class="border-b border-zinc-200 px-6 py-4">
+                    <h2 class="text-base font-bold text-zinc-900">Recent Faculty and Student Sessions</h2>
+                    <p class="mt-1 text-sm text-zinc-500">Saved access history from login and session activity.</p>
                 </div>
-                <div class="p-6 flex-1 relative flex items-center justify-center min-h-[300px]">
-                    @if(count($departmentBreakdown) > 0)
-                        <canvas id="departmentChart"></canvas>
-                    @else
-                        <div class="flex flex-col items-center justify-center h-full">
-                            <svg class="w-16 h-16 text-zinc-200 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
-                            </svg>
-                            <p class="text-zinc-400 font-semibold text-sm">No department data to display</p>
-                            <p class="text-zinc-300 text-xs mt-1">Adjust your filters to see chart data</p>
-                        </div>
-                    @endif
-                </div>
-            </div>
-        </div>
-
-        <!-- Tabbed Detailed Reports -->
-        <div x-data="{ activeTab: 'faculty' }" class="mb-8">
-            <!-- Tabs Navigation -->
-            <div class="flex space-x-1 bg-zinc-100/50 p-1 rounded-xl mb-6 border border-zinc-200">
-                <button @click="activeTab = 'faculty'" 
-                    :class="activeTab === 'faculty' ? 'bg-white shadow-sm text-zinc-900 font-semibold border-zinc-200' : 'text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100 font-medium border-transparent'"
-                    class="flex-1 py-2.5 px-4 rounded-lg text-sm transition-all border flex items-center justify-center gap-2">
-                    <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                    </svg>
-                    Faculty Uploads
-                </button>
-                <button @click="activeTab = 'departments'" 
-                    :class="activeTab === 'departments' ? 'bg-white shadow-sm text-zinc-900 font-semibold border-zinc-200' : 'text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100 font-medium border-transparent'"
-                    class="flex-1 py-2.5 px-4 rounded-lg text-sm transition-all border flex items-center justify-center gap-2">
-                    <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                    </svg>
-                    Department Breakdown
-                </button>
-                <button @click="activeTab = 'students'" 
-                    :class="activeTab === 'students' ? 'bg-white shadow-sm text-zinc-900 font-semibold border-zinc-200' : 'text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100 font-medium border-transparent'"
-                    class="flex-1 py-2.5 px-4 rounded-lg text-sm transition-all border flex items-center justify-center gap-2">
-                    <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    Student Downloads
-                </button>
-            </div>
-
-            <!-- Tab Contents -->
-            <div class="relative">
-                
-                <!-- Faculty Upload Summary -->
-                <div x-show="activeTab === 'faculty'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" class="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
-                    <div class="p-6 border-b border-zinc-200 bg-white flex items-center justify-between">
-                <div>
-                    <h2 class="text-lg font-bold text-zinc-800 flex items-center gap-2">
-                        <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                        </svg>
-                        Faculty Upload Summary
-                    </h2>
-                    <p class="mt-1 text-sm text-zinc-500">Modules uploaded by each faculty member per course code</p>
-                </div>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="min-w-full" id="facultyTable">
-                    <thead class="bg-zinc-50/80 border-b border-zinc-200">
-                        <tr>
-                            <th class="px-6 py-5 text-left text-xs font-bold text-zinc-500 uppercase tracking-wider">Faculty Name</th>
-                            <th class="px-6 py-5 text-left text-xs font-bold text-zinc-500 uppercase tracking-wider">Department</th>
-                            <th class="px-6 py-5 text-left text-xs font-bold text-zinc-500 uppercase tracking-wider">Course Codes Handled</th>
-                            <th class="px-6 py-5 text-right text-xs font-bold text-zinc-500 uppercase tracking-wider">Total Modules</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-zinc-100">
-                        @forelse($facultyUploadSummary as $faculty)
-                        <tr class="hover:bg-zinc-50/50 transition-colors group">
-                            <td class="px-6 py-5 whitespace-nowrap">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-sm font-black text-indigo-700 border border-indigo-200 shadow-sm group-hover:scale-105 transition-transform">
-                                        {{ substr($faculty['faculty_name'], 0, 1) }}
-                                    </div>
-                                    <div class="text-sm font-bold text-zinc-900">{{ $faculty['faculty_name'] }}</div>
+                <div class="divide-y divide-zinc-100">
+                    @forelse($recentUserActivity as $session)
+                        <div class="px-6 py-3.5">
+                            <div class="flex items-start justify-between gap-4">
+                                <div class="min-w-0">
+                                    <p class="truncate text-sm font-semibold text-zinc-900">{{ $session['name'] }}</p>
+                                    <p class="text-xs uppercase tracking-wide text-zinc-500">
+                                        {{ $session['role'] }} - {{ $session['id_number'] ?? 'N/A' }}
+                                    </p>
+                                    <p class="mt-1 text-xs text-zinc-500">
+                                        Login:
+                                        {{ $session['login_at'] ? $session['login_at']->format('M d, Y h:i A') : 'Current session' }}
+                                    </p>
                                 </div>
-                            </td>
-                            <td class="px-6 py-5 whitespace-nowrap text-sm text-zinc-600">
-                                {{ $faculty['department'] }}
-                            </td>
-                            <td class="px-6 py-5">
-                                <button type="button" data-modal-target="faculty-course-modal-{{ $loop->index }}" class="inline-flex items-center px-3 py-1.5 text-xs font-bold bg-indigo-50 text-indigo-700 hover:bg-indigo-600 hover:text-white rounded-lg border border-indigo-200 shadow-sm transition-all">
-                                    View Handled Courses ({{ count($faculty['course_breakdown']) }})
-                                </button>
-
-                                <x-my-modal id="faculty-course-modal-{{ $loop->index }}" title="Courses Handled by {{ $faculty['faculty_name'] }}" iconType="info">
-                                    <div class="mt-4">
-                                        <ul class="space-y-3">
-                                            @forelse($faculty['course_breakdown'] as $course)
-                                            <li class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
-                                                <div>
-                                                    <span class="font-bold text-gray-800">{{ $course['course_code'] }}</span>
-                                                    <span class="block text-xs text-gray-500 mt-1">{{ $course['course_name'] }}</span>
-                                                </div>
-                                                <span class="px-2.5 py-1 rounded-md bg-indigo-100 text-indigo-800 text-xs font-bold">
-                                                    {{ $course['count'] }} Modules
-                                                </span>
-                                            </li>
-                                            @empty
-                                            <li class="text-sm text-gray-500 italic">No courses handled.</li>
-                                            @endforelse
-                                        </ul>
-                                    </div>
-                                    <x-slot name="footer">
-                                        <x-my-secondary-button data-modal-close>Close</x-my-secondary-button>
-                                    </x-slot>
-                                </x-my-modal>
-                            </td>
-                            <td class="px-6 py-5 whitespace-nowrap text-right">
-                                <span class="px-4 py-2 inline-flex text-sm leading-5 font-black rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm">
-                                    {{ $faculty['total_modules'] }}
-                                </span>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="4" class="px-6 py-12 text-center">
-                                <div class="flex flex-col items-center justify-center">
-                                    <svg class="w-12 h-12 text-zinc-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-                                    <p class="text-zinc-500 font-bold">No faculty upload data found</p>
-                                    <p class="text-sm text-zinc-400 mt-1">Try adjusting your filters to see results</p>
-                                    @if(array_filter($filters ?? []))
-                                        <a href="{{ route('reports.summary') }}" class="mt-3 inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                                            Clear all filters
-                                        </a>
+                                <div class="shrink-0 text-right">
+                                    @if($session['logout_at'] ?? null)
+                                        <p class="text-xs font-semibold text-zinc-500">Signed out</p>
+                                        <p class="mt-1 text-xs text-zinc-500">{{ $session['logout_at']->format('M d, h:i A') }}</p>
+                                    @else
+                                        <p class="text-xs font-semibold text-emerald-700">Active</p>
+                                        <p class="mt-1 text-xs text-zinc-500">
+                                            {{ $session['last_seen_at'] ? $session['last_seen_at']->diffForHumans() : 'No timestamp' }}
+                                        </p>
                                     @endif
                                 </div>
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-                </div>
-
-                <!-- Department Breakdown -->
-                <div x-cloak x-show="activeTab === 'departments'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" class="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
-                    <div class="p-6 border-b border-zinc-200 bg-zinc-50/30 flex items-center justify-between">
-                <div>
-                    <h2 class="text-lg font-bold text-zinc-800 flex items-center gap-2">
-                        <svg class="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                        </svg>
-                        Department Breakdown
-                    </h2>
-                    <p class="mt-1 text-sm text-zinc-500 font-medium">Distribution of modules across academic departments</p>
-                </div>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="min-w-full">
-                    <thead class="bg-zinc-50/80 border-b border-zinc-200">
-                        <tr>
-                            <th class="px-6 py-5 text-left text-xs font-bold text-zinc-500 uppercase tracking-wider">Department Name</th>
-                            <th class="px-6 py-5 text-right text-xs font-bold text-zinc-500 uppercase tracking-wider">Total Modules</th>
-                            <th class="px-6 py-5 text-left text-xs font-bold text-zinc-500 uppercase tracking-wider">Degree Programs</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-zinc-100">
-                        @forelse($departmentBreakdown as $dept)
-                        <tr class="hover:bg-zinc-50/50 transition-colors group">
-                            <td class="px-6 py-5 whitespace-nowrap">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-sm font-black text-purple-700 border border-purple-200 shadow-sm group-hover:scale-105 transition-transform">
-                                        {{ substr($dept['department_name'], 0, 1) }}
-                                    </div>
-                                    <div class="text-sm font-bold text-zinc-900">{{ $dept['department_name'] }}</div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-5 whitespace-nowrap text-right">
-                                <span class="px-4 py-2 inline-flex text-sm leading-5 font-black rounded-lg bg-purple-50 text-purple-700 border border-purple-200 shadow-sm">
-                                    {{ $dept['total_modules'] }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-5">
-                                <button type="button" data-modal-target="dept-program-modal-{{ $loop->index }}" class="inline-flex items-center px-3 py-1.5 text-xs font-bold bg-purple-50 text-purple-700 hover:bg-purple-600 hover:text-white rounded-lg border border-purple-200 shadow-sm transition-all">
-                                    View Degree Programs ({{ collect($dept['degree_programs'])->filter()->count() }})
-                                </button>
-
-                                <x-my-modal id="dept-program-modal-{{ $loop->index }}" title="Degree Programs - {{ $dept['department_name'] }}" iconType="info">
-                                    <div class="mt-4">
-                                        <div class="flex flex-col gap-3">
-                                            @forelse($dept['degree_programs'] as $program)
-                                            @if($program)
-                                                <a href="{{ route('reports.individual', $program->id) }}" class="flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors group">
-                                                    <span class="text-sm font-bold text-gray-800 group-hover:text-purple-700">{{ $program->course_name }}</span>
-                                                    <svg class="w-4 h-4 text-gray-400 group-hover:text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-                                                </a>
-                                            @endif
-                                            @empty
-                                                <p class="text-sm text-gray-500 italic">No degree programs found.</p>
-                                            @endforelse
-                                        </div>
-                                    </div>
-                                    <x-slot name="footer">
-                                        <x-my-secondary-button data-modal-close>Close</x-my-secondary-button>
-                                    </x-slot>
-                                </x-my-modal>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="3" class="px-6 py-12 text-center">
-                                <div class="flex flex-col items-center justify-center">
-                                    <svg class="w-12 h-12 text-zinc-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
-                                    <p class="text-zinc-500 font-bold">No department data found</p>
-                                    <p class="text-sm text-zinc-400 mt-1">Try adjusting your filters to see results</p>
-                                    @if(array_filter($filters ?? []))
-                                        <a href="{{ route('reports.summary') }}" class="mt-3 inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                                            Clear all filters
-                                        </a>
-                                    @endif
-                                </div>
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-                </div>
-
-                <!-- Student Download Report -->
-                <div x-cloak x-show="activeTab === 'students'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" class="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
-                    <div class="p-6 border-b border-zinc-200 bg-zinc-50/30 flex items-center justify-between">
-                <div>
-                    <h2 class="text-lg font-bold text-zinc-800 flex items-center gap-2">
-                        <svg class="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                        </svg>
-                        Student Download Report
-                    </h2>
-                    <p class="mt-1 text-sm text-zinc-500 font-medium">Usage activity tracking for students</p>
-                </div>
-            </div>
-            <div class="p-6">
-                @forelse($studentDownloads as $deptName => $programs)
-                <div class="mb-10 last:mb-0 bg-zinc-50/50 rounded-2xl p-6 border border-zinc-200 shadow-sm">
-                    <h3 class="text-base font-black text-zinc-900 mb-5 flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center border border-zinc-200 shadow-sm">
-                            <svg class="w-5 h-5 text-zinc-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                            </svg>
+                            </div>
                         </div>
-                        {{ $deptName }}
-                    </h3>
-                    @foreach($programs as $program)
-                    <div class="ml-2 mb-8 last:mb-0">
-                        <h4 class="text-sm font-bold text-zinc-800 mb-4 flex items-center gap-2.5">
-                            <span class="w-2 h-2 rounded-full bg-blue-600 shadow-sm"></span>
-                            <span class="px-3 py-1 bg-white text-blue-700 rounded-lg border border-blue-200 shadow-sm uppercase tracking-wide text-xs">{{ $program['degree_program'] }}</span>
-                        </h4>
-                        <div class="overflow-x-auto ring-1 ring-zinc-200 sm:rounded-lg shadow-sm">
-                            <table class="min-w-full divide-y divide-zinc-200 bg-white">
-                                <thead class="bg-zinc-50/80 border-b border-zinc-200">
-                                    <tr>
-                                        <th class="px-6 py-4 text-left text-xs font-bold text-zinc-500 uppercase tracking-wider">Student Name</th>
-                                        <th class="px-6 py-4 text-center text-xs font-bold text-zinc-500 uppercase tracking-wider">ID Number</th>
-                                        <th class="px-6 py-4 text-right text-xs font-bold text-zinc-500 uppercase tracking-wider">Total Downloads</th>
-                                        <th class="px-6 py-4 text-left text-xs font-bold text-zinc-500 uppercase tracking-wider">Last Download Activity</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-zinc-100">
-                                    @foreach($program['students'] as $student)
-                                    <tr class="hover:bg-zinc-50/50 transition-colors group">
-                                        <td class="px-6 py-4 text-sm font-bold text-zinc-900">
-                                            <div class="flex items-center gap-3">
-                                                <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-sm font-black text-orange-700 border border-orange-200 shadow-sm group-hover:scale-105 transition-transform">
-                                                    {{ substr($student['name'], 0, 1) }}
-                                                </div>
-                                                {{ $student['name'] }}
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4 text-sm text-zinc-600 font-mono text-center font-medium">{{ $student['id_number'] }}</td>
-                                        <td class="px-6 py-4 text-sm text-right">
-                                            <span class="px-3 py-1.5 rounded-lg bg-orange-50 text-orange-700 font-black border border-orange-100 shadow-sm inline-flex items-center gap-2">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                                                {{ $student['download_count'] }}
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4 text-sm text-zinc-500 font-semibold">
-                                            <div class="flex items-center gap-2">
-                                                <svg class="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                                {{ $student['last_download'] ? \Carbon\Carbon::parse($student['last_download'])->format('M d, Y h:i A') : 'N/A' }}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    @endforeach
+                    @empty
+                        <div class="px-6 py-8 text-center text-sm text-zinc-500">No faculty or student access records available.</div>
+                    @endforelse
                 </div>
-                @empty
-                <div class="text-center py-12">
-                    <div class="flex flex-col items-center justify-center">
-                        <svg class="w-12 h-12 text-zinc-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                        </svg>
-                        <p class="text-zinc-500 font-medium">No student download data found</p>
-                        <p class="text-sm text-zinc-400 mt-1">Try adjusting your filters</p>
-                        @if(array_filter($filters ?? []))
-                            <a href="{{ route('reports.summary') }}" class="mt-3 inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                                Clear all filters
-                            </a>
+            </section>
+        </div>
+
+        <div class="summary-feed-grid mb-8 grid grid-cols-1 gap-6 xl:grid-cols-2">
+            <section
+                x-data="{ page: 1, perPage: 5, total: {{ count($activityFeed ?? []) }}, get pages() { return Math.max(1, Math.ceil(this.total / this.perPage)); } }"
+                class="compact-report-card flex flex-col rounded-lg border border-zinc-200 bg-white shadow-sm"
+            >
+                <div class="compact-card-header border-b border-zinc-200 px-6 py-4">
+                    <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                        <div>
+                            <h2 class="text-base font-bold text-zinc-900">Recent Repository Activity</h2>
+                            <p class="mt-1 text-sm text-zinc-500">Combined activity log for the selected report scope.</p>
+                        </div>
+                        @if(count($activityFeed ?? []) > 0)
+                            <span class="shrink-0 rounded-md border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-xs font-semibold text-zinc-600">
+                                {{ count($activityFeed) }} {{ Str::plural('record', count($activityFeed)) }}
+                            </span>
                         @endif
                     </div>
                 </div>
-                @endforelse
-            </div>
-            </div>
+                @if(count($activityFeed ?? []) > 0)
+                    <div class="compact-activity-list divide-y divide-zinc-100">
+                    @foreach($activityFeed as $index => $activity)
+                        @php
+                            $isUpload = $activity['type'] === 'upload';
+                            $activityDate = \Carbon\Carbon::parse($activity['occurred_at']);
+                            $activityMeta = $activity['actor'] . ' (' . ucfirst($activity['role']) . ') - ' . $activity['course_code'] . ' - ' . $activity['department'];
+                        @endphp
+                        <div x-show="{{ $index }} >= (page - 1) * perPage && {{ $index }} < page * perPage" x-cloak class="compact-activity-row px-6 py-4">
+                            <div class="compact-activity-content">
+                                <div class="compact-activity-icon mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg {{ $isUpload ? 'bg-blue-50 text-blue-700' : 'bg-indigo-50 text-indigo-700' }}">
+                                    @if($isUpload)
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M12 4v12m0-12l-4 4m4-4l4 4" />
+                                        </svg>
+                                    @else
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                        </svg>
+                                    @endif
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <div class="compact-activity-heading">
+                                        <p class="truncate text-sm font-semibold text-zinc-900" title="{{ $activity['label'] }}">{{ $activity['label'] }}</p>
+                                        <p class="compact-activity-date text-xs text-zinc-500">{{ $activityDate->format('M d, Y h:i A') }}</p>
+                                    </div>
+                                    <p class="mt-1 truncate text-sm text-zinc-700" title="{{ $activity['module_title'] }}">{{ $activity['module_title'] }}</p>
+                                    <p class="compact-activity-meta mt-1 text-xs text-zinc-500" title="{{ $activityMeta }}">{{ $activityMeta }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                    </div>
+
+                    <div class="compact-card-footer flex flex-col gap-3 border-t border-zinc-200 bg-zinc-50/70 px-6 py-3 sm:flex-row sm:items-center sm:justify-between">
+                        <p class="text-xs font-medium text-zinc-500">
+                            Showing
+                            <span x-text="((page - 1) * perPage) + 1"></span>
+                            -
+                            <span x-text="Math.min(page * perPage, total)"></span>
+                            of
+                            <span x-text="total"></span>
+                        </p>
+                        <div class="flex items-center gap-2">
+                            <button
+                                type="button"
+                                @click="page = Math.max(1, page - 1)"
+                                :disabled="page === 1"
+                                class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-zinc-300 bg-white text-zinc-700 shadow-sm transition-colors hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-40"
+                                aria-label="Previous activity page"
+                            >
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                                </svg>
+                            </button>
+                            <span class="min-w-16 text-center text-xs font-semibold text-zinc-600">
+                                <span x-text="page"></span> / <span x-text="pages"></span>
+                            </span>
+                            <button
+                                type="button"
+                                @click="page = Math.min(pages, page + 1)"
+                                :disabled="page === pages"
+                                class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-zinc-300 bg-white text-zinc-700 shadow-sm transition-colors hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-40"
+                                aria-label="Next activity page"
+                            >
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                @else
+                    <div>
+                        <div class="px-6 py-10 text-center text-sm text-zinc-500">No upload or download activity found.</div>
+                    </div>
+                @endif
+            </section>
+
+            <section
+                x-data="{ page: 1, perPage: 4, total: {{ count($topModules ?? []) }}, get pages() { return Math.max(1, Math.ceil(this.total / this.perPage)); } }"
+                class="compact-report-card flex flex-col rounded-lg border border-zinc-200 bg-white shadow-sm"
+            >
+                <div class="compact-card-header border-b border-zinc-200 px-6 py-4">
+                    <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                        <div>
+                            <h2 class="text-base font-bold text-zinc-900">Top Module Engagement</h2>
+                            <p class="mt-1 text-sm text-zinc-500">Modules ranked by combined views and downloads.</p>
+                        </div>
+                        @if(count($topModules ?? []) > 0)
+                            <span class="shrink-0 rounded-md border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-xs font-semibold text-zinc-600">
+                                {{ count($topModules) }} {{ Str::plural('module', count($topModules)) }}
+                            </span>
+                        @endif
+                    </div>
+                </div>
+                <div class="compact-table-wrap">
+                    <table class="compact-module-table min-w-full divide-y divide-zinc-200">
+                        <thead class="bg-zinc-50">
+                            <tr>
+                                <th style="width: 52%;" class="px-6 py-3 text-left text-xs font-bold uppercase tracking-wide text-zinc-500">Module</th>
+                                <th style="width: 24%;" class="px-6 py-3 text-left text-xs font-bold uppercase tracking-wide text-zinc-500">Uploader</th>
+                                <th style="width: 10%;" class="px-6 py-3 text-center text-xs font-bold uppercase tracking-wide text-zinc-500">Views</th>
+                                <th style="width: 14%;" class="px-6 py-3 text-center text-xs font-bold uppercase tracking-wide text-zinc-500">Downloads</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-zinc-100 bg-white">
+                            @forelse($topModules as $index => $module)
+                                @php
+                                    $moduleDepartment = $module->department->department_name ?? 'N/A';
+                                    $moduleUploader = $module->user->name ?? 'Unknown';
+                                    $moduleMeta = $module->course_code . ' - ' . $moduleDepartment;
+                                @endphp
+                                <tr x-show="{{ $index }} >= (page - 1) * perPage && {{ $index }} < page * perPage" x-cloak class="hover:bg-zinc-50">
+                                    <td class="px-6 py-4">
+                                        <p class="compact-module-title text-sm font-semibold text-zinc-900" title="{{ $module->title }}">{{ $module->title }}</p>
+                                        <p class="compact-module-meta mt-1 text-xs text-zinc-500" title="{{ $moduleMeta }}">{{ $moduleMeta }}</p>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-zinc-700"><span class="compact-uploader" title="{{ $moduleUploader }}">{{ $moduleUploader }}</span></td>
+                                    <td class="metric-cell px-6 py-4 text-center text-sm font-semibold text-zinc-900">{{ number_format($module->number_of_views ?? 0) }}</td>
+                                    <td class="metric-cell px-6 py-4 text-center text-sm font-semibold text-indigo-700">{{ number_format($module->module_downloads_count ?? 0) }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="4" class="px-6 py-10 text-center text-sm text-zinc-500">No module engagement data available.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+                @if(count($topModules ?? []) > 0)
+                    <div class="compact-card-footer flex flex-col gap-3 border-t border-zinc-200 bg-zinc-50/70 px-6 py-3 sm:flex-row sm:items-center sm:justify-between">
+                        <p class="text-xs font-medium text-zinc-500">
+                            Showing
+                            <span x-text="((page - 1) * perPage) + 1"></span>
+                            -
+                            <span x-text="Math.min(page * perPage, total)"></span>
+                            of
+                            <span x-text="total"></span>
+                        </p>
+                        <div class="flex items-center gap-2">
+                            <button
+                                type="button"
+                                @click="page = Math.max(1, page - 1)"
+                                :disabled="page === 1"
+                                class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-zinc-300 bg-white text-zinc-700 shadow-sm transition-colors hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-40"
+                                aria-label="Previous module page"
+                            >
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                                </svg>
+                            </button>
+                            <span class="min-w-16 text-center text-xs font-semibold text-zinc-600">
+                                <span x-text="page"></span> / <span x-text="pages"></span>
+                            </span>
+                            <button
+                                type="button"
+                                @click="page = Math.min(pages, page + 1)"
+                                :disabled="page === pages"
+                                class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-zinc-300 bg-white text-zinc-700 shadow-sm transition-colors hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-40"
+                                aria-label="Next module page"
+                            >
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                @endif
+            </section>
         </div>
 
+        <section x-data="{ activeTab: 'faculty' }" class="rounded-lg border border-zinc-200 bg-white shadow-sm">
+            <div class="border-b border-zinc-200 px-6 py-4">
+                <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                    <div>
+                        <h2 class="text-base font-bold text-zinc-900">Detailed Activity Reports</h2>
+                        <p class="mt-1 text-sm text-zinc-500">Uploads, department coverage, and downloader activity.</p>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" @click="activeTab = 'faculty'" class="rounded-md px-4 py-2 text-sm font-semibold transition-colors" :class="activeTab === 'faculty' ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200'">Faculty Uploads</button>
+                        <button type="button" @click="activeTab = 'departments'" class="rounded-md px-4 py-2 text-sm font-semibold transition-colors" :class="activeTab === 'departments' ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200'">Departments</button>
+                        <button type="button" @click="activeTab = 'downloads'" class="rounded-md px-4 py-2 text-sm font-semibold transition-colors" :class="activeTab === 'downloads' ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200'">Downloads</button>
+                    </div>
+                </div>
+            </div>
+
+            <div x-cloak x-show="activeTab === 'faculty'" x-transition class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-zinc-200">
+                    <thead class="bg-zinc-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-bold uppercase tracking-wide text-zinc-500">Faculty</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold uppercase tracking-wide text-zinc-500">Department</th>
+                            <th class="px-6 py-3 text-center text-xs font-bold uppercase tracking-wide text-zinc-500">Uploads</th>
+                            <th class="px-6 py-3 text-center text-xs font-bold uppercase tracking-wide text-zinc-500">Views</th>
+                            <th class="px-6 py-3 text-center text-xs font-bold uppercase tracking-wide text-zinc-500">Downloads</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold uppercase tracking-wide text-zinc-500">Course Codes</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-zinc-100">
+                        @forelse($facultyUploadSummary as $faculty)
+                            <tr class="hover:bg-zinc-50">
+                                <td class="px-6 py-4 text-sm font-semibold text-zinc-900">{{ $faculty['faculty_name'] }}</td>
+                                <td class="px-6 py-4 text-sm text-zinc-600">{{ $faculty['department'] }}</td>
+                                <td class="px-6 py-4 text-center text-sm font-bold text-zinc-900">{{ number_format($faculty['total_modules']) }}</td>
+                                <td class="px-6 py-4 text-center text-sm font-semibold text-amber-700">{{ number_format($faculty['total_views'] ?? 0) }}</td>
+                                <td class="px-6 py-4 text-center text-sm font-semibold text-indigo-700">{{ number_format($faculty['total_downloads'] ?? 0) }}</td>
+                                <td class="px-6 py-4">
+                                    <div class="flex flex-wrap gap-1.5">
+                                        @foreach($faculty['course_breakdown'] as $course)
+                                            <span class="rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1 text-xs font-medium text-zinc-700">
+                                                {{ $course['course_code'] }} ({{ $course['count'] }})
+                                            </span>
+                                        @endforeach
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" class="px-6 py-10 text-center text-sm text-zinc-500">No faculty upload data found.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            <div x-cloak x-show="activeTab === 'departments'" x-transition class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-zinc-200">
+                    <thead class="bg-zinc-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-bold uppercase tracking-wide text-zinc-500">Department</th>
+                            <th class="px-6 py-3 text-center text-xs font-bold uppercase tracking-wide text-zinc-500">Modules</th>
+                            <th class="px-6 py-3 text-center text-xs font-bold uppercase tracking-wide text-zinc-500">Views</th>
+                            <th class="px-6 py-3 text-center text-xs font-bold uppercase tracking-wide text-zinc-500">Downloads</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold uppercase tracking-wide text-zinc-500">Degree Programs</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-zinc-100">
+                        @forelse($departmentBreakdown as $dept)
+                            <tr class="hover:bg-zinc-50">
+                                <td class="px-6 py-4 text-sm font-semibold text-zinc-900">{{ $dept['department_name'] }}</td>
+                                <td class="px-6 py-4 text-center text-sm font-bold text-zinc-900">{{ number_format($dept['total_modules']) }}</td>
+                                <td class="px-6 py-4 text-center text-sm font-semibold text-amber-700">{{ number_format($dept['total_views'] ?? 0) }}</td>
+                                <td class="px-6 py-4 text-center text-sm font-semibold text-indigo-700">{{ number_format($dept['total_downloads'] ?? 0) }}</td>
+                                <td class="px-6 py-4">
+                                    <div class="flex flex-wrap gap-1.5">
+                                        @foreach($dept['degree_programs'] as $program)
+                                            @if($program)
+                                                <a href="{{ route('reports.individual', $program->id) }}" class="rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1 text-xs font-medium text-zinc-700 transition-colors hover:border-zinc-300 hover:bg-zinc-100">
+                                                    {{ $program->course_name }}
+                                                </a>
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="px-6 py-10 text-center text-sm text-zinc-500">No department data found.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            <div x-cloak x-show="activeTab === 'downloads'" x-transition class="p-6">
+                @forelse($studentDownloads as $deptName => $programs)
+                    <div class="mb-8 last:mb-0">
+                        <h3 class="mb-3 text-sm font-bold uppercase tracking-wide text-zinc-700">{{ $deptName }}</h3>
+                        @foreach($programs as $program)
+                            <div class="mb-6 overflow-hidden rounded-lg border border-zinc-200 last:mb-0">
+                                <div class="bg-zinc-50 px-4 py-3">
+                                    <p class="text-sm font-semibold text-zinc-900">{{ $program['degree_program'] }}</p>
+                                </div>
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-zinc-200">
+                                        <thead class="bg-white">
+                                            <tr>
+                                                <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-zinc-500">User</th>
+                                                <th class="px-4 py-3 text-center text-xs font-bold uppercase tracking-wide text-zinc-500">ID Number</th>
+                                                <th class="px-4 py-3 text-center text-xs font-bold uppercase tracking-wide text-zinc-500">Downloads</th>
+                                                <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-zinc-500">Last Activity</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-zinc-100">
+                                            @foreach($program['students'] as $student)
+                                                <tr class="hover:bg-zinc-50">
+                                                    <td class="px-4 py-3 text-sm font-semibold text-zinc-900">{{ $student['name'] }}</td>
+                                                    <td class="px-4 py-3 text-center font-mono text-sm text-zinc-600">{{ $student['id_number'] }}</td>
+                                                    <td class="px-4 py-3 text-center text-sm font-bold text-indigo-700">{{ number_format($student['download_count']) }}</td>
+                                                    <td class="px-4 py-3 text-sm text-zinc-600">
+                                                        {{ $student['last_download'] ? \Carbon\Carbon::parse($student['last_download'])->format('M d, Y h:i A') : 'N/A' }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @empty
+                    <div class="py-10 text-center text-sm text-zinc-500">No download activity found.</div>
+                @endforelse
+            </div>
+        </section>
     </main>
 
-    {{-- Print Styles (disabled — printing is handled by the dedicated print layout) --}}
     <style>
+        .summary-feed-grid {
+            align-items: start;
+        }
+
+        .compact-report-card {
+            overflow: hidden;
+        }
+
+        .compact-card-header {
+            padding: 1rem 1.25rem;
+        }
+
+        .compact-activity-list,
+        .compact-table-wrap {
+            flex: 0 0 auto;
+        }
+
+        .compact-activity-row {
+            padding: 0.75rem 1.25rem;
+        }
+
+        .compact-activity-content {
+            display: grid;
+            grid-template-columns: 2rem minmax(0, 1fr);
+            gap: 0.75rem;
+            align-items: start;
+        }
+
+        .compact-activity-icon {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 0.5rem;
+        }
+
+        .compact-activity-heading {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 0.75rem;
+            align-items: baseline;
+        }
+
+        .compact-activity-heading p,
+        .compact-activity-meta {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .compact-activity-date {
+            white-space: nowrap;
+        }
+
+        .compact-card-footer {
+            padding: 0.75rem 1.25rem;
+        }
+
+        .compact-module-table {
+            table-layout: fixed;
+            width: 100%;
+        }
+
+        .compact-module-table th,
+        .compact-module-table td {
+            padding: 0.7rem 1rem;
+            vertical-align: top;
+        }
+
+        .compact-module-title {
+            display: -webkit-box;
+            overflow: hidden;
+            line-height: 1.25;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+        }
+
+        .compact-module-meta,
+        .compact-uploader {
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .compact-module-table .metric-cell {
+            white-space: nowrap;
+        }
+
+        @media (max-width: 640px) {
+            .compact-activity-heading {
+                grid-template-columns: 1fr;
+                gap: 0.15rem;
+            }
+        }
+
         @media print {
             body { display: none !important; }
         }
     </style>
 
-    {{-- Chart.js & html2pdf Library --}}
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Dependent Dropdown Filtering for Department -> Course/Faculty
             const departmentSelect = document.querySelector('select[name="department_id"]');
             const courseSelect = document.querySelector('select[name="course_id"]');
             const facultySelect = document.querySelector('select[name="faculty_id"]');
 
             function filterDropdowns() {
+                if (!departmentSelect || !courseSelect || !facultySelect) return;
+
                 const selectedDept = departmentSelect.value;
-
-                // Filter Degree Programs
-                Array.from(courseSelect.options).forEach(option => {
-                    if (option.value === "") {
-                        option.hidden = false;
-                        option.disabled = false;
-                        return;
-                    }
-                    if (!selectedDept || option.dataset.departmentId === selectedDept) {
-                        option.hidden = false;
-                        option.disabled = false;
-                    } else {
-                        option.hidden = true;
-                        option.disabled = true;
-                        if (option.selected) courseSelect.value = "";
-                    }
-                });
-
-                // Filter Faculty Members
-                Array.from(facultySelect.options).forEach(option => {
-                    if (option.value === "") {
-                        option.hidden = false;
-                        option.disabled = false;
-                        return;
-                    }
-                    if (!selectedDept || option.dataset.departmentId === selectedDept) {
-                        option.hidden = false;
-                        option.disabled = false;
-                    } else {
-                        option.hidden = true;
-                        option.disabled = true;
-                        if (option.selected) facultySelect.value = "";
-                    }
-                });
-            }
-
-            if (departmentSelect && courseSelect && facultySelect) {
-                departmentSelect.addEventListener('change', filterDropdowns);
-                // Run once on load to apply initial state
-                filterDropdowns();
-            }
-
-            // Data from Backend
-            const facultyData = @json($facultyUploadSummary);
-            const departmentData = @json($departmentBreakdown);
-
-            // 1. Faculty Chart — only render if data exists
-            const facultyCanvas = document.getElementById('facultyChart');
-            if (facultyCanvas && facultyData.length > 0) {
-                const sortedFaculty = facultyData.sort((a, b) => b.total_modules - a.total_modules).slice(0, 10);
-                const facultyNames = sortedFaculty.map(f => f.faculty_name);
-                const facultyCounts = sortedFaculty.map(f => f.total_modules);
-
-                new Chart(facultyCanvas.getContext('2d'), {
-                    type: 'bar',
-                    data: {
-                        labels: facultyNames,
-                        datasets: [{
-                            label: 'Modules Uploaded',
-                            data: facultyCounts,
-                            backgroundColor: 'rgba(99, 102, 241, 0.8)',
-                            borderColor: 'rgba(79, 70, 229, 1)',
-                            borderWidth: 1,
-                            borderRadius: 4
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        return ` ${context.raw} modules`;
-                                    }
-                                }
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: { precision: 0 }
-                            },
-                            x: {
-                                ticks: {
-                                    maxRotation: 45,
-                                    minRotation: 45
-                                }
-                            }
+                [courseSelect, facultySelect].forEach((select) => {
+                    Array.from(select.options).forEach((option) => {
+                        if (option.value === '') {
+                            option.hidden = false;
+                            option.disabled = false;
+                            return;
                         }
-                    }
-                });
-            }
 
-            // 2. Department Chart — only render if data exists
-            const deptCanvas = document.getElementById('departmentChart');
-            if (deptCanvas && departmentData.length > 0) {
-                const deptNames = departmentData.map(d => d.department_name);
-                const deptCounts = departmentData.map(d => d.total_modules);
+                        const shouldShow = !selectedDept || option.dataset.departmentId === selectedDept;
+                        option.hidden = !shouldShow;
+                        option.disabled = !shouldShow;
 
-                const bgColors = [
-                    'rgba(168, 85, 247, 0.8)',
-                    'rgba(59, 130, 246, 0.8)',
-                    'rgba(16, 185, 129, 0.8)',
-                    'rgba(245, 158, 11, 0.8)',
-                    'rgba(239, 68, 68, 0.8)',
-                    'rgba(236, 72, 153, 0.8)',
-                ];
-
-                new Chart(deptCanvas.getContext('2d'), {
-                    type: 'doughnut',
-                    data: {
-                        labels: deptNames,
-                        datasets: [{
-                            data: deptCounts,
-                            backgroundColor: bgColors,
-                            borderWidth: 2,
-                            borderColor: '#ffffff',
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        cutout: '65%',
-                        plugins: {
-                            legend: {
-                                position: 'bottom',
-                                labels: {
-                                    usePointStyle: true,
-                                    padding: 20
-                                }
-                            }
+                        if (!shouldShow && option.selected) {
+                            select.value = '';
                         }
-                    }
+                    });
                 });
             }
+
+            filterDropdowns();
+            departmentSelect?.addEventListener('change', filterDropdowns);
         });
 
-        function exportToPDF() {
-            // Fetch the print layout and generate a real downloadable PDF via html2pdf.js
+        function buildSummaryPrintUrl() {
             const url = new URL("{{ route('reports.print.summary') }}", window.location.origin);
             const params = new URLSearchParams(window.location.search);
             params.forEach((value, key) => url.searchParams.append(key, value));
+            return url;
+        }
 
-            // Show loading indicator
-            const btn = event.currentTarget;
+        function exportToPDF(btn) {
+            const url = buildSummaryPrintUrl();
             const originalText = btn.innerHTML;
+
             btn.innerHTML = `<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Generating PDF...`;
             btn.disabled = true;
 
             fetch(url.toString())
-                .then(res => res.text())
-                .then(html => {
+                .then((res) => res.text())
+                .then((html) => {
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(html, 'text/html');
-                    const reportEl = doc.querySelector('.report-container');
+                    const reportEl = doc.querySelector('.report-container') || doc.body;
                     const styleBlock = doc.querySelector('style');
-                    
+
                     if (reportEl && styleBlock) {
                         reportEl.prepend(styleBlock);
                     }
 
-                    const opt = {
-                        margin:       [12, 15, 12, 15],
-                        filename:     'General_Summary_Report_{{ now()->format("Ymd_His") }}.pdf',
-                        image:        { type: 'jpeg', quality: 0.98 },
-                        html2canvas:  { scale: 2, useCORS: true, logging: false },
-                        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+                    const options = {
+                        margin: [12, 15, 12, 15],
+                        filename: 'Activity_Summary_Report_{{ now()->format("Ymd_His") }}.pdf',
+                        image: { type: 'jpeg', quality: 0.98 },
+                        html2canvas: { scale: 2, useCORS: true, logging: false },
+                        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
                     };
 
-                    html2pdf().set(opt).from(reportEl || html).save().then(() => {
-                        btn.innerHTML = originalText;
-                        btn.disabled = false;
-                    });
+                    return html2pdf().set(options).from(reportEl).save();
                 })
-                .catch(err => {
+                .catch((err) => {
                     console.error('PDF generation failed:', err);
+                    window.open(url.toString(), '_blank');
+                })
+                .finally(() => {
                     btn.innerHTML = originalText;
                     btn.disabled = false;
-                    // Fallback: open print layout
-                    window.open(url.toString(), '_blank');
                 });
         }
 
         function printReport() {
-            const url = new URL("{{ route('reports.print.summary') }}", window.location.origin);
-            const params = new URLSearchParams(window.location.search);
-            params.forEach((value, key) => url.searchParams.append(key, value));
-            
             const iframe = document.getElementById('print-preview-iframe');
-            iframe.src = url.toString();
-            
+            iframe.src = buildSummaryPrintUrl().toString();
             document.getElementById('trigger-print-modal').click();
         }
     </script>
 
-    <!-- Print Preview Modal -->
     <x-my-modal id="print-modal" title="Report Print Preview" :showIcon="false" maxWidth="5xl">
-        <div class="mt-4 bg-zinc-100/50 rounded-xl overflow-hidden border border-zinc-200 p-2" style="height: 75vh; min-height: 500px;">
-            <iframe id="print-preview-iframe" class="w-full h-full bg-white border border-zinc-200 rounded-lg shadow-sm" src=""></iframe>
+        <div class="mt-4 overflow-hidden rounded-lg border border-zinc-200 bg-zinc-100/50 p-2" style="height: 75vh; min-height: 500px;">
+            <iframe id="print-preview-iframe" class="h-full w-full rounded-lg border border-zinc-200 bg-white shadow-sm" src=""></iframe>
         </div>
         <x-slot name="footer">
             <x-my-secondary-button data-modal-close>Close</x-my-secondary-button>
-            <button onclick="document.getElementById('print-preview-iframe').contentWindow.print()" class="px-5 py-2.5 bg-zinc-900 text-white font-medium text-sm rounded-lg hover:bg-zinc-800 transition-colors shadow-sm ml-3 flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+            <button onclick="document.getElementById('print-preview-iframe').contentWindow.print()" class="ml-3 inline-flex items-center gap-2 rounded-lg bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-zinc-800">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
                 Print Document
             </button>
         </x-slot>
     </x-my-modal>
 
-    <!-- Hidden button to trigger modal -->
     <button id="trigger-print-modal" data-modal-target="print-modal" class="hidden"></button>
 </x-admin-layout>
